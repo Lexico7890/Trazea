@@ -1,0 +1,1 @@
+# minca-inventory-system
