@@ -40,7 +40,7 @@ const data = {
     },
     {
       title: "Registros",
-      url: "/productos",
+      url: "/registros",
       icon: Bot,
       items: [
         

@@ -1,5 +1,4 @@
 import { Routes, Route } from "react-router-dom";
-import Products from "./pages/Products";
 import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound";
 import "./App.css";
@@ -20,6 +19,7 @@ import {
   BreadcrumbSeparator,
 } from "./components/ui/breadcrumb";
 import InventoryPage from "./features/inventory/components/InventoryPage";
+import RecordsPage from "./features/records/components/records-page";
 
 function App() {
   return (
@@ -52,7 +52,7 @@ function App() {
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <Routes>
               <Route path="/" element={<InventoryPage />} />
-              <Route path="/productos" element={<Products />} />
+              <Route path="/registros" element={<RecordsPage />} />
               <Route path="/inventario" element={<Inventory />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
