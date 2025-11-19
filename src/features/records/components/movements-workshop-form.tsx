@@ -24,6 +24,12 @@ export default function MovementsWorkshopForm() {
     setSelected,
     setItemName,
   } = useMovements();
+  const submitForm = async (e: any) => {
+    e.preventDefault()
+    handleCreateMovement(actionSelected, countItems, orderNumber)
+    setOrderNumber("");
+    setCountItems(1);
+  }
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>

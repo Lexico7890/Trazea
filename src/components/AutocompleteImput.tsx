@@ -3,14 +3,14 @@ import { Input } from "@/components/ui/input";
 import { useSearchInventory } from "../hooks/use-inventory";
 
 interface InventoryItem {
-  id: string | number;
+  id: string;
   name: string;
 }
 
 interface AutocompleteInputProps {
   onSelect: (selection: {id: string, name: string}) => void;
   selected?: string | null;
-  setSelected: (selection: InventoryItem | null) => void;
+  setSelected: (selection: string | null) => void;
 }
 
 export default function AutocompleteInput({
@@ -82,7 +82,7 @@ export default function AutocompleteInput({
       {selected && (
         <div className="mt-4 p-2 bg-red-400 rounded-full text-center">
           <p className="text-sm dark:text-white">
-            <strong>Referencia:</strong> {selected.id}
+            <strong>Referencia:</strong> {selected}
           </p>
         </div>
       )}
