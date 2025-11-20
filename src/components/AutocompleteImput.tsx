@@ -56,7 +56,7 @@ export default function AutocompleteInput({
           setSelected(null);
         }}
         placeholder="Escribe para buscar..."
-        className="w-full rounded-2xl p-4 dark:text-white focus:ring-2 focus:ring-neon-blue-500 focus:border-transparent resize-none transition-all duration-300 placeholder-gray-500"
+        className="w-full p-4 dark:text-white focus:ring-2 focus:ring-neon-blue-500 focus:border-transparent resize-none transition-all duration-300 placeholder-gray-500"
       />
 
       {isLoading && (
