@@ -16,6 +16,7 @@ import { useMovements } from "@/hooks/useMovements";
 import { ActionsMovements } from "@/types/movement";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { toast } from "sonner";
 
 const enum ActionButtonGroup {
   SALIDA = "salida",
@@ -40,7 +41,7 @@ export default function MovementsWorkshopForm() {
     MovementConcept.VENTA
   );
 
-  const [actionSelected, setActionSelected] = useState<ActionsMovements>(
+  const [actionSelected] = useState<ActionsMovements>(
     ActionsMovements.ENTRADA_COTIZACION
   );
   const {
@@ -59,7 +60,7 @@ export default function MovementsWorkshopForm() {
       actionButtonGroup === ActionButtonGroup.INGRESO
     ) {
       if (!movementConcept) {
-        alert("Debe seleccionar un concepto de movimiento para salida o ingreso");
+        toast.info("Debe seleccionar un concepto de movimiento para salida o ingreso");
         return;
       }
     }
@@ -67,15 +68,15 @@ export default function MovementsWorkshopForm() {
     // Validación 2: Para todos excepto VENTA, validar orden, repuesto y cantidad
     if (actionButtonGroup !== ActionButtonGroup.VENTA) {
       if (!orderNumber.trim()) {
-        alert("Debe ingresar un número de orden");
+        toast.info("Debe ingresar un número de orden");
         return;
       }
       if (!selected) {
-        alert("Debe seleccionar un repuesto");
+        toast.info("Debe seleccionar un repuesto");
         return;
       }
       if (countItems <= 0) {
-        alert("La cantidad debe ser mayor a 0");
+        toast.info("La cantidad debe ser mayor a 0");
         return;
       }
     }

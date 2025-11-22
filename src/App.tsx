@@ -20,6 +20,7 @@ import {
 } from "./components/ui/breadcrumb";
 import InventoryPage from "./features/inventory/components/InventoryPage";
 import RecordsPage from "./features/records/components/records-page";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
           </div>
         </SidebarInset>
       </SidebarProvider>
+      <Toaster richColors />
     </ThemeProvider>
   );
 }
