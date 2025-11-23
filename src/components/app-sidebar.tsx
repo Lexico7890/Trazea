@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
   BookOpen,
-  Bot,
+  ClipboardClock,
   Command,
   LifeBuoy,
   Send,
@@ -41,9 +41,9 @@ const data = {
     {
       title: "Registros",
       url: "/registros",
-      icon: Bot,
+      icon: ClipboardClock,
       items: [
-        
+
       ],
     },
     {
