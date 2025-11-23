@@ -1,3 +1,4 @@
+import ListMovements from "./list-movements";
 import MovementsWorkshopForm from "./movements-workshop-form";
 
 export default function RecordsPage() {
@@ -10,7 +11,7 @@ export default function RecordsPage() {
           <MovementsWorkshopForm />
         </section>
         <section className="flex justify-center items-center p-4">
-          <p>Lista de movimientos</p>
+          <ListMovements />
         </section>
       </div>
     </div>

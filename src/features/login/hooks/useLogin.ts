@@ -25,27 +25,21 @@ export const useLogin = () => {
       }
 
       if (data.session && data.user) {
-        const mockLocations = [
-            {
-                id: 1,
-                name: "Main Workshop",
-                type: "workshop",
-                city: "Bogota",
-                address: "Calle 123",
-                role: { id: "1", name: "admin", permissions: { all: true } },
-                is_active: true,
-                joined_at: new Date().toISOString()
-            }
-        ];
+        const { data: user } = await supabase.from('usuarios').select('*').eq('id_usuario', data.user.id).single();
+        const { data: rol } = await supabase.from('roles').select('*').eq('id_rol', user?.id_rol).single();
+        const { data: locations } = await supabase.from('usuarios_localizacion').select('*').eq('id_usuario', data.user?.id);
 
         setSessionData({
           user: {
             id: data.user.id,
             email: data.user.email!,
-            locations: mockLocations
+            role: rol!
           },
-          locations: mockLocations
+          locations: locations
         });
+        console.log("user ", user);
+        console.log("rol ", rol);
+        console.log("locations ", locations);
         
         sonnerToast.success('Bienvenido de nuevo');
       }

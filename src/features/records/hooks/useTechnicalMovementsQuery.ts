@@ -18,15 +18,36 @@ export function useCreateTechnicalMovement() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      toast.success('Movimiento técnico registrado exitosamente');
-      
-      // Invalidate relevant queries to refresh data
-      // Adjust the query key as needed based on where you fetch this data
+    // Optimistic update: update cache before server responds
+    onMutate: async (newMovement) => {
+      // Cancel any outgoing refetches to avoid overwriting our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['technical-movements'] });
+
+      // Snapshot the previous value
+      const previousMovements = queryClient.getQueryData(['technical-movements']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['technical-movements'], (old: any) => {
+        if (!old) return [{ ...newMovement, id: 'temp-' + Date.now() }];
+        return [{ ...newMovement, id: 'temp-' + Date.now() }, ...old];
+      });
+
+      // Return a context object with the snapshotted value
+      return { previousMovements };
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (error: unknown, _newMovement, context) => {
+      if (context?.previousMovements) {
+        queryClient.setQueryData(['technical-movements'], context.previousMovements);
+      }
+      handleSupabaseError(error);
+    },
+    // Always refetch after error or success to ensure we have the latest data
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['technical-movements'] });
     },
-    onError: (error: unknown) => {
-      handleSupabaseError(error);
+    onSuccess: () => {
+      toast.success('Movimiento técnico registrado exitosamente');
     },
   });
 }

@@ -3,31 +3,27 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface Role {
-  id: string;
-  name: string;
-  permissions: Record<string, boolean>;
+  id_rol: string;
+  nombre: string;
+  descripcion: string;
+  permissions: {};
 }
 
 interface Location {
-  id: number;
-  name: string;
-  type: string;
-  city: string;
-  address: string;
-  role: Role;
-  is_active: boolean;
-  joined_at: string;
+  id_localizacion: number;
+  nombre: string;
 }
 
 interface UserData {
   id: string;
   email: string;
+  role: Role;
   locations?: Location[];
 }
 
 interface SessionData {
   user: UserData;
-  locations: Location[];
+  locations: Location[] | null;
 }
 
 interface UserStore {
@@ -69,15 +65,15 @@ export const useUserStore = create<UserStore>()(
         isAuthenticated: false 
       }),
       
-      hasPermission: (permission: string) => {
+      hasPermission: () => {
         const state = get();
-        const permissions = state.currentLocation?.role?.permissions;
-        return permissions?.[permission] === true || permissions?.all === true;
+        const permissions = state.sessionData?.user.role?.permissions;
+        return permissions === true
       },
       
       hasRole: (roleName: string) => {
         const state = get();
-        return state.currentLocation?.role?.name === roleName;
+        return state.sessionData?.user.role?.nombre === roleName;
       },
     }),
     {
