@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { useUserStore } from '@/store/useUserStore';
 import { toast as sonnerToast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { handleSupabaseError } from '@/lib/error-handler';
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,16 +20,11 @@ export const useLogin = () => {
       });
 
       if (error) {
-        throw error;
+        handleSupabaseError(error);
+        return;
       }
 
       if (data.session && data.user) {
-        // Here you would typically fetch additional user data (like locations) from your database
-        // For now, we'll just set the basic session data.
-        // You might need to adjust this based on your actual data structure requirements.
-        
-        // Mocking location data for now as per the store structure, 
-        // or you should fetch it from a 'users' or 'user_locations' table.
         const mockLocations = [
             {
                 id: 1,
@@ -53,27 +49,27 @@ export const useLogin = () => {
         
         sonnerToast.success('Bienvenido de nuevo');
       }
-    } catch (error: any) {
-      sonnerToast.error(error.message || 'Error al iniciar sesión');
-      console.error('Login error:', error);
+    } catch (error) {
+      handleSupabaseError(error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = async () => {
-    debugger
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        handleSupabaseError(error);
+        return;
+      }
       
       clearUser();
       sonnerToast.success('Sesión cerrada exitosamente');
       navigate('/login');
-    } catch (error: any) {
-      sonnerToast.error(error.message || 'Error al cerrar sesión');
-      console.error('Logout error:', error);
+    } catch (error) {
+      handleSupabaseError(error);
     } finally {
       setIsLoading(false);
     }

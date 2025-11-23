@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import type { TechnicalMovement } from '@/types/technical-movement';
+import { handleSupabaseError } from '@/lib/error-handler';
 
 export function useCreateTechnicalMovement() {
   const queryClient = useQueryClient();
@@ -25,12 +26,7 @@ export function useCreateTechnicalMovement() {
       queryClient.invalidateQueries({ queryKey: ['technical-movements'] });
     },
     onError: (error: unknown) => {
-      const message =
-        error instanceof Error
-          ? error.message
-          : (error as { message?: string })?.message ?? 'Error al registrar movimiento técnico';
-      toast.error(message);
-      console.error('Error creating technical movement:', error);
+      handleSupabaseError(error);
     },
   });
 }
