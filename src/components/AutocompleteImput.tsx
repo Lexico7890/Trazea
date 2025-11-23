@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useSearchInventory } from "../hooks/use-inventory";
-
-interface InventoryItem {
-  id: string;
-  name: string;
-}
+import type { InventoryItem } from "@/types/common-types";
+import { Badge } from "./ui/badge";
 
 interface AutocompleteInputProps {
-  onSelect: (selection: {id: string, name: string}) => void;
+  onSelect: (selection: string) => void;
   selected?: string | null;
   setSelected: (selection: string | null) => void;
 }
@@ -41,9 +38,9 @@ export default function AutocompleteInput({
 
   // When the user selects a suggestion
     const handleSelect = (item: InventoryItem) => {
-      setSelected(item.name);
-      setQuery(item.name);
-      onSelect(item);
+      setSelected(item.referencia);
+      setQuery(item.nombre);
+      onSelect(item.referencia);
     };
 
   return (
@@ -60,31 +57,27 @@ export default function AutocompleteInput({
       />
 
       {isLoading && (
-        <div className="absolute z-40 left-0 right-0 border bg-background mt-1 p-2 rounded-full">
+        <div className="absolute z-40 left-0 right-0 border mt-1 p-2 rounded-lg bg-secondary">
           Buscando...
         </div>
       )}
 
-      {!isLoading && typedSuggestions.length > 0 && (
-        <ul className="absolute z-40 left-0 right-0 bg-background border rounded-lg mt-1 max-h-60 overflow-y-auto shadow">
+      {(!isLoading && typedSuggestions.length > 0 && !selected) && (
+        <ul className="absolute bg-secondary z-40 left-0 right-0 border rounded-lg mt-1 max-h-60 overflow-y-auto shadow">
           {typedSuggestions.map((item) => (
             <li
-              key={item.id || item.name}
-              className="p-2 cursor-pointer hover:bg-red-400"
+              key={item.id_repuesto || item.referencia}
+              className="p-2 cursor-pointer hover:bg-red-600"
               onClick={() => handleSelect(item)}
             >
-              {item.name}
+              {item.nombre}
             </li>
           ))}
         </ul>
       )}
 
       {selected && (
-        <div className="mt-4 p-2 bg-red-400 rounded-full text-center">
-          <p className="text-sm dark:text-white">
-            <strong>Referencia:</strong> {selected}
-          </p>
-        </div>
+        <Badge className="absolute top-10 right-0" variant="secondary">Ref: {selected}</Badge>
       )}
     </div>
   );

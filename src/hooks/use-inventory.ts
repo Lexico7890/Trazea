@@ -7,9 +7,9 @@ import {
   createInventoryItem,
   searchInventoryItems,
   type InventoryParams,
-  type InventoryItem,
 } from '../lib/api';
 import { toast } from 'sonner';
+import type { InventoryItem } from '@/types/common-types';
 
 // Query keys for better cache management
 export const inventoryKeys = {

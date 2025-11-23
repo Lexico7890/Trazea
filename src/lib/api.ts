@@ -1,3 +1,5 @@
+import type { InventoryItem } from '@/types/common-types';
+import { supabase } from './supabase';
 // API client configuration and helper functions
 
 const BACKEND_URL = 'https://aux-backend-snlq.onrender.com';
@@ -32,20 +34,6 @@ async function fetchAPI<T>(
     }
     throw new Error('Network error occurred');
   }
-}
-
-// Types
-export interface InventoryItem {
-  id: string;
-  name: string;
-  description: string | null;
-  category: string | null;
-  location_id: number | null;
-  min_stock: number | null;
-  current_stock: number | null;
-  stock: number | null;
-  created_at: string | null;
-  updated_at: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -163,7 +151,19 @@ export async function searchInventoryItems(query: string): Promise<InventoryItem
   if (!query.trim()) {
     return [];
   }
-  return fetchAPI<InventoryItem[]>(`/inventory/search?q=${encodeURIComponent(query)}`);
+
+  const { data, error } = await supabase
+    .from('repuestos')
+    .select('*')
+    .ilike('nombre', `%${query}%`)
+    .limit(50);
+
+  if (error) {
+    console.error('Error searching inventory:', error);
+    throw new Error(error.message);
+  }
+
+  return data as InventoryItem[];
 }
 
 export { BACKEND_URL };

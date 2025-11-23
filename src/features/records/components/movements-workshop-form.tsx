@@ -12,22 +12,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useMovements } from "@/hooks/useMovements";
-import { ActionsMovements } from "@/types/movement";
+import { useTechnicalMovements } from "../hooks/useTechnicalMovements";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { toast } from "sonner";
+import { TIPY_CONCEPT } from "@/types/movement";
 
 const enum ActionButtonGroup {
   SALIDA = "salida",
   INGRESO = "ingreso",
-  VENTA = "venta",
-}
-
-const enum MovementConcept {
-  COTIZACION = "cotizacion",
-  PRESTAMO = "prestamo",
-  GARANTIA = "garantia",
   VENTA = "venta",
 }
 
@@ -37,23 +30,16 @@ export default function MovementsWorkshopForm() {
   const [actionButtonGroup, setActionButtonGroup] = useState<ActionButtonGroup>(
     ActionButtonGroup.SALIDA
   );
-  const [movementConcept, setMovementConcept] = useState<MovementConcept>(
-    MovementConcept.VENTA
+  const [movementConcept, setMovementConcept] = useState<TIPY_CONCEPT | null>(
+    null
   );
+  const [selected, setSelected] = useState<string | null>(null);
+  const [itemName, setItemName] = useState<string>("");
 
-  const [actionSelected] = useState<ActionsMovements>(
-    ActionsMovements.ENTRADA_COTIZACION
-  );
-  const {
-    handleCreateMovement,
-    isProcessing,
-    selected,
-    setSelected,
-    setItemName,
-  } = useMovements();
+  const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
+
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     // Validación 1: Si es SALIDA o INGRESO, debe tener un movement concept
     if (
       actionButtonGroup === ActionButtonGroup.SALIDA ||
@@ -81,7 +67,20 @@ export default function MovementsWorkshopForm() {
       }
     }
 
-    handleCreateMovement(actionSelected, countItems, orderNumber);
+    // TODO: Populate this object with the actual form data (11 fields)
+    const movementData = {
+      // Example:
+      // order_number: orderNumber,
+      // quantity: countItems,
+      // action: actionButtonGroup,
+      // concept: movementConcept,
+      // item_id: selected, // Assuming 'selected' holds the ID
+      // ... other fields
+    };
+
+    await handleCreateTechnicalMovement(movementData);
+    
+    // Reset form (adjust as needed)
     setOrderNumber("");
     setCountItems(1);
   };
@@ -193,56 +192,56 @@ export default function MovementsWorkshopForm() {
               <Button
                 type="button"
                 variant={
-                  movementConcept === MovementConcept.COTIZACION
+                  movementConcept === TIPY_CONCEPT.COTIZACION
                     ? "default"
                     : "outline"
                 }
                 className={
-                  movementConcept === MovementConcept.COTIZACION
+                  movementConcept === TIPY_CONCEPT.COTIZACION
                     ? "bg-red-600 hover:bg-red-500 text-white"
                     : "hover:bg-blue-50"
                 }
-                onClick={() => setMovementConcept(MovementConcept.COTIZACION)}
+                onClick={() => setMovementConcept(TIPY_CONCEPT.COTIZACION)}
               >
                 Cotizacion
               </Button>
               <Button
                 type="button"
                 variant={
-                  movementConcept === MovementConcept.PRESTAMO
+                  movementConcept === TIPY_CONCEPT.PRESTAMO
                     ? "default"
                     : "outline"
                 }
                 className={
-                  movementConcept === MovementConcept.PRESTAMO
+                  movementConcept === TIPY_CONCEPT.PRESTAMO
                     ? "bg-red-600 hover:bg-red-500 text-white"
                     : "hover:bg-blue-50"
                 }
-                onClick={() => setMovementConcept(MovementConcept.PRESTAMO)}
+                onClick={() => setMovementConcept(TIPY_CONCEPT.PRESTAMO)}
               >
                 Prestamo
               </Button>
               <Button
                 type="button"
                 variant={
-                  movementConcept === MovementConcept.GARANTIA
+                  movementConcept === TIPY_CONCEPT.GARANTIA
                     ? "default"
                     : "outline"
                 }
                 className={
-                  movementConcept === MovementConcept.GARANTIA
+                  movementConcept === TIPY_CONCEPT.GARANTIA
                     ? "bg-red-600 hover:bg-red-500 text-white"
                     : "hover:bg-blue-50"
                 }
-                onClick={() => setMovementConcept(MovementConcept.GARANTIA)}
+                onClick={() => setMovementConcept(TIPY_CONCEPT.GARANTIA)}
               >
                 Garantia
               </Button>
             </div>
           </div>
           <div className="mt-4">
-            <Button type="submit" className="w-full" disabled={isProcessing}>
-              {isProcessing ? "Procesando..." : "Guardar"}
+            <Button type="submit" className="w-full" disabled={isTechnicalProcessing}>
+              {isTechnicalProcessing ? "Procesando..." : "Guardar"}
             </Button>
           </div>
         </form>
