@@ -17,6 +17,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { toast } from "sonner";
 import { TIPY_CONCEPT } from "@/types/movement";
+import { useUserStore } from "@/store/useUserStore";
 
 const enum ActionButtonGroup {
   SALIDA = "salida",
@@ -33,14 +34,14 @@ export default function MovementsWorkshopForm() {
   const [movementConcept, setMovementConcept] = useState<TIPY_CONCEPT | null>(
     null
   );
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ id_repuesto: string, referencia: string, nombre: string } | null>(null);
+  const { sessionData } = useUserStore();
 
 
   const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Validación 1: Si es SALIDA o INGRESO, debe tener un movement concept
     if (
       actionButtonGroup === ActionButtonGroup.SALIDA ||
       actionButtonGroup === ActionButtonGroup.INGRESO
@@ -51,36 +52,37 @@ export default function MovementsWorkshopForm() {
       }
     }
 
-    // Validación 2: Para todos excepto VENTA, validar orden, repuesto y cantidad
     if (actionButtonGroup !== ActionButtonGroup.VENTA) {
       if (!orderNumber.trim()) {
         toast.info("Debe ingresar un número de orden");
         return;
       }
-      if (!selected) {
-        toast.info("Debe seleccionar un repuesto");
-        return;
-      }
-      if (countItems <= 0) {
-        toast.info("La cantidad debe ser mayor a 0");
-        return;
-      }
     }
 
-    // TODO: Populate this object with the actual form data (11 fields)
+    if (!selected) {
+      toast.info("Debe seleccionar un repuesto");
+      return;
+    }
+    if (countItems <= 0) {
+      toast.info("La cantidad debe ser mayor a 0");
+      return;
+    }
+    //TODO: Get the location from the global variable
     const movementData = {
-      // Example:
-      // order_number: orderNumber,
-      // quantity: countItems,
-      // action: actionButtonGroup,
-      // concept: movementConcept,
-      // item_id: selected, // Assuming 'selected' holds the ID
-      // ... other fields
+      id_localizacion: sessionData?.locations?.[0].id_localizacion,
+      id_usuario_responsable: sessionData?.user?.id,
+      id_repuesto: selected?.id_repuesto,
+      concepto: movementConcept,
+      tipo: actionButtonGroup,
+      cantidad: countItems,
+      numero_orden: orderNumber || "",
     };
 
     await handleCreateTechnicalMovement(movementData);
 
-    // Reset form (adjust as needed)
+    setSelected(null);
+    setActionButtonGroup(ActionButtonGroup.SALIDA);
+    setMovementConcept(null);
     setOrderNumber("");
     setCountItems(1);
   };
@@ -110,9 +112,8 @@ export default function MovementsWorkshopForm() {
                 <Label htmlFor="password">Repuesto</Label>
               </div>
               <AutocompleteInput
-                onSelect={() => { }}
-                selected={selected}
                 setSelected={setSelected}
+                selected={selected}
               />
             </div>
             <div className="grid gap-4 col-span-5">

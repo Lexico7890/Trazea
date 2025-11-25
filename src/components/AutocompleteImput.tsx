@@ -5,13 +5,11 @@ import type { InventoryItem } from "@/types/common-types";
 import { Badge } from "./ui/badge";
 
 interface AutocompleteInputProps {
-  onSelect: (selection: string) => void;
-  selected?: string | null;
-  setSelected: (selection: string | null) => void;
+  selected?: { id_repuesto: string, referencia: string, nombre: string } | null;
+  setSelected: (selection: { id_repuesto: string, referencia: string, nombre: string } | null) => void;
 }
 
 export default function AutocompleteInput({
-  onSelect,
   selected,
   setSelected,
 }: AutocompleteInputProps) {
@@ -37,11 +35,10 @@ export default function AutocompleteInput({
   const typedSuggestions = suggestions as InventoryItem[];
 
   // When the user selects a suggestion
-    const handleSelect = (item: InventoryItem) => {
-      setSelected(item.referencia);
-      setQuery(item.nombre);
-      onSelect(item.referencia);
-    };
+  const handleSelect = (item: InventoryItem) => {
+    setSelected({ id_repuesto: item.id_repuesto, referencia: item.referencia, nombre: item.nombre });
+    setQuery(item.nombre);
+  };
 
   return (
     <div className="relative w-full mx-auto">
@@ -77,7 +74,7 @@ export default function AutocompleteInput({
       )}
 
       {selected && (
-        <Badge className="absolute top-10 right-0" variant="secondary">Ref: {selected}</Badge>
+        <Badge className="absolute top-10 right-0" variant="secondary">Ref: {selected.referencia}</Badge>
       )}
     </div>
   );

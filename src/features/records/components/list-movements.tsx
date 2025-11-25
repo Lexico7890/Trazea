@@ -44,6 +44,7 @@ export default function ListMovements() {
             </div>
         );
     }
+    console.log("data", data)
 
     return (
         <div className="bg-card p-4 flex justify-center items-start border rounded-lg h-full w-full">
@@ -63,7 +64,7 @@ export default function ListMovements() {
                             <TableCell className="font-medium">
                                 {typeof movement.id === 'string' && movement.id.startsWith('temp-')
                                     ? <span className="text-muted-foreground italic">Guardando...</span>
-                                    : movement.id
+                                    : movement.repuesto_referencia
                                 }
                             </TableCell>
                             <TableCell>
@@ -72,7 +73,7 @@ export default function ListMovements() {
                                     : '-'
                                 }
                             </TableCell>
-                            <TableCell>{movement.tipo_concepto || '-'}</TableCell>
+                            <TableCell>{movement.concepto || '-'}</TableCell>
                             <TableCell className="text-right">{movement.cantidad || '-'}</TableCell>
                         </TableRow>
                     ))}

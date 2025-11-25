@@ -3,8 +3,8 @@ import type { InventoryItem } from "@/types/common-types";
 
 export async function getListMovements() {
     const { data, error } = await supabase
-    .from('movimientos_tecnicos')
-    .select('*')
+  .from('v_movimientos_detallados') // <--- Usas la vista
+  .select('*')
     .order('fecha', { ascending: false })
     .limit(10);
 
