@@ -39,12 +39,17 @@ const data = {
       items: [],
     },
     {
+      title: "Repuestos",
+      url: "/repuestos",
+      icon: Settings2,
+      isActive: true,
+      items: [],
+    },
+    {
       title: "Registros",
       url: "/registros",
       icon: ClipboardClock,
-      items: [
-
-      ],
+      items: [],
     },
     {
       title: "Documentation",
