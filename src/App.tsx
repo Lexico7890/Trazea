@@ -19,6 +19,7 @@ import {
   BreadcrumbSeparator,
 } from "./components/ui/breadcrumb";
 import InventoryPage from "./features/inventory/components/InventoryPage";
+import RepuestosPage from "./features/repuestos/components/RepuestosPage";
 import RecordsPage from "./features/records/components/records-page";
 import { Toaster } from "./components/ui/sonner";
 import { useUserStore } from "@/store/useUserStore";
@@ -66,6 +67,7 @@ function App() {
                   <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                     <Routes>
                       <Route path="/" element={<InventoryPage />} />
+                      <Route path="/repuestos" element={<RepuestosPage />} />
                       <Route path="/registros" element={<RecordsPage />} />
                       <Route path="/inventario" element={<Inventory />} />
                       <Route path="*" element={<NotFound />} />
