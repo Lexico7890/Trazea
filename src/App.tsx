@@ -25,6 +25,8 @@ import { Toaster } from "./components/ui/sonner";
 import { useUserStore } from "@/store/useUserStore";
 import { LoginPage } from "./features/login/components/login-page";
 
+import { LocationSelector } from "./components/common/LocationSelector";
+
 function App() {
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
 
@@ -40,6 +42,7 @@ function App() {
           element={
             isAuthenticated ? (
               <SidebarProvider>
+                <LocationSelector />
                 <AppSidebar />
                 <SidebarInset>
                   <header className="flex h-16 shrink-0 items-center gap-2">

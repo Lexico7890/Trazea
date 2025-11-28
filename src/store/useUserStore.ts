@@ -1,6 +1,7 @@
 // store/useUserStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import type { UserLocation } from '@/types/common-types';
 
 interface Role {
   id_rol: string;
@@ -9,30 +10,25 @@ interface Role {
   permissions: {};
 }
 
-interface Location {
-  id_localizacion: number;
-  nombre: string;
-}
-
 interface UserData {
   id: string;
   email: string;
   role: Role;
-  locations?: Location[];
+  locations?: UserLocation[];
 }
 
 interface SessionData {
   user: UserData;
-  locations: Location[] | null;
+  locations: UserLocation[] | null;
 }
 
 interface UserStore {
   sessionData: SessionData | null;
-  currentLocation: Location | null;
+  currentLocation: UserLocation | null;
   isAuthenticated: boolean;
   
   setSessionData: (data: SessionData | null) => void;
-  setCurrentLocation: (location: Location | null) => void;
+  setCurrentLocation: (location: UserLocation | null) => void;
   clearUser: () => void;
   hasPermission: (permission: string) => boolean;
   hasRole: (roleName: string) => boolean;
@@ -50,11 +46,6 @@ export const useUserStore = create<UserStore>()(
           sessionData: data, 
           isAuthenticated: !!data 
         });
-        
-        // Auto-seleccionar primera tienda si existe
-        if (data?.locations && data.locations.length > 0 && !get().currentLocation) {
-          set({ currentLocation: data.locations[0] });
-        }
       },
       
       setCurrentLocation: (location) => set({ currentLocation: location }),

@@ -28,9 +28,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useLogin } from "@/features/login/hooks/useLogin"
+import { useUserStore } from "@/store/useUserStore"
 
 export function NavUser({
-  user,
+  user
 }: {
   user: {
     name: string
@@ -40,6 +41,8 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const { logout } = useLogin()
+  const { currentLocation } = useUserStore()
+  console.log(currentLocation)
 
   return (
     <SidebarMenu>
@@ -56,7 +59,7 @@ export function NavUser({
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-xs">{currentLocation?.nombre}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>

@@ -10,3 +10,8 @@ export interface InventoryItem {
     created_at: string | null;
     updated_at: string | null;
 }
+
+export interface UserLocation {
+  id_localizacion: number;
+  nombre: string;
+}
