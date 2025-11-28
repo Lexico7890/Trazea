@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, AlertCircle, CheckCircle2, FileSpreadsheet } from "lucide-react";
+import { AlertCircle, CheckCircle2, FileSpreadsheet } from "lucide-react";
 import { bulkUploadRepuestos } from "../services";
 import { toast } from "sonner";
 import {

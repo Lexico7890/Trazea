@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { useSearchInventory } from "../hooks/use-inventory";
-import type { InventoryItem } from "@/types/common-types";
+import type { InventoryItem } from "@/features/inventory/types";
 import { Badge } from "./ui/badge";
 
 interface AutocompleteInputProps {
@@ -31,9 +31,6 @@ export default function AutocompleteInput({
     !selected // Only search if no item is selected
   );
 
-  // Ensure suggestions are treated as InventoryItem[]
-  const typedSuggestions = suggestions as InventoryItem[];
-
   // When the user selects a suggestion
   const handleSelect = (item: InventoryItem) => {
     setSelected({ id_repuesto: item.id_repuesto, referencia: item.referencia, nombre: item.nombre });
@@ -59,9 +56,9 @@ export default function AutocompleteInput({
         </div>
       )}
 
-      {(!isLoading && typedSuggestions.length > 0 && !selected) && (
+      {(!isLoading && suggestions.length > 0 && !selected) && (
         <ul className="absolute bg-secondary z-40 left-0 right-0 border rounded-lg mt-1 max-h-60 overflow-y-auto shadow">
-          {typedSuggestions.map((item) => (
+          {suggestions.map((item) => (
             <li
               key={item.id_repuesto || item.referencia}
               className="p-2 cursor-pointer hover:bg-red-600"

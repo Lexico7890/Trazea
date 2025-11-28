@@ -4,6 +4,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { toast as sonnerToast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { handleSupabaseError } from '@/lib/error-handler';
+import { fetchUserSessionData } from '../utils/auth-utils';
 
 export const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,21 +26,8 @@ export const useLogin = () => {
       }
 
       if (data.session && data.user) {
-        const { data: user } = await supabase.from('usuarios').select('*').eq('id_usuario', data.user.id).single();
-        const { data: rol } = await supabase.from('roles').select('*').eq('id_rol', user?.id_rol).single();
-        const { data: locations } = await supabase.from('usuarios_localizacion').select('*').eq('id_usuario', data.user?.id);
-
-        setSessionData({
-          user: {
-            id: data.user.id,
-            email: data.user.email!,
-            role: rol!
-          },
-          locations: locations
-        });
-        console.log("user ", user);
-        console.log("rol ", rol);
-        console.log("locations ", locations);
+        const sessionData = await fetchUserSessionData(data.user);
+        setSessionData(sessionData);
         
         sonnerToast.success('Bienvenido de nuevo');
       }
@@ -69,9 +57,50 @@ export const useLogin = () => {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+
+      if (error) {
+        handleSupabaseError(error);
+        return;
+      }
+
+      sonnerToast.success('Correo de recuperación enviado. Revisa tu bandeja de entrada.');
+    } catch (error) {
+      handleSupabaseError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+
+      if (error) {
+        handleSupabaseError(error);
+        return;
+      }
+
+      sonnerToast.success('Contraseña actualizada exitosamente');
+      navigate('/'); // Navigate to dashboard
+    } catch (error) {
+      handleSupabaseError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     login,
     logout,
+    resetPassword,
+    updatePassword,
     isLoading,
   };
 };

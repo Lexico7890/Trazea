@@ -24,9 +24,12 @@ import RecordsPage from "./features/records/components/records-page";
 import { Toaster } from "./components/ui/sonner";
 import { useUserStore } from "@/store/useUserStore";
 import { LoginPage } from "./features/login/components/login-page";
+import { useSupabaseAuthListener } from "./hooks/useSupabaseAuthListener";
+import { UpdatePasswordPage } from "./features/login/components/update-password-page";
 
 function App() {
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
+  useSupabaseAuthListener();
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -34,6 +37,10 @@ function App() {
         <Route
           path="/login"
           element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />}
+        />
+        <Route
+          path="/update-password"
+          element={<UpdatePasswordPage />}
         />
         <Route
           path="/*"
