@@ -29,7 +29,7 @@ export function RepuestosFilters({
     onReset,
 }: RepuestosFiltersProps) {
     return (
-        <div className="flex flex-col gap-4 md:flex-row md:items-end">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
             <div className="flex-1 space-y-2">
                 <label className="text-sm font-medium">Búsqueda</label>
                 <div className="relative">
