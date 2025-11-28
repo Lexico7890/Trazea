@@ -21,13 +21,19 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { login, isLoading } = useLogin();
+  const { login, resetPassword, isLoading } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login(email, password);
+  };
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await resetPassword(email);
   };
 
   return (
@@ -48,51 +54,89 @@ export function LoginForm({
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Minca Inventory System</CardTitle>
             <CardDescription>
-              Logueate con tu correo y contraseña
+              {isResettingPassword
+                ? "Ingresa tu correo para recuperar tu contraseña"
+                : "Logueate con tu correo y contraseña"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit}>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Field>
-                <Field>
-                  <div className="flex items-center">
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
+            {isResettingPassword ? (
+              <form onSubmit={handleResetSubmit}>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="reset-email">Email</FieldLabel>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="m@example.com"
+                      required
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </Field>
+                  <Field>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Enviando..." : "Enviar enlace de recuperación"}
+                    </Button>
+                  </Field>
+                  <Field>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full"
+                      onClick={() => setIsResettingPassword(false)}
+                      disabled={isLoading}
                     >
-                      Forgot your password?
-                    </a>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    autoComplete="current-password"
-                    placeholder="********"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </Field>
-                <Field>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Iniciando sesión..." : "Login"}
-                  </Button>
-                </Field>
-              </FieldGroup>
-            </form>
+                      Volver al Login
+                    </Button>
+                  </Field>
+                </FieldGroup>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="m@example.com"
+                      required
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </Field>
+                  <Field>
+                    <div className="flex items-center">
+                      <FieldLabel htmlFor="password">Password</FieldLabel>
+                      <button
+                        type="button"
+                        className="ml-auto text-sm underline-offset-4 hover:underline"
+                        onClick={() => setIsResettingPassword(true)}
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      value={password}
+                      autoComplete="current-password"
+                      placeholder="********"
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </Field>
+                  <Field>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Iniciando sesión..." : "Login"}
+                    </Button>
+                  </Field>
+                </FieldGroup>
+              </form>
+            )}
           </CardContent>
         </Card>
         <FieldDescription className="text-center">
