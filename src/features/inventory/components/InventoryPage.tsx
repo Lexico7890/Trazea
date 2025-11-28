@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InventoryFilters } from "./InventoryFilters";
 import { InventoryTable } from "./InventoryTable";
-import { InventoryPagination } from "./InventoryPagination";
+import { Pagination } from "@/components/common/Pagination";
 import { InventoryTableSkeleton } from "./InventoryTableSkeleton";
 import { useInventoryFilters } from "../hooks/useInventoryFilters";
 import { useInventoryQuery } from "../hooks/useInventoryQuery";
@@ -88,30 +88,27 @@ export default function InventoryPage() {
               </p>
             </div>
           ) : (
-            <InventoryTable
-              items={data?.items || []}
-              orderBy={filters.orderBy}
-              direction={filters.direction}
-              onSort={updateSort}
-            />
+            <>
+              <InventoryTable
+                items={data?.items || []}
+                orderBy={filters.orderBy}
+                direction={filters.direction}
+                onSort={updateSort}
+              />
+              <div className="mt-4">
+                <Pagination
+                  currentPage={filters.page}
+                  totalPages={data?.page_count || 1}
+                  totalItems={data?.total_count || 0}
+                  itemsPerPage={filters.limit}
+                  onPageChange={updatePage}
+                  onItemsPerPageChange={updateLimit}
+                />
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
-
-      {data && !isLoading && !isError && (
-        <Card>
-          <CardContent className="pt-6">
-            <InventoryPagination
-              currentPage={filters.page}
-              totalPages={data.page_count}
-              totalItems={data.total_count}
-              itemsPerPage={filters.limit}
-              onPageChange={updatePage}
-              onItemsPerPageChange={updateLimit}
-            />
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

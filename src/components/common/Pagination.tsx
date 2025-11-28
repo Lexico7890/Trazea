@@ -13,7 +13,7 @@ import {
     ChevronDown,
 } from "lucide-react";
 
-interface InventoryPaginationProps {
+interface PaginationProps {
     currentPage: number;
     totalPages: number;
     totalItems: number;
@@ -24,14 +24,14 @@ interface InventoryPaginationProps {
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
-export function InventoryPagination({
+export function Pagination({
     currentPage,
     totalPages,
     totalItems,
     itemsPerPage,
     onPageChange,
     onItemsPerPageChange,
-}: InventoryPaginationProps) {
+}: PaginationProps) {
     const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
@@ -41,7 +41,7 @@ export function InventoryPagination({
             <div className="text-sm text-muted-foreground">
                 Mostrando <span className="font-medium">{startItem}</span> a{" "}
                 <span className="font-medium">{endItem}</span> de{" "}
-                <span className="font-medium">{totalItems}</span> repuestos
+                <span className="font-medium">{totalItems}</span> registros
             </div>
 
             <div className="flex items-center gap-4">

@@ -7,7 +7,7 @@ import { RepuestosFilters } from "./RepuestosFilters";
 import { RepuestosForm } from "./RepuestosForm";
 import { BulkUpload } from "./BulkUpload";
 import { useRepuestosQuery, useRepuestosMutations } from "../hooks/useRepuestosQuery";
-import { InventoryPagination } from "../../inventory/components/InventoryPagination"; // Reusing pagination
+import { Pagination } from "@/components/common/Pagination";
 import {
     Sheet,
     SheetContent,
@@ -144,8 +144,7 @@ export default function RepuestosPage() {
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                     <BulkUpload onSuccess={() => data && useRepuestosQuery(filters)} />
                     <Button onClick={handleCreate} className="w-full sm:w-auto">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nuevo Repuesto
+                        <Plus className="h-4 w-4" />
                     </Button>
                 </div>
             </div>
@@ -184,7 +183,7 @@ export default function RepuestosPage() {
                                 onDelete={handleDeleteClick}
                             />
                             <div className="mt-4">
-                                <InventoryPagination
+                                <Pagination
                                     currentPage={filters.page || 1}
                                     totalPages={data?.page_count || 1}
                                     totalItems={data?.total_count || 0}
