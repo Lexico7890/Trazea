@@ -91,7 +91,7 @@ export async function getAllInventoryItems(): Promise<InventoryItem[]> {
  */
 export async function createInventoryItem(data: { id_repuesto: string, id_localizacion: number, cantidad: number, posicion?: string }) {
   const { error } = await supabase
-    .from('inventory')
+    .from('inventario')
     .insert(data);
 
   if (error) {

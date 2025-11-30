@@ -9,7 +9,7 @@ export async function getRepuestos(params: RepuestosParams = {}): Promise<Pagina
     search,
     tipo,
     descontinuado,
-    order_by = 'created_at',
+    order_by = 'fecha_ingreso_inventario',
     direction = 'desc',
   } = params;
 

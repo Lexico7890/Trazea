@@ -15,16 +15,16 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
             <TableCell className="font-medium">{item.referencia}</TableCell>
             <TableCell>{item.nombre}</TableCell>
             <TableCell>
-                <Badge variant="outline" className="capitalize">
-                    {item.tipo || 'N/A'}
-                </Badge>
-            </TableCell>
-            <TableCell>
                 <span className={isLowStock ? 'text-destructive font-semibold' : ''}>
                     {item.stock_actual}
                 </span>
             </TableCell>
             <TableCell>{item.cantidad_minima}</TableCell>
+            <TableCell>
+                <Badge variant="outline" className="capitalize" style={{ backgroundColor: item.estado_stock === 'BAJO' ? 'orange' : item.estado_stock === 'CRITICO' ? 'red' : 'green' }}>
+                    {item.estado_stock || 'N/A'}
+                </Badge>
+            </TableCell>
             <TableCell>
                 {item.descontinuado ? (
                     <Badge variant="destructive">Descontinuado</Badge>

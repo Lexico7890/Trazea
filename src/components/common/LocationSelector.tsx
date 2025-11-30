@@ -15,7 +15,6 @@ export function LocationSelector() {
     useEffect(() => {
         const initLocation = async () => {
             if (!isAuthenticated || !sessionData?.user?.id) return;
-            debugger
             if (savedLocationId && !currentLocation) {
                 try {
                     const { data, error } = await supabase

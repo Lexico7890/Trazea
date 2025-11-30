@@ -90,7 +90,12 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
             <FormItem>
               <FormLabel>Cantidad</FormLabel>
               <FormControl>
-                <Input type="number" min={1} {...field} />
+                <Input
+                  type="number"
+                  min={1}
+                  {...field}
+                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

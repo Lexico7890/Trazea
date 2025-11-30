@@ -7,7 +7,7 @@ export interface InventoryItem {
     tipo: string;
     fecha_estimada: string;
     url_imagen: string;
-    created_at: string | null;
+    fecha_ingreso_inventario: string | null;
     updated_at: string | null;
 }
 

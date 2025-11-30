@@ -15,6 +15,8 @@ export interface InventoryItem {
   tipo: string;
   fecha_estimada: string;
   url_imagen: string;
+  estado_stock: string;
+  fecha_ingreso_inventario: string;
 }
 
 export interface InventoryParams {

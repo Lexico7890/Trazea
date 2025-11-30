@@ -28,6 +28,7 @@ export interface RepuestosParams {
   descontinuado?: boolean;
   order_by?: keyof Repuesto;
   direction?: 'asc' | 'desc';
+  
 }
 
 export interface PaginatedRepuestosResponse {

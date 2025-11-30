@@ -17,7 +17,7 @@ export function useInventoryFilters() {
     descontinuado: 'all',
     page: 1,
     limit: 10,
-    orderBy: 'created_at',
+    orderBy: 'fecha_ingreso_inventario',
     direction: 'desc',
   });
 
@@ -56,7 +56,7 @@ export function useInventoryFilters() {
       descontinuado: 'all',
       page: 1,
       limit: 10,
-      orderBy: 'created_at',
+      orderBy: 'fecha_ingreso_inventario',
       direction: 'desc',
     });
   }, []);
