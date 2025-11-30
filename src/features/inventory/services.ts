@@ -121,3 +121,25 @@ export async function searchInventoryItems(query: string): Promise<InventoryItem
 
   return (data as InventoryItem[]) || [];
 }
+
+/**
+ * Search repuestos by query
+ */
+export async function searchRepuestos(query: string): Promise<InventoryItem[]> {
+  if (!query.trim()) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('repuestos')
+    .select('*')
+    .or(`nombre.ilike.%${query}%,referencia.ilike.%${query}%`)
+    .limit(50);
+
+  if (error) {
+    console.error('Error searching repuestos:', error);
+    throw new Error(error.message);
+  }
+
+  return (data as InventoryItem[]) || [];
+}

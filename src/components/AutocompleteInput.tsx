@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { useSearchInventory } from "../hooks/use-inventory";
+import { useSearchRepuestos } from "../hooks/use-inventory";
 import type { InventoryItem } from "@/features/inventory/types";
 import { Badge } from "./ui/badge";
 
@@ -20,13 +20,13 @@ export default function AutocompleteInput({
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 500); // 500ms debounce
+    }, 2000); // 2000ms debounce
 
     return () => clearTimeout(timer);
   }, [query]);
 
   // Use React Query hook for searching
-  const { data: suggestions = [], isLoading } = useSearchInventory(
+  const { data: suggestions = [], isLoading } = useSearchRepuestos(
     debouncedQuery,
     !selected // Only search if no item is selected
   );

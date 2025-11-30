@@ -3,6 +3,7 @@ import {
   getInventory,
   getAllInventoryItems,
   searchInventoryItems,
+  searchRepuestos,
 } from '../features/inventory/services';
 import type { InventoryParams } from '../features/inventory/types';
 
@@ -15,6 +16,7 @@ export const inventoryKeys = {
   detail: (id: string) => [...inventoryKeys.details(), id] as const,
   allItems: () => [...inventoryKeys.all, 'allItems'] as const,
   search: (query: string) => [...inventoryKeys.all, 'search', query] as const,
+  searchRepuestos: (query: string) => [...inventoryKeys.all, 'searchRepuestos', query] as const,
 };
 
 // Hook to get paginated inventory with sorting
@@ -40,6 +42,16 @@ export function useSearchInventory(query: string, enabled: boolean = true) {
   return useQuery({
     queryKey: inventoryKeys.search(query),
     queryFn: () => searchInventoryItems(query),
+    enabled: enabled && query.trim().length > 0,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+}
+
+// Hook to search repuestos items (for autocomplete)
+export function useSearchRepuestos(query: string, enabled: boolean = true) {
+  return useQuery({
+    queryKey: inventoryKeys.searchRepuestos(query),
+    queryFn: () => searchRepuestos(query),
     enabled: enabled && query.trim().length > 0,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
