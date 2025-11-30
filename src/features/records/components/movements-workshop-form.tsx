@@ -1,4 +1,4 @@
-import AutocompleteInput from "@/components/AutocompleteImput";
+import AutocompleteInput from "@/components/AutocompleteInput";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {

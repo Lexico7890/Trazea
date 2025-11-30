@@ -5,11 +5,22 @@ import { Pagination } from "@/components/common/Pagination";
 import { InventoryTableSkeleton } from "./InventoryTableSkeleton";
 import { useInventoryFilters } from "../hooks/useInventoryFilters";
 import { useInventoryQuery } from "../hooks/useInventoryQuery";
-import { useMemo } from "react";
-import { AlertCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertCircle, Plus } from "lucide-react";
 import type { InventoryParams } from "../types";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { InventoryForm } from "./InventoryForm";
 
 export default function InventoryPage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const {
     filters,
     updateSearch,
@@ -54,6 +65,23 @@ export default function InventoryPage() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Inventario de Repuestos</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Nuevo Inventario
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Agregar al Inventario</DialogTitle>
+              <DialogDescription>
+                Selecciona un repuesto y la cantidad para agregar al inventario actual.
+              </DialogDescription>
+            </DialogHeader>
+            <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>
