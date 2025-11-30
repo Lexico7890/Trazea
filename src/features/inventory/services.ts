@@ -87,6 +87,20 @@ export async function getAllInventoryItems(): Promise<InventoryItem[]> {
 }
 
 /**
+ * Create a new inventory item
+ */
+export async function createInventoryItem(data: { id_repuesto: string, id_localizacion: number, cantidad: number, posicion?: string }) {
+  const { error } = await supabase
+    .from('inventory')
+    .insert(data);
+
+  if (error) {
+    console.error('Error creating inventory item:', error);
+    throw new Error(error.message);
+  }
+}
+
+/**
  * Search inventory items by query
  */
 export async function searchInventoryItems(query: string): Promise<InventoryItem[]> {
