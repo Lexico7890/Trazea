@@ -91,15 +91,26 @@ def verify_requests_flow(page):
         page.screenshot(path="verification/dashboard_fail.png")
         raise
 
-    # Click "Solicitar" on the first item
+    # Open Popover on the first item
+    # The popover trigger has <Ellipsis> icon inside a button.
+    # We can assume it's the only button in the row or select by icon.
+    # Or just select the button in the last cell.
     try:
         expect(page.get_by_text("Aceite Motor")).to_be_visible()
-        solicitar_btn = page.get_by_role("button", name="Solicitar").first
-        solicitar_btn.click()
+        # Find the row for Aceite Motor
+        row = page.get_by_role("row").filter(has_text="Aceite Motor")
+        # Find the popover button inside. It is usually just a button with no text (just icon).
+        popover_btn = row.get_by_role("button")
+        popover_btn.click()
+        print("Clicked Popover")
+
+        # Now click "Solicitar" inside popover
+        page.get_by_role("button", name="Solicitar").click()
         print("Clicked Solicitar")
+
     except:
-        print("Failed to find/click Solicitar")
-        page.screenshot(path="verification/inventory_fail.png")
+        print("Failed to interact with popover")
+        page.screenshot(path="verification/popover_fail.png")
         raise
 
     # Go to Requests directly
@@ -111,10 +122,6 @@ def verify_requests_flow(page):
     # Fill form
     # Select destination
     page.get_by_role("combobox").click()
-    # Wait for options. Use strict locator
-    # The option in Select should be clickable.
-    # It seems "Taller Principal" is also in the sidebar footer (user profile).
-    # We should scope it to the dropdown content.
     page.get_by_role("option", name="Taller Principal").click()
 
     # Type comment

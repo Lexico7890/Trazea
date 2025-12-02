@@ -1,28 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import type { InventoryItem } from "../types";
-import { useRequestsStore } from "@/features/requests/store/useRequestsStore";
-import { toast } from "sonner";
+import { PopoverOptions } from "./PopoverOptions";
 
 interface InventoryTableRowProps {
     item: InventoryItem;
 }
 
 export function InventoryTableRow({ item }: InventoryTableRowProps) {
-    const { addItem } = useRequestsStore();
     // Determine if stock is low
     const isLowStock = item.stock_actual < item.cantidad_minima;
-
-    const handleRequest = () => {
-        addItem({
-            id: item.id_repuesto,
-            nombre: item.nombre,
-            referencia: item.referencia,
-        });
-        toast.success(`"${item.nombre}" agregado a solicitudes`);
-    };
 
     return (
         <TableRow>
@@ -49,16 +36,7 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
                 )}
             </TableCell>
             <TableCell>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={item.descontinuado}
-                    onClick={handleRequest}
-                    title="Solicitar Repuesto"
-                >
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Solicitar
-                </Button>
+                <PopoverOptions item={item} />
             </TableCell>
         </TableRow>
     );
