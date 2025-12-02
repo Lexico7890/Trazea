@@ -21,6 +21,9 @@ import {
 import InventoryPage from "./features/inventory/components/InventoryPage";
 import RepuestosPage from "./features/repuestos/components/RepuestosPage";
 import RecordsPage from "./features/records/components/records-page";
+import RequestsPage from "./features/requests/components/RequestsPage";
+import RequestsCreatedPage from "./features/requests/components/RequestsCreatedPage";
+import RequestsSentPage from "./features/requests/components/RequestsSentPage";
 import { Toaster } from "./components/ui/sonner";
 import { useUserStore } from "@/store/useUserStore";
 import { LoginPage } from "./features/login/components/login-page";
@@ -80,6 +83,10 @@ function App() {
                       <Route path="/repuestos" element={<RepuestosPage />} />
                       <Route path="/registros" element={<RecordsPage />} />
                       <Route path="/inventario" element={<Inventory />} />
+                      <Route path="/solicitudes" element={<RequestsPage />}>
+                        <Route path="creadas" element={<RequestsCreatedPage />} />
+                        <Route path="enviadas" element={<RequestsSentPage />} />
+                      </Route>
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
