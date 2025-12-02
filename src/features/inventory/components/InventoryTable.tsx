@@ -96,6 +96,7 @@ export function InventoryTable({ items, orderBy, direction, onSort }: InventoryT
                     </TableHead>
 
                     <TableHead className="w-[120px]">Estado</TableHead>
+                    <TableHead className="w-[120px]">Acciones</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

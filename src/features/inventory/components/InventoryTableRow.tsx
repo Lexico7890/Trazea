@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import type { InventoryItem } from "../types";
+import { PopoverOptions } from "./PopoverOptions";
 
 interface InventoryTableRowProps {
     item: InventoryItem;
@@ -33,6 +34,9 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
                         Activo
                     </Badge>
                 )}
+            </TableCell>
+            <TableCell>
+                <PopoverOptions />
             </TableCell>
         </TableRow>
     );
