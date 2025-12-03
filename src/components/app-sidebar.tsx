@@ -52,6 +52,21 @@ const data = {
       items: [],
     },
     {
+      title: "Solicitudes",
+      url: "/solicitudes",
+      icon: Send,
+      items: [
+        {
+          title: "Creadas",
+          url: "/solicitudes/creadas",
+        },
+        {
+          title: "Enviadas",
+          url: "/solicitudes/enviadas",
+        },
+      ],
+    },
+    {
       title: "Documentation",
       url: "#",
       icon: BookOpen,
