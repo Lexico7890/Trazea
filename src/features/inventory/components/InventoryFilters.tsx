@@ -11,21 +11,19 @@ import { ChevronDown } from "lucide-react";
 
 interface InventoryFiltersProps {
     search: string;
-    tipo: string;
+    estado_stock: string;
     descontinuado: string;
     onSearchChange: (value: string) => void;
-    onTipoChange: (value: string) => void;
+    onEstadoStockChange: (value: string) => void;
     onDescontinuadoChange: (value: string) => void;
     onReset: () => void;
 }
 
-const TIPOS = [
-    { value: 'all', label: 'Todos los tipos' },
-    { value: 'mecanico', label: 'Mecánico' },
-    { value: 'electrico', label: 'Eléctrico' },
-    { value: 'electronico', label: 'Electrónico' },
-    { value: 'hidraulico', label: 'Hidráulico' },
-    { value: 'neumatico', label: 'Neumático' },
+const ESTADOS_STOCK = [
+    { value: 'all', label: 'Todos estados de stock' },
+    { value: 'BAJO', label: 'Bajo' },
+    { value: 'OK', label: 'Ok' },
+    { value: 'CRITICO', label: 'Crítico' }
 ];
 
 const ESTADOS = [
@@ -36,16 +34,16 @@ const ESTADOS = [
 
 export function InventoryFilters({
     search,
-    tipo,
+    estado_stock,
     descontinuado,
     onSearchChange,
-    onTipoChange,
+    onEstadoStockChange,
     onDescontinuadoChange,
     onReset,
 }: InventoryFiltersProps) {
-    const hasActiveFilters = search !== '' || tipo !== 'all' || descontinuado !== 'all';
+    const hasActiveFilters = search !== '' || estado_stock !== 'all' || descontinuado !== 'all';
 
-    const selectedTipo = TIPOS.find(t => t.value === tipo)?.label || 'Todos los tipos';
+    const selectedEstadoStock = ESTADOS_STOCK.find(t => t.value === estado_stock)?.label || 'Estados de Stock';
     const selectedEstado = ESTADOS.find(e => e.value === descontinuado)?.label || 'Todos los estados';
 
     return (
@@ -62,20 +60,20 @@ export function InventoryFilters({
                     />
                 </div>
 
-                {/* Tipo Filter */}
+                {/* Estado Stock Filter */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="justify-between min-w-[180px]">
-                            {selectedTipo}
+                            {selectedEstadoStock}
                             <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-[180px]">
-                        {TIPOS.map((t) => (
+                        {ESTADOS_STOCK.map((t) => (
                             <DropdownMenuItem
                                 key={t.value}
-                                onClick={() => onTipoChange(t.value)}
-                                className={tipo === t.value ? 'bg-accent' : ''}
+                                onClick={() => onEstadoStockChange(t.value)}
+                                className={estado_stock === t.value ? 'bg-accent' : ''}
                             >
                                 {t.label}
                             </DropdownMenuItem>

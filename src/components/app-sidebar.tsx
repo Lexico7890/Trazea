@@ -53,7 +53,7 @@ const data = {
     },
     {
       title: "Solicitudes",
-      url: "/solicitudes",
+      url: "#",
       icon: Send,
       items: [
         {

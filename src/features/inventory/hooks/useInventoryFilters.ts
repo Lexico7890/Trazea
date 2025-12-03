@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 export interface InventoryFilters {
   search: string;
-  tipo: string;
+  estado_stock: string;
   descontinuado: string; // 'all' | 'active' | 'discontinued'
   page: number;
   limit: number;
@@ -13,7 +13,7 @@ export interface InventoryFilters {
 export function useInventoryFilters() {
   const [filters, setFilters] = useState<InventoryFilters>({
     search: '',
-    tipo: 'all',
+    estado_stock: 'all',
     descontinuado: 'all',
     page: 1,
     limit: 10,
@@ -25,11 +25,12 @@ export function useInventoryFilters() {
     setFilters(prev => ({ ...prev, search, page: 1 }));
   }, []);
 
-  const updateTipo = useCallback((tipo: string) => {
-    setFilters(prev => ({ ...prev, tipo, page: 1 }));
+  const updateStockState = useCallback((estado_stock: string) => {
+    setFilters(prev => ({ ...prev, estado_stock, page: 1 }));
   }, []);
 
   const updateDescontinuado = useCallback((descontinuado: string) => {
+    console.log(descontinuado);
     setFilters(prev => ({ ...prev, descontinuado, page: 1 }));
   }, []);
 
@@ -52,7 +53,7 @@ export function useInventoryFilters() {
   const resetFilters = useCallback(() => {
     setFilters({
       search: '',
-      tipo: 'all',
+      estado_stock: 'all',
       descontinuado: 'all',
       page: 1,
       limit: 10,
@@ -64,7 +65,7 @@ export function useInventoryFilters() {
   return {
     filters,
     updateSearch,
-    updateTipo,
+    updateStockState,
     updateDescontinuado,
     updatePage,
     updateLimit,

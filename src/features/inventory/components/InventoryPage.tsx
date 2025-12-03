@@ -24,7 +24,7 @@ export default function InventoryPage() {
   const {
     filters,
     updateSearch,
-    updateTipo,
+    updateStockState,
     updateDescontinuado,
     updatePage,
     updateLimit,
@@ -46,9 +46,9 @@ export default function InventoryPage() {
       params.search = filters.search;
     }
 
-    // Add tipo filter
-    if (filters.tipo !== 'all') {
-      params.tipo = filters.tipo;
+    // Add estado_stock filter
+    if (filters.estado_stock !== 'all') {
+      params.estado_stock = filters.estado_stock;
     }
 
     // Add descontinuado filter
@@ -90,10 +90,10 @@ export default function InventoryPage() {
         <CardContent>
           <InventoryFilters
             search={filters.search}
-            tipo={filters.tipo}
+            estado_stock={filters.estado_stock}
             descontinuado={filters.descontinuado}
             onSearchChange={updateSearch}
-            onTipoChange={updateTipo}
+            onEstadoStockChange={updateStockState}
             onDescontinuadoChange={updateDescontinuado}
             onReset={resetFilters}
           />
