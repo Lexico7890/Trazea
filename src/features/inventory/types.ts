@@ -2,7 +2,7 @@
 export interface InventoryItem {
   // Inventory specific fields
   id_inventario: number;
-  id_localizacion: number;
+  id_localizacion: string;
   stock_actual: number;
   posicion: string;
   

@@ -60,7 +60,7 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
 
     mutate({
       id_repuesto: values.repuesto.id_repuesto,
-      id_localizacion: Number(idLocalizacion),
+      id_localizacion: String(idLocalizacion),
       cantidad: values.cantidad,
       posicion: values.posicion,
     });

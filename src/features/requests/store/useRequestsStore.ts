@@ -8,7 +8,7 @@ export interface RequestItem {
 }
 
 export interface Destination {
-  id_localizacion: number;
+  id_localizacion: string;
   nombre: string;
 }
 
