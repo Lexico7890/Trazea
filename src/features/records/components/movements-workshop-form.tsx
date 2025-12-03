@@ -72,7 +72,7 @@ export default function MovementsWorkshopForm() {
       id_localizacion: sessionData?.locations?.[0].id_localizacion,
       id_usuario_responsable: sessionData?.user?.id,
       id_repuesto: selected?.id_repuesto,
-      concepto: movementConcept,
+      concepto: actionButtonGroup === ActionButtonGroup.VENTA ? TIPY_CONCEPT.VENTA : movementConcept,
       tipo: actionButtonGroup,
       cantidad: countItems,
       numero_orden: orderNumber || "",

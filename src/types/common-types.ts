@@ -12,6 +12,6 @@ export interface InventoryItem {
 }
 
 export interface UserLocation {
-  id_localizacion: number;
+  id_localizacion: string;
   nombre: string;
 }
