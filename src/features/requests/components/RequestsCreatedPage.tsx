@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRequestsStore } from "../store/useRequestsStore";
-import { getLocations } from "../services/requestsService";
+import { getLocations, createRequest, getRequestHistory, type RequestHistoryItem } from "../services/requestsService";
+import { useUserStore } from "@/store/useUserStore";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -24,8 +25,11 @@ import { toast } from "sonner";
 
 export default function RequestsCreatedPage() {
   const { selectedItems, destinations, setDestinations, removeItem, clearItems } = useRequestsStore();
+  const { sessionData, currentLocation } = useUserStore();
   const [selectedDestination, setSelectedDestination] = useState<string>("");
   const [comment, setComment] = useState("");
+  const [history, setHistory] = useState<RequestHistoryItem[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadLocations() {
@@ -39,7 +43,19 @@ export default function RequestsCreatedPage() {
     loadLocations();
   }, [setDestinations]);
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const historyData = await getRequestHistory();
+        setHistory(historyData);
+      } catch (error) {
+        toast.error("Error al cargar el historial");
+      }
+    }
+    loadHistory();
+  }, []);
+
+  const handleSubmit = async () => {
     if (!selectedDestination) {
       toast.error("Seleccione un destino");
       return;
@@ -48,20 +64,41 @@ export default function RequestsCreatedPage() {
       toast.error("Agregue repuestos a la solicitud");
       return;
     }
+    if (!currentLocation) {
+      toast.error("No se ha seleccionado una ubicación de origen");
+      return;
+    }
+    if (!sessionData?.user?.id) {
+      toast.error("No se ha identificado el usuario");
+      return;
+    }
 
-    console.log("Enviando solicitud:", {
-        destination: selectedDestination,
-        comment,
-        items: selectedItems
-    });
+    setIsSubmitting(true);
+    try {
+      await createRequest({
+        id_localizacion_origen: currentLocation.id_localizacion,
+        id_localizacion_destino: selectedDestination,
+        id_usuario_solicitante: sessionData.user.id,
+        observaciones_generales: comment,
+        items: selectedItems.map(item => ({ id_repuesto: item.id })),
+      });
 
-    // Placeholder for submission logic
-    toast.success("Solicitud enviada (simulación)");
+      toast.success("Solicitud enviada exitosamente");
 
-    // Clear form
-    setComment("");
-    setSelectedDestination("");
-    clearItems();
+      // Reload history
+      const historyData = await getRequestHistory();
+      setHistory(historyData);
+
+      // Clear form
+      setComment("");
+      setSelectedDestination("");
+      clearItems();
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      toast.error("Error al enviar la solicitud");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -123,8 +160,8 @@ export default function RequestsCreatedPage() {
             )}
           </div>
 
-          <Button onClick={handleSubmit} className="w-full mt-auto">
-            Enviar Solicitud
+          <Button onClick={handleSubmit} className="w-full mt-auto" disabled={isSubmitting}>
+            {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
           </Button>
         </CardContent>
       </Card>
@@ -144,15 +181,30 @@ export default function RequestsCreatedPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-               {/*
-                 TODO: Fetch history from Supabase here.
-                 const { data } = await supabase.from('solicitudes').select('*')...
-               */}
-               <TableRow>
-                 <TableCell colSpan={3} className="text-center text-muted-foreground">
-                   Historial no disponible por el momento.
-                 </TableCell>
-               </TableRow>
+              {history.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center text-muted-foreground">
+                    No hay solicitudes en el historial.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                history.map((item) => (
+                  <TableRow key={item.id_solicitud}>
+                    <TableCell>{new Date(item.fecha_creacion).toLocaleDateString()}</TableCell>
+                    <TableCell>{item.nombre_destino}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        item.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                        item.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
+                        item.estado === 'rechazada' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {item.estado}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
