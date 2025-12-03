@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import type { TechnicalMovement } from '@/types/technical-movement';
-import { handleSupabaseError } from '@/lib/error-handler';
 
 export function useCreateTechnicalMovement() {
   const queryClient = useQueryClient();
@@ -36,11 +35,12 @@ export function useCreateTechnicalMovement() {
       return { previousMovements };
     },
     // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (error: unknown, _newMovement, context) => {
+    onError: (error: any, _newMovement, context) => {
       if (context?.previousMovements) {
         queryClient.setQueryData(['technical-movements'], context.previousMovements);
       }
-      handleSupabaseError(error);
+      console.error('Error creating movement:', error);
+      toast.error('Error al registrar el movimiento técnico');
     },
     // Always refetch after error or success to ensure we have the latest data
     onSettled: () => {

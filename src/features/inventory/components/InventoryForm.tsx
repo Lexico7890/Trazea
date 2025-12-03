@@ -24,7 +24,7 @@ interface InventoryFormProps {
 
 export function InventoryForm({ onSuccess }: InventoryFormProps) {
   const queryClient = useQueryClient();
-  const { sessionData } = useUserStore();
+  const { sessionData, currentLocation } = useUserStore();
 
   const form = useForm<InsertInventoryFormValues>({
     resolver: zodResolver(insertInventorySchema),
@@ -48,16 +48,19 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
   });
 
   const onSubmit = (values: InsertInventoryFormValues) => {
-    const idLocalizacion = sessionData?.locations?.[0]?.id_localizacion;
+    // Try to get location from currentLocation (selected by user) or fallback to first assigned location
+    const idLocalizacion = currentLocation?.id_localizacion || sessionData?.locations?.[0]?.id_localizacion;
 
     if (!idLocalizacion) {
       toast.error("No se encontró una localización válida para el usuario");
       return;
     }
 
+    console.log("Submitting inventory with location:", idLocalizacion);
+
     mutate({
       id_repuesto: values.repuesto.id_repuesto,
-      id_localizacion: idLocalizacion,
+      id_localizacion: String(idLocalizacion),
       cantidad: values.cantidad,
       posicion: values.posicion,
     });
