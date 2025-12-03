@@ -25,7 +25,7 @@ export interface InventoryParams {
   order_by?: string;
   direction?: 'asc' | 'desc';
   search?: string;
-  tipo?: string;
+  estado_stock?: string;
   descontinuado?: boolean;
 }
 

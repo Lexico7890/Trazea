@@ -13,7 +13,7 @@ export async function getInventory(
     order_by = 'referencia',
     direction = 'asc',
     search,
-    tipo,
+    estado_stock,
     descontinuado,
   } = params;
 
@@ -30,9 +30,9 @@ export async function getInventory(
     query = query.or(`nombre.ilike.%${search}%,referencia.ilike.%${search}%`);
   }
 
-  // Apply tipo filter
-  if (tipo && tipo !== 'all') {
-    query = query.eq('tipo', tipo);
+  // Apply estado_stock filter
+  if (estado_stock && estado_stock !== 'all') {
+    query = query.eq('estado_stock', estado_stock);
   }
 
   // Apply descontinuado filter
