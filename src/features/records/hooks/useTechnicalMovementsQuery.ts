@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import type { TechnicalMovement } from '@/types/technical-movement';
-import { handleSupabaseError } from '@/lib/error-handler';
 
 export function useCreateTechnicalMovement() {
   const queryClient = useQueryClient();
@@ -56,13 +55,13 @@ export function useCreateTechnicalMovement() {
 
       return { previousMovements };
     },
-    
-    onError: (error: Error, _newMovement, context) => { // Tipar error como Error
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (error: any, _newMovement, context) => {
       if (context?.previousMovements) {
         queryClient.setQueryData(['technical-movements'], context.previousMovements);
       }
-      // Mostrar el mensaje de error que viene de la BD (Ej: "Stock insuficiente")
-      toast.error(error.message); 
+      console.error('Error creating movement:', error);
+      toast.error('Error al registrar el movimiento técnico');
     },
     
     onSettled: () => {
