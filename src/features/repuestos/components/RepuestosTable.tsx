@@ -65,12 +65,6 @@ export function RepuestosTable({
                                 <SortIcon column="tipo" />
                             </div>
                         </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => onSort('cantidad_minima')}>
-                            <div className="flex items-center">
-                                Min. Cantidad
-                                <SortIcon column="cantidad_minima" />
-                            </div>
-                        </TableHead>
                         <TableHead className="cursor-pointer" onClick={() => onSort('fecha_estimada')}>
                             <div className="flex items-center">
                                 Fecha Estimada
@@ -101,7 +95,6 @@ export function RepuestosTable({
                                 <TableCell>
                                     <Badge variant="outline">{item.tipo}</Badge>
                                 </TableCell>
-                                <TableCell>{item.cantidad_minima}</TableCell>
                                 <TableCell>
                                     {item.fecha_estimada
                                         ? format(new Date(item.fecha_estimada), "PPP", { locale: es })

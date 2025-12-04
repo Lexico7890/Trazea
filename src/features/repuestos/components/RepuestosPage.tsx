@@ -147,7 +147,6 @@ export default function RepuestosPage() {
                         size="icon"
                         onClick={() => refetch()}
                         disabled={isRefetching}
-                        className="w-full sm:w-auto"
                     >
                         <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
                     </Button>

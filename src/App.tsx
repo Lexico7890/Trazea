@@ -42,22 +42,6 @@ const ROUTE_NAMES: Record<string, string> = {
   "/inventario": "Inventario (Legacy)",
 };
 
-function getBreadcrumbName(pathname: string) {
-  // Try exact match first
-  if (ROUTE_NAMES[pathname]) {
-    return ROUTE_NAMES[pathname];
-  }
-
-  // Handle nested routes logic if needed, or fallback to capitalizing segments
-  const parts = pathname.split("/").filter(Boolean);
-  if (parts.length > 0) {
-    const lastPart = parts[parts.length - 1];
-    return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
-  }
-
-  return "Inicio";
-}
-
 function App() {
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
   useSupabaseAuthListener();
