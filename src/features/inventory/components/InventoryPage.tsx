@@ -6,7 +6,7 @@ import { InventoryTableSkeleton } from "./InventoryTableSkeleton";
 import { useInventoryFilters } from "../hooks/useInventoryFilters";
 import { useInventoryQuery } from "../hooks/useInventoryQuery";
 import { useMemo, useState } from "react";
-import { AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, Plus, RefreshCw } from "lucide-react";
 import type { InventoryParams } from "../types";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,28 +59,42 @@ export default function InventoryPage() {
     return params;
   }, [filters]);
 
-  const { data, isLoading, isError, error } = useInventoryQuery(apiParams);
+  const { data, isLoading, isError, error, refetch, isRefetching } =
+    useInventoryQuery(apiParams);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Inventario de Repuestos</h1>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Agregar al Inventario</DialogTitle>
-              <DialogDescription>
-                Selecciona un repuesto y la cantidad para agregar al inventario actual.
-              </DialogDescription>
-            </DialogHeader>
-            <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+            />
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Agregar al Inventario</DialogTitle>
+                <DialogDescription>
+                  Selecciona un repuesto y la cantidad para agregar al inventario
+                  actual.
+                </DialogDescription>
+              </DialogHeader>
+              <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <Card>

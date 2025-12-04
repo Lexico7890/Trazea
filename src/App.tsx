@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound";
 import "./App.css";
@@ -32,9 +32,50 @@ import { UpdatePasswordPage } from "./features/login/components/update-password-
 
 import { LocationSelector } from "./components/common/LocationSelector";
 
+const ROUTE_NAMES: Record<string, string> = {
+  "/": "Inventario",
+  "/repuestos": "Repuestos",
+  "/registros": "Registros",
+  "/solicitudes": "Solicitudes",
+  "/solicitudes/creadas": "Solicitudes Creadas",
+  "/solicitudes/enviadas": "Solicitudes Enviadas",
+  "/inventario": "Inventario (Legacy)",
+};
+
+function getBreadcrumbName(pathname: string) {
+  // Try exact match first
+  if (ROUTE_NAMES[pathname]) {
+    return ROUTE_NAMES[pathname];
+  }
+
+  // Handle nested routes logic if needed, or fallback to capitalizing segments
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length > 0) {
+    const lastPart = parts[parts.length - 1];
+    return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
+  }
+
+  return "Inicio";
+}
+
 function App() {
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
   useSupabaseAuthListener();
+  const location = useLocation();
+
+  // Generate breadcrumbs based on current location
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  const breadcrumbs = pathSegments.map((segment, index) => {
+    const path = `/${pathSegments.slice(0, index + 1).join("/")}`;
+    return {
+      path,
+      label: ROUTE_NAMES[path] || segment.charAt(0).toUpperCase() + segment.slice(1),
+    };
+  });
+
+  // Always prepend Home/Inventory if distinct, but here '/' is Inventory.
+  // If we are at root, breadcrumbs is empty.
+  const isRoot = location.pathname === "/";
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -64,15 +105,31 @@ function App() {
                       />
                       <Breadcrumb>
                         <BreadcrumbList>
-                          <BreadcrumbItem className="hidden md:block">
-                            <BreadcrumbLink href="#">
-                              Building Your Application
-                            </BreadcrumbLink>
-                          </BreadcrumbItem>
-                          <BreadcrumbSeparator className="hidden md:block" />
-                          <BreadcrumbItem>
-                            <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                          </BreadcrumbItem>
+                          {isRoot ? (
+                            <BreadcrumbItem>
+                              <BreadcrumbPage>Inventario</BreadcrumbPage>
+                            </BreadcrumbItem>
+                          ) : (
+                            <>
+                              <BreadcrumbItem className="hidden md:block">
+                                <BreadcrumbLink href="/">Inicio</BreadcrumbLink>
+                              </BreadcrumbItem>
+                              {breadcrumbs.map((crumb, index) => (
+                                <div key={crumb.path} className="flex items-center gap-2">
+                                  <BreadcrumbSeparator className="hidden md:block" />
+                                  <BreadcrumbItem>
+                                    {index === breadcrumbs.length - 1 ? (
+                                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                                    ) : (
+                                      <BreadcrumbLink href={crumb.path}>
+                                        {crumb.label}
+                                      </BreadcrumbLink>
+                                    )}
+                                  </BreadcrumbItem>
+                                </div>
+                              ))}
+                            </>
+                          )}
                         </BreadcrumbList>
                       </Breadcrumb>
                     </div>

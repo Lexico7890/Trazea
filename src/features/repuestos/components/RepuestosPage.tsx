@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { RepuestosTable } from "./RepuestosTable";
 import { RepuestosFilters } from "./RepuestosFilters";
 import { RepuestosForm } from "./RepuestosForm";
@@ -53,7 +53,7 @@ export default function RepuestosPage() {
     const [deleteId, setDeleteId] = useState<string | null>(null);
 
     // Queries and Mutations
-    const { data, isLoading, isError } = useRepuestosQuery(filters);
+    const { data, isLoading, isError, refetch, isRefetching } = useRepuestosQuery(filters);
     const { createMutation, updateMutation, deleteMutation } = useRepuestosMutations();
 
     // Handlers
@@ -142,6 +142,15 @@ export default function RepuestosPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <h1 className="text-2xl md:text-4xl font-bold">Gestión de Repuestos</h1>
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => refetch()}
+                        disabled={isRefetching}
+                        className="w-full sm:w-auto"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+                    </Button>
                     <BulkUpload onSuccess={() => data && useRepuestosQuery(filters)} />
                     <Button onClick={handleCreate} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4" />
