@@ -18,6 +18,8 @@ import type { FormEvent } from "react";
 import { toast } from "sonner";
 import { TIPY_CONCEPT } from "@/types/movement";
 import { useUserStore } from "@/store/useUserStore";
+import { useTechnicians } from "../queries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const enum ActionButtonGroup {
   SALIDA = "salida",
@@ -35,13 +37,23 @@ export default function MovementsWorkshopForm() {
     null
   );
   const [selected, setSelected] = useState<{ id_repuesto: string, referencia: string, nombre: string } | null>(null);
-  const { sessionData } = useUserStore();
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
 
+  const { sessionData } = useUserStore();
+  const locationId = sessionData?.locations?.[0]?.id_localizacion;
+
+  const { data: technicians } = useTechnicians(locationId);
 
   const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!selectedTechnicianId) {
+      toast.info("Debe seleccionar un técnico");
+      return;
+    }
+
     if (
       actionButtonGroup === ActionButtonGroup.SALIDA ||
       actionButtonGroup === ActionButtonGroup.INGRESO
@@ -69,8 +81,9 @@ export default function MovementsWorkshopForm() {
     }
     //TODO: Get the location from the global variable
     const movementData = {
-      id_localizacion: sessionData?.locations?.[0].id_localizacion,
+      id_localizacion: locationId,
       id_usuario_responsable: sessionData?.user?.id,
+      id_tecnico_asignado: selectedTechnicianId,
       id_repuesto: selected?.id_repuesto,
       concepto: actionButtonGroup === ActionButtonGroup.VENTA ? TIPY_CONCEPT.VENTA : movementConcept,
       tipo: actionButtonGroup,
@@ -85,6 +98,7 @@ export default function MovementsWorkshopForm() {
     setMovementConcept(null);
     setOrderNumber("");
     setCountItems(1);
+    setSelectedTechnicianId("");
   };
   return (
     <Card className="w-full max-w-sm">
@@ -97,6 +111,21 @@ export default function MovementsWorkshopForm() {
       <CardContent>
         <form onSubmit={submitForm}>
           <div className="md:grid md:grid-cols-5 md:gap-4 flex flex-col gap-4">
+            <div className="grid gap-2 col-span-5">
+              <Label htmlFor="technician">Técnico</Label>
+              <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar técnico" />
+                </SelectTrigger>
+                <SelectContent>
+                  {technicians?.map((tech: any) => (
+                    <SelectItem key={tech.id_usuario} value={tech.id_usuario}>
+                      {tech.nombre_usuario}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="order">Orden</Label>
               <Input

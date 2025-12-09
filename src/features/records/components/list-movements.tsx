@@ -53,7 +53,8 @@ export default function ListMovements() {
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[100px]">ID</TableHead>
-                        <TableHead>Fecha</TableHead>
+                        <TableHead>Orden</TableHead>
+                        <TableHead>Técnico</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead className="text-right">Cantidad</TableHead>
                     </TableRow>
@@ -67,12 +68,8 @@ export default function ListMovements() {
                                     : movement.repuesto_referencia
                                 }
                             </TableCell>
-                            <TableCell>
-                                {movement.fecha
-                                    ? new Date(movement.fecha).toLocaleDateString('es-ES')
-                                    : '-'
-                                }
-                            </TableCell>
+                            <TableCell>{movement.numero_orden || '-'}</TableCell>
+                            <TableCell>{movement.tecnico_asignado || '-'}</TableCell>
                             <TableCell>{movement.concepto || '-'}</TableCell>
                             <TableCell className="text-right">{movement.cantidad || '-'}</TableCell>
                         </TableRow>

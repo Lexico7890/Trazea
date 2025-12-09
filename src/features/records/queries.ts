@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getListMovements } from "./services";
+import { getListMovements, getTechniciansByLocation } from "./services";
 
 // Hook to search inventory items (for autocomplete)
 export function useSearchMovements() {
@@ -11,4 +11,13 @@ export function useSearchMovements() {
     refetchOnReconnect: true,
     gcTime: 0,
   });
+}
+
+export function useTechnicians(locationId: string | undefined) {
+    return useQuery({
+        queryKey: ["technicians", locationId],
+        queryFn: () => getTechniciansByLocation(locationId!),
+        enabled: !!locationId,
+        staleTime: 1000 * 60 * 10, // 10 minutes
+    });
 }

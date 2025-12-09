@@ -13,6 +13,7 @@ export function useCreateTechnicalMovement() {
         p_id_localizacion: newMovement.id_localizacion,
         p_id_repuesto: newMovement.id_repuesto,
         p_id_usuario_responsable: newMovement.id_usuario_responsable,
+        p_id_tecnico_asignado: newMovement.id_tecnico_asignado || null,
         p_concepto: newMovement.concepto,
         p_tipo: newMovement.tipo,
         p_cantidad: newMovement.cantidad,
