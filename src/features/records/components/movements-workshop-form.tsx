@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { BrushCleaning } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -78,6 +80,16 @@ export default function MovementsWorkshopForm() {
     }
   }, [movementToEdit]);
 
+  const handleClear = () => {
+    setSelected(null);
+    setActionButtonGroup(ActionButtonGroup.SALIDA);
+    setMovementConcept(null);
+    setOrderNumber("");
+    setCountItems(1);
+    setSelectedTechnicianId("");
+    setMovementToEdit(null);
+  };
+
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     debugger
     e.preventDefault();
@@ -144,6 +156,18 @@ export default function MovementsWorkshopForm() {
             ? "Edita los detalles del movimiento (se creará un nuevo registro)"
             : "Registra el movimiento de tus repuestos en el taller"}
         </CardDescription>
+        <CardAction>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClear}
+            className="text-muted-foreground hover:text-foreground"
+            type="button"
+          >
+            <BrushCleaning className="h-4 w-4" />
+            <span className="sr-only">Limpiar formulario</span>
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent>
         <form onSubmit={submitForm}>
