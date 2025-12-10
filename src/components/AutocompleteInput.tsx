@@ -25,6 +25,12 @@ export default function AutocompleteInput({
     return () => clearTimeout(timer);
   }, [query]);
 
+  useEffect(() => {
+    if (selected) {
+      setQuery(selected.nombre);
+    }
+  }, [selected]);
+
   // Use React Query hook for searching
   const { data: suggestions = [], isLoading } = useSearchRepuestos(
     debouncedQuery,

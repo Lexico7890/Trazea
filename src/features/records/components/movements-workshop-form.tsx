@@ -22,7 +22,7 @@ import { useTechnicians } from "../queries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRecordsStore } from "../store/useRecordsStore";
 
-const enum ActionButtonGroup {
+enum ActionButtonGroup {
   SALIDA = "salida",
   INGRESO = "ingreso",
   VENTA = "venta",
@@ -64,7 +64,6 @@ export default function MovementsWorkshopForm() {
       if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
         setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
       }
-
       if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
           setSelected({
               id_repuesto: movementToEdit.id_repuesto,
@@ -80,7 +79,9 @@ export default function MovementsWorkshopForm() {
   }, [movementToEdit]);
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
+    debugger
     e.preventDefault();
+    const validatedOrderNumber = typeof orderNumber !== 'string' ? String(orderNumber) : orderNumber;
 
     if (!selectedTechnicianId) {
       toast.info("Debe seleccionar un técnico");
@@ -96,9 +97,8 @@ export default function MovementsWorkshopForm() {
         return;
       }
     }
-
     if (actionButtonGroup !== ActionButtonGroup.VENTA) {
-      if (!orderNumber.trim()) {
+      if (!validatedOrderNumber.trim()) {
         toast.info("Debe ingresar un número de orden");
         return;
       }
@@ -112,7 +112,7 @@ export default function MovementsWorkshopForm() {
       toast.info("La cantidad debe ser mayor a 0");
       return;
     }
-    //TODO: Get the location from the global variable
+    
     const movementData = {
       id_localizacion: locationId,
       id_usuario_responsable: sessionData?.user?.id,
@@ -121,7 +121,7 @@ export default function MovementsWorkshopForm() {
       concepto: actionButtonGroup === ActionButtonGroup.VENTA ? TIPY_CONCEPT.VENTA : movementConcept,
       tipo: actionButtonGroup,
       cantidad: countItems,
-      numero_orden: orderNumber || "",
+      numero_orden: validatedOrderNumber || "",
     };
 
     await handleCreateTechnicalMovement(movementData);

@@ -10,7 +10,7 @@ import {
 import { useSearchMovements } from "../queries";
 import { Loader2 } from "lucide-react";
 import { ActionMenu } from "@/components/common/ActionMenu";
-import { useRecordsStore, type MovementToEdit } from "../store/useRecordsStore";
+import { useRecordsStore } from "../store/useRecordsStore";
 
 export default function ListMovements() {
     const { data, isLoading, isError, error } = useSearchMovements();
