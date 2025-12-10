@@ -13,11 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useTechnicalMovements } from "../hooks/useTechnicalMovements";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { toast } from "sonner";
 import { TIPY_CONCEPT } from "@/types/movement";
 import { useUserStore } from "@/store/useUserStore";
+import { useTechnicians } from "../queries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRecordsStore } from "../store/useRecordsStore";
+import { Eraser } from "lucide-react";
 
 const enum ActionButtonGroup {
   SALIDA = "salida",
@@ -35,13 +39,65 @@ export default function MovementsWorkshopForm() {
     null
   );
   const [selected, setSelected] = useState<{ id_repuesto: string, referencia: string, nombre: string } | null>(null);
-  const { sessionData } = useUserStore();
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
 
+  const { sessionData } = useUserStore();
+  const locationId = sessionData?.locations?.[0]?.id_localizacion;
+
+  const { data: technicians } = useTechnicians(locationId);
+  const { movementToEdit, setMovementToEdit } = useRecordsStore();
 
   const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
 
+  useEffect(() => {
+    if (movementToEdit) {
+      setOrderNumber(movementToEdit.numero_orden || "");
+      setCountItems(movementToEdit.cantidad || 1);
+
+      // Map 'tipo' string to ActionButtonGroup enum if possible
+      // Assuming movementToEdit.tipo matches the enum values
+      if (Object.values(ActionButtonGroup).includes(movementToEdit.tipo as ActionButtonGroup)) {
+        setActionButtonGroup(movementToEdit.tipo as ActionButtonGroup);
+      }
+
+      // Map 'concepto'
+      // Assuming movementToEdit.concepto matches TIPY_CONCEPT
+      if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
+        setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
+      }
+
+      if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
+          setSelected({
+              id_repuesto: movementToEdit.id_repuesto,
+              referencia: movementToEdit.repuesto_referencia || "",
+              nombre: movementToEdit.repuesto_nombre
+          });
+      }
+
+      if (movementToEdit.id_tecnico_asignado) {
+        setSelectedTechnicianId(movementToEdit.id_tecnico_asignado);
+      }
+    }
+  }, [movementToEdit]);
+
+  const resetForm = () => {
+    setSelected(null);
+    setActionButtonGroup(ActionButtonGroup.SALIDA);
+    setMovementConcept(null);
+    setOrderNumber("");
+    setCountItems(1);
+    setSelectedTechnicianId("");
+    setMovementToEdit(null);
+  }
+
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!selectedTechnicianId) {
+      toast.info("Debe seleccionar un técnico");
+      return;
+    }
+
     if (
       actionButtonGroup === ActionButtonGroup.SALIDA ||
       actionButtonGroup === ActionButtonGroup.INGRESO
@@ -69,8 +125,9 @@ export default function MovementsWorkshopForm() {
     }
     //TODO: Get the location from the global variable
     const movementData = {
-      id_localizacion: sessionData?.locations?.[0].id_localizacion,
+      id_localizacion: locationId,
       id_usuario_responsable: sessionData?.user?.id,
+      id_tecnico_asignado: selectedTechnicianId,
       id_repuesto: selected?.id_repuesto,
       concepto: actionButtonGroup === ActionButtonGroup.VENTA ? TIPY_CONCEPT.VENTA : movementConcept,
       tipo: actionButtonGroup,
@@ -80,23 +137,41 @@ export default function MovementsWorkshopForm() {
 
     await handleCreateTechnicalMovement(movementData);
 
-    setSelected(null);
-    setActionButtonGroup(ActionButtonGroup.SALIDA);
-    setMovementConcept(null);
-    setOrderNumber("");
-    setCountItems(1);
+    resetForm();
   };
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-sm relative">
+      <div className="absolute top-2 right-2">
+        <Button variant="ghost" size="icon" onClick={resetForm} type="button">
+          <Eraser className="h-4 w-4" />
+        </Button>
+      </div>
       <CardHeader>
-        <CardTitle>Movimiento taller</CardTitle>
+        <CardTitle>{movementToEdit ? "Editar movimiento" : "Movimiento taller"}</CardTitle>
         <CardDescription>
-          Registra el movimiento de tus repuestos en el taller
+          {movementToEdit
+            ? "Edita los detalles del movimiento (se creará un nuevo registro)"
+            : "Registra el movimiento de tus repuestos en el taller"}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={submitForm}>
           <div className="md:grid md:grid-cols-5 md:gap-4 flex flex-col gap-4">
+            <div className="grid gap-2 col-span-5">
+              <Label htmlFor="technician">Técnico</Label>
+              <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar técnico" />
+                </SelectTrigger>
+                <SelectContent>
+                  {technicians?.map((tech: any) => (
+                    <SelectItem key={tech.id_usuario} value={tech.id_usuario}>
+                      {tech.nombre_usuario}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid gap-2 col-span-2">
               <Label htmlFor="order">Orden</Label>
               <Input
