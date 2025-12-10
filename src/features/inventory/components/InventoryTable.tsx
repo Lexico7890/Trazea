@@ -58,7 +58,7 @@ export function InventoryTable({ items, orderBy, direction, onSort }: InventoryT
                         <Button
                             variant="ghost"
                             onClick={() => onSort('nombre')}
-                            className="h-8 px-2 lg:px-3"
+                            className="h-8 px-2 lg:px-3 "
                         >
                             Nombre
                             {getSortIcon('nombre')}

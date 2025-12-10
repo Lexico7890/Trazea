@@ -14,8 +14,8 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
     return (
         <TableRow>
             <TableCell className="font-medium">{item.referencia}</TableCell>
-            <TableCell>{item.nombre}</TableCell>
-            <TableCell>
+            <TableCell className="capitalize text-center text-nowrap overflow-hidden whitespace-nowrap max-w-[150px]">{item.nombre}</TableCell>
+            <TableCell className="text-center">
                 <span className={isLowStock ? 'text-destructive font-semibold' : ''}>
                     {item.stock_actual}
                 </span>
