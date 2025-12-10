@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useTechnicalMovements } from "../hooks/useTechnicalMovements";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { toast } from "sonner";
 import { TIPY_CONCEPT } from "@/types/movement";
 import { useUserStore } from "@/store/useUserStore";
 import { useTechnicians } from "../queries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRecordsStore } from "../store/useRecordsStore";
 
 const enum ActionButtonGroup {
   SALIDA = "salida",
@@ -43,8 +44,40 @@ export default function MovementsWorkshopForm() {
   const locationId = sessionData?.locations?.[0]?.id_localizacion;
 
   const { data: technicians } = useTechnicians(locationId);
+  const { movementToEdit, setMovementToEdit } = useRecordsStore();
 
   const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
+
+  useEffect(() => {
+    if (movementToEdit) {
+      setOrderNumber(movementToEdit.numero_orden || "");
+      setCountItems(movementToEdit.cantidad || 1);
+
+      // Map 'tipo' string to ActionButtonGroup enum if possible
+      // Assuming movementToEdit.tipo matches the enum values
+      if (Object.values(ActionButtonGroup).includes(movementToEdit.tipo as ActionButtonGroup)) {
+        setActionButtonGroup(movementToEdit.tipo as ActionButtonGroup);
+      }
+
+      // Map 'concepto'
+      // Assuming movementToEdit.concepto matches TIPY_CONCEPT
+      if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
+        setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
+      }
+
+      if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
+          setSelected({
+              id_repuesto: movementToEdit.id_repuesto,
+              referencia: movementToEdit.repuesto_referencia || "",
+              nombre: movementToEdit.repuesto_nombre
+          });
+      }
+
+      if (movementToEdit.id_tecnico_asignado) {
+        setSelectedTechnicianId(movementToEdit.id_tecnico_asignado);
+      }
+    }
+  }, [movementToEdit]);
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,19 +126,23 @@ export default function MovementsWorkshopForm() {
 
     await handleCreateTechnicalMovement(movementData);
 
+    // Clear form and edit state
     setSelected(null);
     setActionButtonGroup(ActionButtonGroup.SALIDA);
     setMovementConcept(null);
     setOrderNumber("");
     setCountItems(1);
     setSelectedTechnicianId("");
+    setMovementToEdit(null);
   };
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Movimiento taller</CardTitle>
+        <CardTitle>{movementToEdit ? "Editar movimiento" : "Movimiento taller"}</CardTitle>
         <CardDescription>
-          Registra el movimiento de tus repuestos en el taller
+          {movementToEdit
+            ? "Edita los detalles del movimiento (se creará un nuevo registro)"
+            : "Registra el movimiento de tus repuestos en el taller"}
         </CardDescription>
       </CardHeader>
       <CardContent>

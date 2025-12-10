@@ -9,9 +9,12 @@ import {
 } from "@/components/ui/table"
 import { useSearchMovements } from "../queries";
 import { Loader2 } from "lucide-react";
+import { ActionMenu } from "@/components/common/ActionMenu";
+import { useRecordsStore, type MovementToEdit } from "../store/useRecordsStore";
 
 export default function ListMovements() {
     const { data, isLoading, isError, error } = useSearchMovements();
+    const { setMovementToEdit } = useRecordsStore();
 
     if (isLoading) {
         return (
@@ -44,7 +47,6 @@ export default function ListMovements() {
             </div>
         );
     }
-    console.log("data", data)
 
     return (
         <div className="bg-card p-4 flex justify-center items-start border rounded-lg h-full w-full">
@@ -52,16 +54,17 @@ export default function ListMovements() {
                 <TableCaption>Lista de movimientos técnicos recientes</TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[100px]">ID</TableHead>
+                        <TableHead className="w-[100px]">Referencia</TableHead>
                         <TableHead>Orden</TableHead>
                         <TableHead>Técnico</TableHead>
-                        <TableHead>Tipo</TableHead>
+                        <TableHead>Concepto</TableHead>
                         <TableHead className="text-right">Cantidad</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {data.map((movement: any) => (
-                        <TableRow key={movement.id}>
+                        <TableRow key={movement.id_movimientos_tecnicos || movement.id}>
                             <TableCell className="font-medium">
                                 {typeof movement.id === 'string' && movement.id.startsWith('temp-')
                                     ? <span className="text-muted-foreground italic">Guardando...</span>
@@ -72,6 +75,21 @@ export default function ListMovements() {
                             <TableCell>{movement.tecnico_asignado || '-'}</TableCell>
                             <TableCell>{movement.concepto || '-'}</TableCell>
                             <TableCell className="text-right">{movement.cantidad || '-'}</TableCell>
+                            <TableCell>
+                                <ActionMenu
+                                    onEdit={() => setMovementToEdit({
+                                        id_movimientos_tecnicos: movement.id_movimientos_tecnicos,
+                                        id_repuesto: movement.id_repuesto,
+                                        repuesto_referencia: movement.repuesto_referencia,
+                                        repuesto_nombre: movement.repuesto_nombre,
+                                        id_tecnico_asignado: movement.id_tecnico_asignado,
+                                        tipo: movement.tipo,
+                                        concepto: movement.concepto,
+                                        cantidad: movement.cantidad,
+                                        numero_orden: movement.numero_orden
+                                    })}
+                                />
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
