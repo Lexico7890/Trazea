@@ -1,30 +1,84 @@
 import { supabase } from "@/lib/supabase";
 import type { InventoryItem } from "@/types/common-types";
 
-export async function getListMovements(technicianId?: string) {
-    console.log("getListMovements called with technicianId:", technicianId);
+interface MovementFilters {
+    page: number;
+    pageSize: number;
+    technicianId?: string;
+    startDate?: string;
+    endDate?: string;
+    orderNumber?: string;
+    concept?: string;
+    downloaded?: string; // 'all', 'true', 'false'
+}
+
+export async function getListMovements(filters: MovementFilters) {
+    const {
+        page = 1,
+        pageSize = 10,
+        technicianId,
+        startDate,
+        endDate,
+        orderNumber,
+        concept,
+        downloaded
+    } = filters;
 
     let query = supabase
         .from('v_movimientos_detallados')
-        .select('*')
-        .order('fecha', { ascending: false })
-        .limit(10);
+        .select('*', { count: 'exact' });
 
+    // Apply filters
     if (technicianId) {
-        console.log("Applying filter for technicianId:", technicianId);
         query = query.eq('id_tecnico_asignado', technicianId);
-    } else {
-        console.log("No technician filter applied.");
     }
 
-    const { data, error } = await query;
+    if (startDate) {
+        query = query.gte('fecha', startDate);
+    }
+
+    if (endDate) {
+        // Assume end date implies end of that day if user picks a date.
+        // Typically UI inputs return YYYY-MM-DD.
+        // To include the whole end day, we might need to add time or check < next day.
+        // For simplicity with standard inputs, let's assume the user inputs or we handle it.
+        // If it's just a date string, standard comparison works fine if strict.
+        // However, usually end date should include the day.
+        // Let's assume the caller handles the time part or we treat it inclusive.
+        // If we get "2023-01-01", we probably want everything up to "2023-01-01 23:59:59".
+        // A simple way is to use .lte if the input includes time, or add 1 day and use .lt.
+        // I'll stick to simple .lte for now, assuming standard usage.
+        query = query.lte('fecha', `${endDate}T23:59:59`);
+    }
+
+    if (orderNumber) {
+        query = query.ilike('numero_orden', `%${orderNumber}%`);
+    }
+
+    if (concept && concept !== 'all') {
+        query = query.eq('concepto', concept);
+    }
+
+    if (downloaded && downloaded !== 'all') {
+        query = query.eq('descargada', downloaded === 'true');
+    }
+
+    // Pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    query = query
+        .order('fecha', { ascending: false })
+        .range(from, to);
+
+    const { data, error, count } = await query;
 
     if (error) {
         console.error('Error searching inventory:', error);
         throw new Error(error.message);
     }
 
-    return data as InventoryItem[];
+    return { data: data as InventoryItem[], count };
 }
 
 export async function getTechniciansByLocation(locationId: string) {
