@@ -130,10 +130,11 @@ export async function searchRepuestos(query: string, id_localizacion: string): P
     return [];
   }
 
+  let fromDate = id_localizacion ? 'v_inventario_completo' : 'repuestos';
+
   const { data, error } = await supabase
-    .from('v_inventario_completo')
+    .from(fromDate)
     .select('*')
-    .eq('id_localizacion', id_localizacion)
     .or(`nombre.ilike.%${query}%,referencia.ilike.%${query}%`)
     .limit(50);
 

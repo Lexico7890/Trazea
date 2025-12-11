@@ -30,8 +30,6 @@ export default function AutocompleteInput({
   useEffect(() => {
     if (selected !== null && selected !== undefined) {
       setQuery(selected.nombre);
-    } else {
-      setQuery("");
     }
   }, [selected]);
 
