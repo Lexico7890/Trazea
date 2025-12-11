@@ -64,7 +64,9 @@ export const useUserStore = create<UserStore>()(
       
       hasRole: (roleName: string) => {
         const state = get();
-        return state.sessionData?.user.role?.nombre === roleName;
+        const userRole = state.sessionData?.user.role?.nombre;
+        if (!userRole) return false;
+        return userRole.toLowerCase().trim() === roleName.toLowerCase().trim();
       },
     }),
     {
