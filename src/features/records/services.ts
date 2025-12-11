@@ -2,6 +2,8 @@ import { supabase } from "@/lib/supabase";
 import type { InventoryItem } from "@/types/common-types";
 
 export async function getListMovements(technicianId?: string) {
+    console.log("getListMovements called with technicianId:", technicianId);
+
     let query = supabase
         .from('v_movimientos_detallados')
         .select('*')
@@ -9,7 +11,10 @@ export async function getListMovements(technicianId?: string) {
         .limit(10);
 
     if (technicianId) {
+        console.log("Applying filter for technicianId:", technicianId);
         query = query.eq('id_tecnico_asignado', technicianId);
+    } else {
+        console.log("No technician filter applied.");
     }
 
     const { data, error } = await query;

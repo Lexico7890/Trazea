@@ -12,7 +12,7 @@ import { Loader2, Edit, Eye, Download } from "lucide-react";
 import { ActionMenu } from "@/components/common/ActionMenu";
 import { useRecordsStore } from "../store/useRecordsStore";
 import { useUserStore } from "@/store/useUserStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -29,10 +29,18 @@ export default function ListMovements() {
     const { sessionData, hasRole } = useUserStore();
 
     // Determine if we need to filter by technician
-    // If user is 'tecnico', we pass their ID. Otherwise undefined.
-    // Note: sessionData might be null initially but useUserStore persists so it should be available if authenticated.
     const isTechnician = hasRole('tecnico');
     const technicianId = isTechnician ? sessionData?.user.id : undefined;
+
+    // Debug logging
+    useEffect(() => {
+        console.log("=== ListMovements Debug ===");
+        console.log("Session Data:", sessionData);
+        console.log("User Role Object:", sessionData?.user?.role);
+        console.log("Is Technician (hasRole 'tecnico'):", isTechnician);
+        console.log("Technician ID Filter:", technicianId);
+        console.log("===========================");
+    }, [sessionData, isTechnician, technicianId]);
 
     const { data, isLoading, isError, error } = useSearchMovements(technicianId);
     const { setMovementToEdit } = useRecordsStore();
@@ -53,15 +61,6 @@ export default function ListMovements() {
 
         if (movement.fecha) {
             const movementDate = new Date(movement.fecha); // UTC date from DB
-            // Adjust movement date to local time is handled by JS Date constructor automatically if string includes Z,
-            // or if it's ISO string. Supabase returns ISO strings typically (e.g. 2023-10-27T10:00:00+00:00 or Z).
-            // Let's assume standard ISO format.
-            // If it's just '2023-10-27 10:00:00' without timezone, it might be interpreted as local.
-            // However, typical Supabase setup is timestamptz.
-            // Requirement: "ajustar la hora ya que esta en utc para que se compare con la hora local"
-            // If the string is UTC but lacks 'Z', we might need to append it.
-            // But usually the client handles it.
-            // We'll compare against current time.
 
             const now = new Date();
             const diffMs = now.getTime() - movementDate.getTime();
