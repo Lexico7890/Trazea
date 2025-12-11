@@ -8,11 +8,11 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { useSearchMovements, useMarkMovementAsDownloaded } from "../queries";
-import { Loader2, Edit, Eye, Download } from "lucide-react";
+import { Loader2, Edit, Eye, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { ActionMenu } from "@/components/common/ActionMenu";
 import { useRecordsStore } from "../store/useRecordsStore";
 import { useUserStore } from "@/store/useUserStore";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -24,6 +24,16 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 export default function ListMovements() {
     const { sessionData, hasRole } = useUserStore();
@@ -32,17 +42,31 @@ export default function ListMovements() {
     const isTechnician = hasRole('tecnico');
     const technicianId = isTechnician ? sessionData?.user.id : undefined;
 
-    // Debug logging
-    useEffect(() => {
-        console.log("=== ListMovements Debug ===");
-        console.log("Session Data:", sessionData);
-        console.log("User Role Object:", sessionData?.user?.role);
-        console.log("Is Technician (hasRole 'tecnico'):", isTechnician);
-        console.log("Technician ID Filter:", technicianId);
-        console.log("===========================");
-    }, [sessionData, isTechnician, technicianId]);
+    // Filter State
+    const [page, setPage] = useState(1);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [orderNumber, setOrderNumber] = useState("");
+    const [concept, setConcept] = useState("");
+    const [downloaded, setDownloaded] = useState("all");
 
-    const { data, isLoading, isError, error } = useSearchMovements(technicianId);
+    const pageSize = 10;
+
+    const { data: queryData, isLoading, isError, error } = useSearchMovements({
+        page,
+        pageSize,
+        technicianId,
+        startDate,
+        endDate,
+        orderNumber,
+        concept,
+        downloaded
+    });
+
+    const movements = queryData?.data || [];
+    const totalCount = queryData?.count || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
     const { setMovementToEdit } = useRecordsStore();
     const markAsDownloaded = useMarkMovementAsDownloaded();
     const [downloadConfirmId, setDownloadConfirmId] = useState<string | null>(null);
@@ -56,12 +80,11 @@ export default function ListMovements() {
 
     const getRowClass = (movement: any) => {
         if (movement.descargada === true) {
-            return "bg-green-100 dark:bg-green-900/20"; // Green if downloaded
+            return "bg-green-400"; // User requested bg-green-400
         }
 
         if (movement.fecha) {
-            const movementDate = new Date(movement.fecha); // UTC date from DB
-
+            const movementDate = new Date(movement.fecha);
             const now = new Date();
             const diffMs = now.getTime() - movementDate.getTime();
             const diffHours = diffMs / (1000 * 60 * 60);
@@ -73,6 +96,17 @@ export default function ListMovements() {
 
         return "";
     };
+
+    // Concepts list based on typical usage + enum
+    const concepts = [
+        { value: "salida", label: "Salida" },
+        { value: "ingreso", label: "Ingreso" },
+        { value: "venta", label: "Venta" },
+        { value: "garantia", label: "Garantia" },
+        { value: "prestamo", label: "Prestamo" },
+        { value: "cotizacion", label: "Cotizacion" },
+        { value: "devolucion", label: "Devolucion" },
+    ];
 
     if (isLoading) {
         return (
@@ -98,80 +132,163 @@ export default function ListMovements() {
         );
     }
 
-    if (!data || data.length === 0) {
-        return (
-            <div className="bg-card p-4 flex justify-center items-center border rounded-lg h-full w-full">
-                <p className="text-muted-foreground">No hay movimientos técnicos registrados</p>
-            </div>
-        );
-    }
-
     return (
-        <div className="bg-card p-4 flex justify-center items-start border rounded-lg h-full w-full">
-            <Table>
-                <TableCaption>Lista de movimientos técnicos recientes</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[100px]">Referencia</TableHead>
-                        <TableHead>Orden</TableHead>
-                        <TableHead>Técnico</TableHead>
-                        <TableHead>Concepto</TableHead>
-                        <TableHead className="text-right">Cantidad</TableHead>
-                        <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {data.map((movement: any) => (
-                        <TableRow
-                            key={movement.id_movimientos_tecnicos || movement.id}
-                            className={cn(getRowClass(movement))}
-                        >
-                            <TableCell className="font-medium">
-                                {typeof movement.id === 'string' && movement.id.startsWith('temp-')
-                                    ? <span className="text-muted-foreground italic">Guardando...</span>
-                                    : movement.repuesto_referencia
-                                }
-                            </TableCell>
-                            <TableCell>{movement.numero_orden || '-'}</TableCell>
-                            <TableCell>{movement.tecnico_asignado || '-'}</TableCell>
-                            <TableCell>{movement.concepto || '-'}</TableCell>
-                            <TableCell className="text-right">{movement.cantidad || '-'}</TableCell>
-                            <TableCell>
-                                <ActionMenu
-                                    actions={[
-                                        {
-                                            label: "Editar",
-                                            icon: <Edit className="h-4 w-4" />,
-                                            onClick: () => setMovementToEdit({
-                                                id_movimientos_tecnicos: movement.id_movimientos_tecnicos,
-                                                id_repuesto: movement.id_repuesto,
-                                                repuesto_referencia: movement.repuesto_referencia,
-                                                repuesto_nombre: movement.repuesto_nombre,
-                                                id_tecnico_asignado: movement.id_tecnico_asignado,
-                                                tipo: movement.tipo,
-                                                concepto: movement.concepto,
-                                                cantidad: movement.cantidad,
-                                                numero_orden: movement.numero_orden
-                                            })
-                                        },
-                                        {
-                                            label: "Descargar",
-                                            icon: <Download className="h-4 w-4" />,
-                                            onClick: () => setDownloadConfirmId(movement.id_movimientos_tecnicos)
-                                        },
-                                        {
-                                            label: "Ver",
-                                            icon: <Eye className="h-4 w-4" />,
-                                            onClick: () => {},
-                                            disabled: true
+        <div className="space-y-4 h-full w-full">
+            {/* Filters Section */}
+            <div className="bg-card p-4 border rounded-lg grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
+                <div className="flex flex-col gap-2">
+                    <Label>Fecha Inicio</Label>
+                    <Input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                    />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <Label>Fecha Fin</Label>
+                    <Input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                    />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <Label>Orden</Label>
+                    <Input
+                        placeholder="Buscar orden..."
+                        value={orderNumber}
+                        onChange={(e) => { setOrderNumber(e.target.value); setPage(1); }}
+                    />
+                </div>
+                <div className="flex flex-col gap-2">
+                    <Label>Concepto</Label>
+                    <Select value={concept} onValueChange={(val) => { setConcept(val); setPage(1); }}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Todos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Todos</SelectItem>
+                            {concepts.map((c) => (
+                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="flex flex-col gap-2">
+                    <Label>Estado Descarga</Label>
+                    <Select value={downloaded} onValueChange={(val) => { setDownloaded(val); setPage(1); }}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Todos" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Todos</SelectItem>
+                            <SelectItem value="true">Descargados</SelectItem>
+                            <SelectItem value="false">Pendientes</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {/* Table Section */}
+            <div className="bg-card p-4 flex flex-col justify-between border rounded-lg h-full w-full">
+                {movements.length === 0 ? (
+                    <div className="flex justify-center items-center h-40">
+                         <p className="text-muted-foreground">No hay movimientos coinciden con los filtros</p>
+                    </div>
+                ) : (
+                    <Table>
+                        <TableCaption>Lista de movimientos técnicos recientes</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">Referencia</TableHead>
+                                <TableHead>Orden</TableHead>
+                                <TableHead>Técnico</TableHead>
+                                <TableHead>Concepto</TableHead>
+                                <TableHead className="text-right">Cantidad</TableHead>
+                                <TableHead className="w-[50px]"></TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {movements.map((movement: any) => (
+                                <TableRow
+                                    key={movement.id_movimientos_tecnicos || movement.id}
+                                    className={cn(getRowClass(movement))}
+                                >
+                                    <TableCell className="font-medium">
+                                        {typeof movement.id === 'string' && movement.id.startsWith('temp-')
+                                            ? <span className="text-muted-foreground italic">Guardando...</span>
+                                            : movement.repuesto_referencia
                                         }
-                                    ]}
-                                />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                                    </TableCell>
+                                    <TableCell>{movement.numero_orden || '-'}</TableCell>
+                                    <TableCell>{movement.tecnico_asignado || '-'}</TableCell>
+                                    <TableCell>{movement.concepto || '-'}</TableCell>
+                                    <TableCell className="text-right">{movement.cantidad || '-'}</TableCell>
+                                    <TableCell>
+                                        <ActionMenu
+                                            actions={[
+                                                {
+                                                    label: "Editar",
+                                                    icon: <Edit className="h-4 w-4" />,
+                                                    onClick: () => setMovementToEdit({
+                                                        id_movimientos_tecnicos: movement.id_movimientos_tecnicos,
+                                                        id_repuesto: movement.id_repuesto,
+                                                        repuesto_referencia: movement.repuesto_referencia,
+                                                        repuesto_nombre: movement.repuesto_nombre,
+                                                        id_tecnico_asignado: movement.id_tecnico_asignado,
+                                                        tipo: movement.tipo,
+                                                        concepto: movement.concepto,
+                                                        cantidad: movement.cantidad,
+                                                        numero_orden: movement.numero_orden
+                                                    })
+                                                },
+                                                {
+                                                    label: "Descargar",
+                                                    icon: <Download className="h-4 w-4" />,
+                                                    onClick: () => setDownloadConfirmId(movement.id_movimientos_tecnicos)
+                                                },
+                                                {
+                                                    label: "Ver",
+                                                    icon: <Eye className="h-4 w-4" />,
+                                                    onClick: () => {},
+                                                    disabled: true
+                                                }
+                                            ]}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
+
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between space-x-2 py-4">
+                    <div className="flex-1 text-sm text-muted-foreground">
+                        Página {page} de {totalPages || 1} ({totalCount} registros)
+                    </div>
+                    <div className="space-x-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(old => Math.max(old - 1, 1))}
+                            disabled={page === 1}
+                        >
+                            <ChevronLeft className="h-4 w-4 mr-2" />
+                            Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage(old => (totalPages && old < totalPages ? old + 1 : old))}
+                            disabled={!totalPages || page === totalPages}
+                        >
+                            Siguiente
+                            <ChevronRight className="h-4 w-4 ml-2" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
             <AlertDialog open={!!downloadConfirmId} onOpenChange={(open) => !open && setDownloadConfirmId(null)}>
                 <AlertDialogContent>

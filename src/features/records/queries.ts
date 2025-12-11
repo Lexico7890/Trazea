@@ -1,11 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { getListMovements, getTechniciansByLocation, markMovementAsDownloaded } from "./services";
 
+interface MovementFilters {
+    page: number;
+    pageSize: number;
+    technicianId?: string;
+    startDate?: string;
+    endDate?: string;
+    orderNumber?: string;
+    concept?: string;
+    downloaded?: string;
+}
+
 // Hook to search inventory items (for autocomplete)
-export function useSearchMovements(technicianId?: string) {
+export function useSearchMovements(filters: MovementFilters) {
   return useQuery({
-    queryKey: ["technical-movements", technicianId],
-    queryFn: () => getListMovements(technicianId),
+    queryKey: ["technical-movements", filters],
+    queryFn: () => getListMovements(filters),
+    placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
