@@ -80,7 +80,7 @@ export default function ListMovements() {
 
     const getRowClass = (movement: any) => {
         if (movement.descargada === true) {
-            return "bg-green-400"; // User requested bg-green-400
+            return "bg-green-400/50"; // User requested bg-green-400
         }
 
         if (movement.fecha) {
@@ -90,7 +90,7 @@ export default function ListMovements() {
             const diffHours = diffMs / (1000 * 60 * 60);
 
             if (diffHours > 24) {
-                return "bg-red-100 dark:bg-red-900/20"; // Red if older than 24h and not downloaded
+                return "bg-red-100 dark:bg-red-400/50"; // Red if older than 24h and not downloaded
             }
         }
 

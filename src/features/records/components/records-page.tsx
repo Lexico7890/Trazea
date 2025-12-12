@@ -6,7 +6,7 @@ export default function RecordsPage() {
     <div>
       <h1 className="text-2xl font-bold mb-4">Registros</h1>
       <p>Esta es la página de registros.</p>
-      <div className="lg:grid lg:grid-cols-2 gap-4 mt-4 flex flex-col">
+      <div className="gap-4 mt-4 flex flex-col">
         <section className="flex justify-center items-center p-4">
           <MovementsWorkshopForm />
         </section>

@@ -43,9 +43,11 @@ const ROUTE_NAMES: Record<string, string> = {
 };
 
 function App() {
-  const isAuthenticated = useUserStore((state) => state.isAuthenticated);
   useSupabaseAuthListener();
   const location = useLocation();
+  const { sessionData, isAuthenticated } = useUserStore();
+  console.log("sessionData", sessionData);
+  console.log("isAuthenticated", isAuthenticated);
 
   // Generate breadcrumbs based on current location
   const pathSegments = location.pathname.split("/").filter(Boolean);

@@ -77,7 +77,6 @@ export async function getAllInventoryItems(): Promise<InventoryItem[]> {
     .order('nombre', { ascending: true })
     .limit(1000);
 
-  console.log("data", data);
   if (error) {
     console.error('Error fetching all inventory items:', error);
     throw new Error(error.message);
