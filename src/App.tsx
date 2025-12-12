@@ -31,6 +31,7 @@ import { useSupabaseAuthListener } from "./hooks/useSupabaseAuthListener";
 import { UpdatePasswordPage } from "./features/login/components/update-password-page";
 
 import { LocationSelector } from "./components/common/LocationSelector";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const ROUTE_NAMES: Record<string, string> = {
   "/": "Inventario",
@@ -120,14 +121,32 @@ function App() {
                   </header>
                   <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                     <Routes>
-                      <Route path="/" element={<InventoryPage />} />
-                      <Route path="/repuestos" element={<RepuestosPage />} />
-                      <Route path="/registros" element={<RecordsPage />} />
-                      <Route path="/inventario" element={<Inventory />} />
-                      <Route path="/solicitudes" element={<RequestsPage />}>
-                        <Route path="creadas" element={<RequestsCreatedPage />} />
-                        <Route path="enviadas" element={<RequestsSentPage />} />
+                      {/* Protected Routes Wrapper */}
+                      <Route element={<ProtectedRoute routeKey="inventario" />}>
+                         <Route path="/" element={<InventoryPage />} />
                       </Route>
+
+                      <Route element={<ProtectedRoute routeKey="repuestos" />}>
+                        <Route path="/repuestos" element={<RepuestosPage />} />
+                      </Route>
+
+                      <Route element={<ProtectedRoute routeKey="registros" />}>
+                         <Route path="/registros" element={<RecordsPage />} />
+                      </Route>
+
+                      {/* Note: 'inventario' route (legacy) might need a permission check or just link to 'mi_inventario' perm?
+                          For now, I'll protect it with 'inventario' as well. */}
+                      <Route element={<ProtectedRoute routeKey="inventario" />}>
+                         <Route path="/inventario" element={<Inventory />} />
+                      </Route>
+
+                      <Route element={<ProtectedRoute routeKey="solicitudes" />}>
+                        <Route path="/solicitudes" element={<RequestsPage />}>
+                          <Route path="creadas" element={<RequestsCreatedPage />} />
+                          <Route path="enviadas" element={<RequestsSentPage />} />
+                        </Route>
+                      </Route>
+
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
@@ -145,7 +164,3 @@ function App() {
 }
 
 export default App;
-
-/**
- * 
- */
