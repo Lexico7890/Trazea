@@ -7,11 +7,13 @@ import { Badge } from "./ui/badge";
 interface AutocompleteInputProps {
   selected?: { id_repuesto: string, referencia: string, nombre: string } | null;
   setSelected: (selection: { id_repuesto: string, referencia: string, nombre: string } | null) => void;
+  id_localizacion: string | undefined;
 }
 
 export default function AutocompleteInput({
   selected,
   setSelected,
+  id_localizacion,
 }: AutocompleteInputProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -26,7 +28,7 @@ export default function AutocompleteInput({
   }, [query]);
 
   useEffect(() => {
-    if (selected) {
+    if (selected !== null && selected !== undefined) {
       setQuery(selected.nombre);
     }
   }, [selected]);
@@ -34,7 +36,8 @@ export default function AutocompleteInput({
   // Use React Query hook for searching
   const { data: suggestions = [], isLoading } = useSearchRepuestos(
     debouncedQuery,
-    !selected // Only search if no item is selected
+    !selected, // Only search if no item is selected
+    id_localizacion || ""
   );
 
   // When the user selects a suggestion

@@ -91,7 +91,6 @@ export default function MovementsWorkshopForm() {
   };
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
-    debugger
     e.preventDefault();
     const validatedOrderNumber = typeof orderNumber !== 'string' ? String(orderNumber) : orderNumber;
 
@@ -204,6 +203,7 @@ export default function MovementsWorkshopForm() {
               <AutocompleteInput
                 setSelected={setSelected}
                 selected={selected}
+                id_localizacion={locationId}
               />
             </div>
             <div className="grid gap-4 col-span-5">

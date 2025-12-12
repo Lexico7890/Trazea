@@ -48,10 +48,10 @@ export function useSearchInventory(query: string, enabled: boolean = true) {
 }
 
 // Hook to search repuestos items (for autocomplete)
-export function useSearchRepuestos(query: string, enabled: boolean = true) {
+export function useSearchRepuestos(query: string, enabled: boolean = true, id_localizacion: string) {
   return useQuery({
     queryKey: inventoryKeys.searchRepuestos(query),
-    queryFn: () => searchRepuestos(query),
+    queryFn: () => searchRepuestos(query, id_localizacion),
     enabled: enabled && query.trim().length > 0,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });

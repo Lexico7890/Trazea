@@ -79,6 +79,7 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
                 <AutocompleteInput
                   selected={field.value}
                   setSelected={(val) => field.onChange(val)}
+                  id_localizacion={undefined}
                 />
               </FormControl>
               <FormMessage />
