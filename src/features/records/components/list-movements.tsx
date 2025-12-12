@@ -34,6 +34,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { MovementDetailsModal } from "./movement-details-modal";
 
 export default function ListMovements() {
     const { sessionData, hasRole, checkMenuPermission } = useUserStore();
@@ -70,6 +71,7 @@ export default function ListMovements() {
     const { setMovementToEdit } = useRecordsStore();
     const markAsDownloaded = useMarkMovementAsDownloaded();
     const [downloadConfirmId, setDownloadConfirmId] = useState<string | null>(null);
+    const [viewMovement, setViewMovement] = useState<any>(null);
 
     const handleDownload = () => {
         if (downloadConfirmId) {
@@ -253,8 +255,7 @@ export default function ListMovements() {
                                                 {
                                                     label: "Ver",
                                                     icon: <Eye className="h-4 w-4" />,
-                                                    onClick: () => {},
-                                                    disabled: true
+                                                    onClick: () => setViewMovement(movement),
                                                 }
                                             ]}
                                         />
@@ -307,6 +308,12 @@ export default function ListMovements() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <MovementDetailsModal
+                open={!!viewMovement}
+                onOpenChange={(open) => !open && setViewMovement(null)}
+                movement={viewMovement}
+            />
         </div>
     );
 }
