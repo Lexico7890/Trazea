@@ -92,6 +92,7 @@ interface UserStore {
   hasRole: (roleName: string) => boolean;
   // Nuevo helper específico para rutas
   canViewRoute: (routeKey: string) => boolean;
+  checkMenuPermission: (menu: string, permission: string) => boolean;
 }
 
 export const useUserStore = create<UserStore>()(
@@ -126,6 +127,20 @@ export const useUserStore = create<UserStore>()(
         const userRole = state.sessionData?.user.role?.nombre;
         if (!userRole) return false;
         return userRole.toLowerCase().trim() === roleName.toLowerCase().trim();
+      },
+
+      checkMenuPermission: (menu: string, permission: string) => {
+        const state = get();
+        const menuPermissions = state.sessionData?.user.role?.permissions?.menu;
+
+        if (!menuPermissions || !menuPermissions[menu]) {
+          return false;
+        }
+
+        // We check if the property exists and is exactly true.
+        // Using explicit casting or checking truthiness depending on requirement.
+        // Based on "si esta llega como false no la quites", we assume boolean values in JSON.
+        return !!menuPermissions[menu][permission];
       },
 
       canViewRoute: (routeKey: string) => {

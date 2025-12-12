@@ -36,7 +36,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 export default function ListMovements() {
-    const { sessionData, hasRole } = useUserStore();
+    const { sessionData, hasRole, checkMenuPermission } = useUserStore();
 
     // Determine if we need to filter by technician
     const isTechnician = hasRole('tecnico');
@@ -107,6 +107,8 @@ export default function ListMovements() {
         { value: "cotizacion", label: "Cotizacion" },
         { value: "devolucion", label: "Devolucion" },
     ];
+
+    const canEdit = checkMenuPermission("registros", "edit_register");
 
     if (isLoading) {
         return (
@@ -230,6 +232,7 @@ export default function ListMovements() {
                                                 {
                                                     label: "Editar",
                                                     icon: <Edit className="h-4 w-4" />,
+                                                    disabled: !canEdit,
                                                     onClick: () => setMovementToEdit({
                                                         id_movimientos_tecnicos: movement.id_movimientos_tecnicos,
                                                         id_repuesto: movement.id_repuesto,
