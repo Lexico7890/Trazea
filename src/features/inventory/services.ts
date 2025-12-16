@@ -100,39 +100,33 @@ export async function createInventoryItem(data: { id_repuesto: string, id_locali
 }
 
 /**
- * Update inventory item (table: inventario)
+ * Update inventory item complete using RPC
  */
-export async function updateInventoryItem(
-  id_inventario: number,
-  data: { cantidad?: number, posicion?: string, cantidad_minima?: number }
+export async function updateItemComplete(
+  id_inventario: string,
+  stock_actual: number,
+  posicion: string,
+  cantidad_minima: number,
+  descontinuado: boolean,
+  tipo: string,
+  fecha_estimada: string | null
 ) {
-  const { error } = await supabase
-    .from('inventario')
-    .update(data)
-    .eq('id_inventario', id_inventario);
+  const { data, error } = await supabase.rpc('actualizar_item_completo', {
+    p_id_inventario: id_inventario,
+    p_stock_actual: stock_actual,
+    p_posicion: posicion,
+    p_cantidad_minima: cantidad_minima,
+    p_descontinuado: descontinuado,
+    p_tipo: tipo,
+    p_fecha_estimada: fecha_estimada
+  });
 
   if (error) {
-    console.error('Error updating inventory item:', error);
+    console.error('Error updating inventory item complete:', error);
     throw new Error(error.message);
   }
-}
 
-/**
- * Update repuesto item (table: repuestos)
- */
-export async function updateRepuesto(
-  id_repuesto: string,
-  data: { descontinuado?: boolean, tipo?: string, fecha_estimada?: string | null }
-) {
-  const { error } = await supabase
-    .from('repuestos')
-    .update(data)
-    .eq('id_repuesto', id_repuesto);
-
-  if (error) {
-    console.error('Error updating repuesto:', error);
-    throw new Error(error.message);
-  }
+  return data;
 }
 
 /**

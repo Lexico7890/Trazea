@@ -1,7 +1,7 @@
 // Types for inventory feature
 export interface InventoryItem {
   // Inventory specific fields
-  id_inventario: number;
+  id_inventario: string; // Changed to string to support UUID
   id_localizacion: string;
   stock_actual: number;
   posicion: string;
