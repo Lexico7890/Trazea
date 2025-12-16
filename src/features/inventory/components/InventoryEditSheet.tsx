@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect } from "react";
 import type { InventoryItem } from "../types";
-import { updateInventoryItem, updateRepuesto } from "../services";
+import { updateItemComplete } from "../services";
 import { useRequestsStore } from "@/features/requests/store/useRequestsStore";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +32,10 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
     const [isLoading, setIsLoading] = useState(false);
     const [selectedAction, setSelectedAction] = useState<ActionType>(null);
 
-    // Form State
-    const [stockActual, setStockActual] = useState(item.stock_actual);
+    // Form State (Changed to string | number to handle empty inputs gracefully)
+    const [stockActual, setStockActual] = useState<string | number>(item.stock_actual);
     const [posicion, setPosicion] = useState(item.posicion || "");
-    const [cantidadMinima, setCantidadMinima] = useState(item.cantidad_minima);
+    const [cantidadMinima, setCantidadMinima] = useState<string | number>(item.cantidad_minima);
     const [tipo, setTipo] = useState(item.tipo || "General");
     const [descontinuado, setDescontinuado] = useState(item.descontinuado);
     const [fechaEstimada, setFechaEstimada] = useState(item.fecha_estimada ? new Date(item.fecha_estimada).toISOString().split('T')[0] : "");
@@ -52,11 +52,15 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
     }, [item, open]);
 
     const handleSave = async () => {
+        // Convert to numbers for comparison and submission
+        const finalStockActual = stockActual === "" ? 0 : Number(stockActual);
+        const finalCantidadMinima = cantidadMinima === "" ? 0 : Number(cantidadMinima);
+
         // Validation: Check if any changes were made
         const hasInventoryChanges =
-            stockActual !== item.stock_actual ||
+            finalStockActual !== item.stock_actual ||
             posicion !== (item.posicion || "") ||
-            cantidadMinima !== item.cantidad_minima;
+            finalCantidadMinima !== item.cantidad_minima;
 
         const hasRepuestoChanges =
             tipo !== (item.tipo || "General") ||
@@ -73,22 +77,20 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
         setIsLoading(true);
 
         try {
-            // Update Inventory Table
-            if (hasInventoryChanges) {
-                await updateInventoryItem(item.id_inventario, {
-                    cantidad: stockActual,
-                    posicion: posicion,
-                    cantidad_minima: cantidadMinima,
-                });
-            }
+            // Update using RPC
+            if (hasInventoryChanges || hasRepuestoChanges) {
+                // Ensure correct types for RPC
+                const fechaEstimadaISO = fechaEstimada ? new Date(fechaEstimada).toISOString() : null;
 
-            // Update Repuestos Table
-            if (hasRepuestoChanges) {
-                await updateRepuesto(item.id_repuesto, {
-                    tipo: tipo,
-                    descontinuado: descontinuado,
-                    fecha_estimada: fechaEstimada || null,
-                });
+                await updateItemComplete(
+                    String(item.id_inventario), // Ensure UUID string
+                    finalStockActual,
+                    posicion,
+                    finalCantidadMinima,
+                    descontinuado,
+                    tipo,
+                    fechaEstimadaISO
+                );
             }
 
             // Handle Actions
@@ -120,6 +122,18 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
             setSelectedAction(null);
         } else {
             setSelectedAction(action);
+        }
+    };
+
+    const handleNumberChange = (value: string, setter: (val: string | number) => void) => {
+        if (value === "") {
+            setter("");
+        } else {
+            // Remove leading zeros if present, unless it's just "0"
+            const num = Number(value);
+            if (!isNaN(num)) {
+                setter(value); // Keep string to avoid auto-formatting while typing
+            }
         }
     };
 
@@ -189,7 +203,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                     id="stock"
                                     type="number"
                                     value={stockActual}
-                                    onChange={(e) => setStockActual(Number(e.target.value))}
+                                    onChange={(e) => handleNumberChange(e.target.value, setStockActual)}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -198,7 +212,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                     id="minima"
                                     type="number"
                                     value={cantidadMinima}
-                                    onChange={(e) => setCantidadMinima(Number(e.target.value))}
+                                    onChange={(e) => handleNumberChange(e.target.value, setCantidadMinima)}
                                 />
                             </div>
                         </div>
