@@ -38,16 +38,16 @@ export function Pagination({
     return (
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Items info */}
-            <div className="text-sm text-muted-foreground">
+            <div className="hidden sm:block text-sm text-muted-foreground">
                 Mostrando <span className="font-medium">{startItem}</span> a{" "}
                 <span className="font-medium">{endItem}</span> de{" "}
                 <span className="font-medium">{totalItems}</span> registros
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-4 w-full md:w-auto">
                 {/* Items per page selector */}
                 <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Filas por página:</span>
+                    <span className="hidden sm:inline text-sm text-muted-foreground">Filas por página:</span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-8 gap-1">

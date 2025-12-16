@@ -63,7 +63,7 @@ export default function InventoryPage() {
     useInventoryQuery(apiParams);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-2 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Inventario de Repuestos</h1>
         <div className="flex gap-2">

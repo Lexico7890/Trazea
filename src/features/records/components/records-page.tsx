@@ -12,11 +12,11 @@ export default function RecordsPage() {
       <p>Esta es la página de registros.</p>
       <div className="gap-4 mt-4 flex flex-col">
         {showForm && (
-          <section className="flex justify-center items-center p-4">
+          <section className="flex justify-center items-center p-0 md:p-4">
             <MovementsWorkshopForm />
           </section>
         )}
-        <section className="flex justify-center items-center p-4">
+        <section className="flex justify-center items-center p-0 md:p-4">
           <ListMovements />
         </section>
       </div>

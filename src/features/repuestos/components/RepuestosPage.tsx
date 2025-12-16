@@ -138,7 +138,7 @@ export default function RepuestosPage() {
     };
 
     return (
-        <div className="container mx-auto p-4 md:p-6 space-y-6">
+        <div className="container mx-auto p-2 md:p-6 space-y-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <h1 className="text-2xl md:text-4xl font-bold">Gestión de Repuestos</h1>
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
