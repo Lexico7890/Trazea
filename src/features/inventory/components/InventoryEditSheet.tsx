@@ -139,7 +139,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+            <SheetContent className="w-full sm:max-w-md overflow-y-auto p-2">
                 <SheetHeader>
                     <SheetTitle>Editar Inventario</SheetTitle>
                     <SheetDescription>
@@ -147,7 +147,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="grid gap-6 py-6">
+                <div className="grid gap-6">
                     {/* Read-only Info */}
                     <div className="space-y-4 rounded-lg bg-muted/50 p-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -180,14 +180,14 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                     <div className="grid grid-cols-2 gap-3">
                         <Button
                             variant={selectedAction === "solicitar" ? "default" : "outline"}
-                            className="w-full"
+                            className="w-full bg-blue-300 hover:bg-blue-400"
                             onClick={() => toggleAction("solicitar")}
                         >
                             Solicitar
                         </Button>
                         <Button
                             variant={selectedAction === "taller" ? "default" : "outline"}
-                            className="w-full"
+                            className="w-full bg-blue-300 hover:bg-blue-400"
                             onClick={() => toggleAction("taller")}
                         >
                             Enviar a Taller
@@ -260,7 +260,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                 checked={descontinuado}
                                 onCheckedChange={(checked) => setDescontinuado(checked === true)}
                             />
-                            <Label htmlFor="descontinuado" className="font-normal cursor-pointer">
+                            <Label htmlFor="descontinuado" className="font-normal cursor-pointer text-red-300">
                                 Descontinuado
                             </Label>
                         </div>
