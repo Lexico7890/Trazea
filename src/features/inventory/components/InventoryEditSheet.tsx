@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import type { InventoryItem } from "../types";
 import { updateItemComplete } from "../services";
 import { useRequestsStore } from "@/features/requests/store/useRequestsStore";
+import { useUserStore } from "@/store/useUserStore";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 
@@ -28,7 +29,8 @@ interface InventoryEditSheetProps {
 type ActionType = "solicitar" | "taller" | null;
 
 export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: InventoryEditSheetProps) {
-    const { addItem } = useRequestsStore();
+    const { addItemToCart } = useRequestsStore();
+    const { sessionData } = useUserStore();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedAction, setSelectedAction] = useState<ActionType>(null);
 
@@ -95,12 +97,16 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
 
             // Handle Actions
             if (selectedAction === "solicitar") {
-                addItem({
-                    id: item.id_repuesto,
-                    nombre: item.nombre,
-                    referencia: item.referencia,
-                });
-                toast.success(`"${item.nombre}" agregado a solicitudes`);
+                if (!sessionData?.user?.id) {
+                    toast.error("No se pudo identificar al usuario para agregar al carrito");
+                } else {
+                    await addItemToCart(
+                        sessionData.user.id,
+                        item.id_localizacion,
+                        item.id_repuesto
+                    );
+                    toast.success(`"${item.nombre}" agregado a solicitudes`);
+                }
             } else if (selectedAction === "taller") {
                 // Future implementation
                 console.log("Enviar a taller - logic pending");

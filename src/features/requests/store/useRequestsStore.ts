@@ -1,56 +1,84 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import type { CartItem, Destination } from '../types';
+import { getCartItems, addCartItem, removeCartItem, bulkRemoveCartItems } from '../services/requestsService';
+import { toast } from 'sonner';
 
-export interface RequestItem {
-  id: string; // id_repuesto
-  nombre: string;
-  referencia: string;
-}
-
-export interface Destination {
-  id_localizacion: string;
-  nombre: string;
-}
-
-interface RequestsStore {
-  selectedItems: RequestItem[];
+interface RequestsState {
+  cartItems: CartItem[];
   destinations: Destination[];
+  isLoading: boolean;
 
-  addItem: (item: RequestItem) => void;
-  removeItem: (id: string) => void;
-  clearItems: () => void;
-  setDestinations: (locations: Destination[]) => void;
+  setDestinations: (destinations: Destination[]) => void;
+  loadCart: (locationId: string) => Promise<void>;
+  addItemToCart: (userId: string, locationId: string, repuestoId: string, quantity?: number) => Promise<void>;
+  removeItemFromCart: (cartItemId: string) => Promise<void>;
+  clearCartAfterSubmit: (cartItemIds: string[]) => Promise<void>;
 }
 
-export const useRequestsStore = create<RequestsStore>()(
-  persist(
-    (set, get) => ({
-      selectedItems: [],
-      destinations: [],
+export const useRequestsStore = create<RequestsState>((set, get) => ({
+  cartItems: [],
+  destinations: [],
+  isLoading: false,
 
-      addItem: (item) => {
-        const { selectedItems } = get();
-        const exists = selectedItems.some((i) => i.id === item.id);
-        if (!exists) {
-          set({ selectedItems: [...selectedItems, item] });
-        }
-      },
+  setDestinations: (destinations) => set({ destinations }),
 
-      removeItem: (id) => {
-        const { selectedItems } = get();
-        set({ selectedItems: selectedItems.filter((i) => i.id !== id) });
-      },
-
-      clearItems: () => {
-        set({ selectedItems: [] });
-      },
-
-      setDestinations: (locations) => {
-        set({ destinations: locations });
-      },
-    }),
-    {
-      name: 'requests-storage',
+  loadCart: async (locationId: string) => {
+    set({ isLoading: true });
+    try {
+      const items = await getCartItems(locationId);
+      set({ cartItems: items });
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al cargar el carrito de solicitudes');
+    } finally {
+      set({ isLoading: false });
     }
-  )
-);
+  },
+
+  addItemToCart: async (userId: string, locationId: string, repuestoId: string, quantity = 1) => {
+    set({ isLoading: true });
+    try {
+      await addCartItem(userId, locationId, repuestoId, quantity);
+      // We assume the component will reload the cart or we can optimistically update
+      // But since it's a shared cart, reloading is safer to see others' changes too
+      await get().loadCart(locationId);
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al agregar al carrito');
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  removeItemFromCart: async (cartItemId: string) => {
+    set({ isLoading: true });
+    try {
+      await removeCartItem(cartItemId);
+      set((state) => ({
+        cartItems: state.cartItems.filter((i) => i.id_item_carrito !== cartItemId),
+      }));
+      toast.success('Item eliminado del carrito');
+    } catch (error) {
+      console.error(error);
+      toast.error('Error al eliminar del carrito');
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  clearCartAfterSubmit: async (cartItemIds: string[]) => {
+    set({ isLoading: true });
+    try {
+      await bulkRemoveCartItems(cartItemIds);
+      set((state) => ({
+        cartItems: state.cartItems.filter((i) => !cartItemIds.includes(i.id_item_carrito)),
+      }));
+    } catch (error) {
+      console.error(error);
+      // Even if delete fails, the request was created. We just warn.
+      toast.warning('Solicitud creada, pero hubo un error al limpiar el carrito.');
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+}));

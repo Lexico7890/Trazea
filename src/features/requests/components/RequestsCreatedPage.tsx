@@ -24,7 +24,15 @@ import {
 import { toast } from "sonner";
 
 export default function RequestsCreatedPage() {
-  const { selectedItems, destinations, setDestinations, removeItem, clearItems } = useRequestsStore();
+  const {
+    cartItems,
+    destinations,
+    setDestinations,
+    loadCart,
+    removeItemFromCart,
+    clearCartAfterSubmit
+  } = useRequestsStore();
+
   const { sessionData, currentLocation } = useUserStore();
   const [selectedDestination, setSelectedDestination] = useState<string>("");
   const [comment, setComment] = useState("");
@@ -55,12 +63,19 @@ export default function RequestsCreatedPage() {
     loadHistory();
   }, []);
 
+  // Load cart when location is available
+  useEffect(() => {
+    if (currentLocation?.id_localizacion) {
+      loadCart(String(currentLocation.id_localizacion));
+    }
+  }, [currentLocation, loadCart]);
+
   const handleSubmit = async () => {
     if (!selectedDestination) {
       toast.error("Seleccione un destino");
       return;
     }
-    if (selectedItems.length === 0) {
+    if (cartItems.length === 0) {
       toast.error("Agregue repuestos a la solicitud");
       return;
     }
@@ -75,24 +90,32 @@ export default function RequestsCreatedPage() {
 
     setIsSubmitting(true);
     try {
+      // 1. Create Request
       await createRequest({
-        id_localizacion_origen: currentLocation.id_localizacion,
+        id_localizacion_origen: String(currentLocation.id_localizacion),
         id_localizacion_destino: selectedDestination,
         id_usuario_solicitante: sessionData.user.id,
         observaciones_generales: comment,
-        items: selectedItems.map(item => ({ id_repuesto: item.id })),
+        items: cartItems.map(item => ({
+          id_repuesto: item.id_repuesto,
+          cantidad: item.cantidad
+        })),
       });
 
       toast.success("Solicitud enviada exitosamente");
 
-      // Reload history
+      // 2. Clear Cart Items from DB
+      const cartIds = cartItems.map(item => item.id_item_carrito);
+      await clearCartAfterSubmit(cartIds);
+
+      // 3. Reload History
       const historyData = await getRequestHistory();
       setHistory(historyData);
 
-      // Clear form
+      // 4. Reset Form
       setComment("");
       setSelectedDestination("");
-      clearItems();
+
     } catch (error) {
       console.error("Error submitting request:", error);
       toast.error("Error al enviar la solicitud");
@@ -135,21 +158,25 @@ export default function RequestsCreatedPage() {
           </div>
 
           <div className="flex-1 overflow-auto border rounded-md p-2">
-            <h3 className="font-medium mb-2">Repuestos Seleccionados</h3>
-            {selectedItems.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No hay repuestos seleccionados.</p>
+            <h3 className="font-medium mb-2">Repuestos Seleccionados (Carrito Taller)</h3>
+            {cartItems.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No hay repuestos en el carrito de este taller.</p>
             ) : (
               <ul className="space-y-2">
-                {selectedItems.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between p-2 bg-accent/50 rounded-md">
+                {cartItems.map((item) => (
+                  <li key={item.id_item_carrito} className="flex items-center justify-between p-2 bg-accent/50 rounded-md">
                     <div className="flex flex-col">
                       <span className="font-medium">{item.referencia}</span>
-                      <span className="text-xs text-muted-foreground">{item.nombre}</span>
+                      <span className="text-xs text-muted-foreground">{item.nombre_repuesto}</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        Solicitado por: {item.nombre_solicitante}
+                        {item.cantidad > 1 && ` (x${item.cantidad})`}
+                      </span>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItemFromCart(item.id_item_carrito)}
                       className="text-destructive hover:text-destructive/90"
                     >
                       <Trash2 className="h-4 w-4" />
