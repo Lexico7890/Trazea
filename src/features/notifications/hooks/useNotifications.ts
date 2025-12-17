@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useUserStore } from '@/store/useUserStore';
-import { Notification } from '../types';
+import type { Notification } from '../types';
 import { toast } from 'sonner';
 
 export const useNotifications = () => {
@@ -12,7 +12,7 @@ export const useNotifications = () => {
   // Derived state
   const unreadCount = useMemo(() =>
     notifications.filter(n => !n.leida).length,
-  [notifications]);
+    [notifications]);
 
   // Determine current user and location IDs
   const userId = sessionData?.user?.id;
@@ -78,7 +78,7 @@ export const useNotifications = () => {
       if (error) {
         // Revert on error
         setNotifications(prev =>
-            prev.map(n => n.id_notificacion === notificationId ? { ...n, leida: false } : n)
+          prev.map(n => n.id_notificacion === notificationId ? { ...n, leida: false } : n)
         );
         throw error;
       }
