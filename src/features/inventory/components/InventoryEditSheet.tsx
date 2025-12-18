@@ -85,6 +85,14 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                 // Ensure correct types for RPC
                 const fechaEstimadaISO = fechaEstimada ? new Date(fechaEstimada).toISOString() : null;
 
+                // Determine logic for "nuevo_hasta"
+                // If stock increased, we send current date. Trigger will add 5 days.
+                // If stock decreased or stayed same, we send null (per requirements)
+                let nuevoHasta = null;
+                if (finalStockActual > item.stock_actual) {
+                    nuevoHasta = new Date().toISOString();
+                }
+
                 await updateItemComplete(
                     String(item.id_inventario), // Ensure UUID string
                     finalStockActual,
@@ -92,7 +100,8 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                     finalCantidadMinima,
                     descontinuado,
                     tipo,
-                    fechaEstimadaISO
+                    fechaEstimadaISO,
+                    nuevoHasta
                 );
             }
 

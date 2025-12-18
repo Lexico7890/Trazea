@@ -18,6 +18,9 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
     // Determine if stock is low
     const isLowStock = item.stock_actual < item.cantidad_minima;
 
+    // Determine if item is "New"
+    const isNew = item.nuevo_hasta && new Date() < new Date(item.nuevo_hasta);
+
     const handleSaveSuccess = () => {
         // Invalidate the inventory query to refresh the list
         queryClient.invalidateQueries({ queryKey: ['inventory'] });
@@ -25,7 +28,16 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
 
     return (
         <TableRow>
-            <TableCell className="font-medium">{item.referencia}</TableCell>
+            <TableCell className="font-medium">
+                <div className="flex items-center gap-2">
+                    {item.referencia}
+                    {isNew && (
+                        <span className="inline-flex items-center justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm leading-none">
+                            NEW
+                        </span>
+                    )}
+                </div>
+            </TableCell>
             <TableCell className="capitalize text-center text-nowrap overflow-hidden whitespace-nowrap max-w-[150px]">{item.nombre}</TableCell>
             <TableCell className="text-center">
                 <span className={isLowStock ? 'text-destructive font-semibold' : ''}>

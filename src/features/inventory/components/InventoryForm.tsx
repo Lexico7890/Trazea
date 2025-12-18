@@ -63,6 +63,7 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
       id_localizacion: String(idLocalizacion),
       cantidad: values.cantidad,
       posicion: values.posicion,
+      nuevo_hasta: new Date().toISOString(), // Newly added item -> Set "New" indicator
     });
   };
 

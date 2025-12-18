@@ -88,7 +88,7 @@ export async function getAllInventoryItems(): Promise<InventoryItem[]> {
 /**
  * Create a new inventory item
  */
-export async function createInventoryItem(data: { id_repuesto: string, id_localizacion: string, cantidad: number, posicion?: string }) {
+export async function createInventoryItem(data: { id_repuesto: string, id_localizacion: string, cantidad: number, posicion?: string, nuevo_hasta?: string }) {
   const { error } = await supabase
     .from('inventario')
     .insert(data);
@@ -109,16 +109,18 @@ export async function updateItemComplete(
   cantidad_minima: number,
   descontinuado: boolean,
   tipo: string,
-  fecha_estimada: string | null
+  fecha_estimada: string | null,
+  nuevo_hasta: string | null = null
 ) {
-  const { data, error } = await supabase.rpc('actualizar_item_completo', {
+  const { data, error } = await supabase.rpc('actualizar_item_inventario', {
     p_id_inventario: id_inventario,
     p_stock_actual: stock_actual,
     p_posicion: posicion,
     p_cantidad_minima: cantidad_minima,
     p_descontinuado: descontinuado,
     p_tipo: tipo,
-    p_fecha_estimada: fecha_estimada
+    p_fecha_estimada: fecha_estimada,
+    p_nuevo_hasta: nuevo_hasta
   });
 
   if (error) {
