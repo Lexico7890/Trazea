@@ -87,9 +87,15 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
 
                 // Determine logic for "nuevo_hasta"
                 // If stock increased, we send current date. Trigger will add 5 days.
-                // If stock decreased or stayed same, we send null (per requirements)
+                // If stock decreased or stayed same, we check if it was ALREADY new.
+                // If it was new, we maintain the status by sending current date (so trigger resets to 5 days from now).
+                // If it wasn't new, we send null to clear it.
                 let nuevoHasta = null;
+                const isCurrentlyNew = item.nuevo_hasta && new Date() < new Date(item.nuevo_hasta);
+
                 if (finalStockActual > item.stock_actual) {
+                    nuevoHasta = new Date().toISOString();
+                } else if (isCurrentlyNew) {
                     nuevoHasta = new Date().toISOString();
                 }
 
