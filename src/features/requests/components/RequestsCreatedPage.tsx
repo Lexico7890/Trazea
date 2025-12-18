@@ -33,11 +33,12 @@ export default function RequestsCreatedPage() {
     clearCartAfterSubmit
   } = useRequestsStore();
 
-  const { sessionData, currentLocation } = useUserStore();
+  const { sessionData, currentLocation, hasRole } = useUserStore();
   const [selectedDestination, setSelectedDestination] = useState<string>("");
   const [comment, setComment] = useState("");
   const [history, setHistory] = useState<RequestHistoryItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isTechnician = hasRole('tecnico');
 
   useEffect(() => {
     async function loadLocations() {
@@ -132,30 +133,34 @@ export default function RequestsCreatedPage() {
           <CardTitle>Nueva Solicitud</CardTitle>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col gap-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Destino</label>
-            <Select onValueChange={setSelectedDestination} value={selectedDestination}>
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccione taller destino" />
-              </SelectTrigger>
-              <SelectContent>
-                {destinations.map((dest) => (
-                  <SelectItem key={dest.id_localizacion} value={String(dest.id_localizacion)}>
-                    {dest.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!isTechnician && (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Destino</label>
+                <Select onValueChange={setSelectedDestination} value={selectedDestination}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione taller destino" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {destinations.map((dest) => (
+                      <SelectItem key={dest.id_localizacion} value={String(dest.id_localizacion)}>
+                        {dest.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Comentarios</label>
-            <Textarea
-              placeholder="Agregue un comentario..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-          </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Comentarios</label>
+                <Textarea
+                  placeholder="Agregue un comentario..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex-1 overflow-auto border rounded-md p-2">
             <h3 className="font-medium mb-2">Repuestos Seleccionados (Carrito Taller)</h3>
@@ -173,23 +178,27 @@ export default function RequestsCreatedPage() {
                         {item.cantidad > 1 && ` (x${item.cantidad})`}
                       </span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItemFromCart(item.id_item_carrito)}
-                      className="text-destructive hover:text-destructive/90"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {!isTechnician && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeItemFromCart(item.id_item_carrito)}
+                        className="text-destructive hover:text-destructive/90"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          <Button onClick={handleSubmit} className="w-full mt-auto" disabled={isSubmitting}>
-            {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
-          </Button>
+          {!isTechnician && (
+            <Button onClick={handleSubmit} className="w-full mt-auto" disabled={isSubmitting}>
+              {isSubmitting ? "Enviando..." : "Enviar Solicitud"}
+            </Button>
+          )}
         </CardContent>
       </Card>
 

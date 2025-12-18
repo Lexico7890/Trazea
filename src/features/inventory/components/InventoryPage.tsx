@@ -18,9 +18,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { InventoryForm } from "./InventoryForm";
+import { useUserStore } from "@/store/useUserStore";
 
 export default function InventoryPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { hasRole } = useUserStore();
   const {
     filters,
     updateSearch,
@@ -77,23 +79,25 @@ export default function InventoryPage() {
               className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
             />
           </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Agregar al Inventario</DialogTitle>
-                <DialogDescription>
-                  Selecciona un repuesto y la cantidad para agregar al inventario
-                  actual.
-                </DialogDescription>
-              </DialogHeader>
-              <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          {!hasRole('tecnico') && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Agregar al Inventario</DialogTitle>
+                  <DialogDescription>
+                    Selecciona un repuesto y la cantidad para agregar al inventario
+                    actual.
+                  </DialogDescription>
+                </DialogHeader>
+                <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
