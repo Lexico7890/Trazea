@@ -18,6 +18,7 @@ import { MoreHorizontal, ArrowUpDown, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { toast } from "sonner";
 import type { Repuesto } from "../types";
 
 interface RepuestosTableProps {
@@ -40,6 +41,11 @@ export function RepuestosTable({
     const SortIcon = ({ column }: { column: keyof Repuesto }) => {
         if (orderBy !== column) return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />;
         return <ArrowUpDown className={`ml-2 h-4 w-4 ${direction === 'asc' ? 'text-primary' : 'text-primary rotate-180'}`} />;
+    };
+
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast.success("Referencia copiada al portapapeles");
     };
 
     return (
@@ -90,7 +96,13 @@ export function RepuestosTable({
                     ) : (
                         items.map((item) => (
                             <TableRow key={item.id_repuesto}>
-                                <TableCell className="font-medium">{item.referencia}</TableCell>
+                                <TableCell
+                                    className="font-medium cursor-pointer hover:text-primary transition-colors"
+                                    onClick={() => handleCopy(item.referencia)}
+                                    title="Click para copiar referencia"
+                                >
+                                    {item.referencia}
+                                </TableCell>
                                 <TableCell>{item.nombre}</TableCell>
                                 <TableCell>
                                     <Badge variant="outline">{item.tipo}</Badge>
