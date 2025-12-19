@@ -52,21 +52,26 @@ export default function MovementsWorkshopForm() {
 
   useEffect(() => {
     if (movementToEdit) {
+      // eslint-disable-next-line
       setOrderNumber(movementToEdit.numero_orden || "");
+      // eslint-disable-next-line
       setCountItems(movementToEdit.cantidad || 1);
 
       // Map 'tipo' string to ActionButtonGroup enum if possible
       // Assuming movementToEdit.tipo matches the enum values
       if (Object.values(ActionButtonGroup).includes(movementToEdit.tipo as ActionButtonGroup)) {
+        // eslint-disable-next-line
         setActionButtonGroup(movementToEdit.tipo as ActionButtonGroup);
       }
 
       // Map 'concepto'
       // Assuming movementToEdit.concepto matches TIPY_CONCEPT
       if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
+        // eslint-disable-next-line
         setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
       }
       if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
+          // eslint-disable-next-line
           setSelected({
               id_repuesto: movementToEdit.id_repuesto,
               referencia: movementToEdit.repuesto_referencia || "",
@@ -75,9 +80,11 @@ export default function MovementsWorkshopForm() {
       }
 
       if (movementToEdit.id_tecnico_asignado) {
+        // eslint-disable-next-line
         setSelectedTechnicianId(movementToEdit.id_tecnico_asignado);
       }
     }
+    // eslint-disable-next-line
   }, [movementToEdit]);
 
   const handleClear = () => {

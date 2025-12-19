@@ -16,6 +16,18 @@ interface MovementDetailsModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const DetailItem = ({ icon: Icon, label, value, className }: { icon: any, label: string, value: any, className?: string }) => (
+  <div className={cn("flex flex-col space-y-1 p-2 rounded-md border bg-muted/20", className)}>
+    <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+      <Icon className="h-3.5 w-3.5" />
+      <span>{label}</span>
+    </div>
+    <div className="text-sm font-medium pl-5 break-words">
+      {value || "-"}
+    </div>
+  </div>
+);
+
 export function MovementDetailsModal({ movement, open, onOpenChange }: MovementDetailsModalProps) {
   if (!movement) return null;
 
@@ -26,18 +38,6 @@ export function MovementDetailsModal({ movement, open, onOpenChange }: MovementD
       window.open(movement.repuesto_imagen, "_blank");
     }
   };
-
-  const DetailItem = ({ icon: Icon, label, value, className }: { icon: any, label: string, value: any, className?: string }) => (
-    <div className={cn("flex flex-col space-y-1 p-2 rounded-md border bg-muted/20", className)}>
-      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
-        <Icon className="h-3.5 w-3.5" />
-        <span>{label}</span>
-      </div>
-      <div className="text-sm font-medium pl-5 break-words">
-        {value || "-"}
-      </div>
-    </div>
-  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

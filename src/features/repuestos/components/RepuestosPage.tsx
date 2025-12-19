@@ -150,7 +150,7 @@ export default function RepuestosPage() {
                     >
                         <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
                     </Button>
-                    <BulkUpload onSuccess={() => data && useRepuestosQuery(filters)} />
+                    <BulkUpload onSuccess={() => refetch()} />
                     <Button onClick={handleCreate} className="w-full sm:w-auto">
                         <Plus className="h-4 w-4" />
                     </Button>

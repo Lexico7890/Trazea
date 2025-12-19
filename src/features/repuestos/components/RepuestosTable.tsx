@@ -30,6 +30,19 @@ interface RepuestosTableProps {
     onDelete: (id: string) => void;
 }
 
+const SortIcon = ({
+    column,
+    orderBy,
+    direction
+}: {
+    column: keyof Repuesto;
+    orderBy: keyof Repuesto;
+    direction: 'asc' | 'desc'
+}) => {
+    if (orderBy !== column) return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />;
+    return <ArrowUpDown className={`ml-2 h-4 w-4 ${direction === 'asc' ? 'text-primary' : 'text-primary rotate-180'}`} />;
+};
+
 export function RepuestosTable({
     items,
     orderBy,
@@ -38,11 +51,6 @@ export function RepuestosTable({
     onEdit,
     onDelete,
 }: RepuestosTableProps) {
-    const SortIcon = ({ column }: { column: keyof Repuesto }) => {
-        if (orderBy !== column) return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground" />;
-        return <ArrowUpDown className={`ml-2 h-4 w-4 ${direction === 'asc' ? 'text-primary' : 'text-primary rotate-180'}`} />;
-    };
-
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
         toast.success("Referencia copiada al portapapeles");
@@ -56,31 +64,31 @@ export function RepuestosTable({
                         <TableHead className="cursor-pointer" onClick={() => onSort('referencia')}>
                             <div className="flex items-center">
                                 Referencia
-                                <SortIcon column="referencia" />
+                                <SortIcon column="referencia" orderBy={orderBy} direction={direction} />
                             </div>
                         </TableHead>
                         <TableHead className="cursor-pointer" onClick={() => onSort('nombre')}>
                             <div className="flex items-center">
                                 Nombre
-                                <SortIcon column="nombre" />
+                                <SortIcon column="nombre" orderBy={orderBy} direction={direction} />
                             </div>
                         </TableHead>
                         <TableHead className="cursor-pointer" onClick={() => onSort('tipo')}>
                             <div className="flex items-center">
                                 Tipo
-                                <SortIcon column="tipo" />
+                                <SortIcon column="tipo" orderBy={orderBy} direction={direction} />
                             </div>
                         </TableHead>
                         <TableHead className="cursor-pointer" onClick={() => onSort('fecha_estimada')}>
                             <div className="flex items-center">
                                 Fecha Estimada
-                                <SortIcon column="fecha_estimada" />
+                                <SortIcon column="fecha_estimada" orderBy={orderBy} direction={direction} />
                             </div>
                         </TableHead>
                         <TableHead className="cursor-pointer" onClick={() => onSort('descontinuado')}>
                             <div className="flex items-center">
                                 Estado
-                                <SortIcon column="descontinuado" />
+                                <SortIcon column="descontinuado" orderBy={orderBy} direction={direction} />
                             </div>
                         </TableHead>
                         <TableHead className="text-right">Acciones</TableHead>

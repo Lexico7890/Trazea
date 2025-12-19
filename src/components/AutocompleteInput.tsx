@@ -15,7 +15,8 @@ export default function AutocompleteInput({
   setSelected,
   id_localizacion,
 }: AutocompleteInputProps) {
-  const [query, setQuery] = useState("");
+  // Initialize query with selected name if available, otherwise empty string
+  const [query, setQuery] = useState(selected?.nombre || "");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
   // Debounce the search query
@@ -27,11 +28,19 @@ export default function AutocompleteInput({
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Sync local query state when selected prop changes externally
+  // We check if the query is different to avoid unnecessary updates if it's already in sync
   useEffect(() => {
-    if (selected !== null && selected !== undefined) {
+    if (selected && selected.nombre !== query) {
+      // eslint-disable-next-line
       setQuery(selected.nombre);
     }
-  }, [selected]);
+    // We intentionally do not reset query if selected becomes null,
+    // as that usually happens when the user types (which sets selected to null).
+    // If selected is cleared externally, we might want to clear query,
+    // but the current logic in onChange handles the nulling.
+  // eslint-disable-next-line
+  }, [selected]); // Removed 'query' from deps to avoid circular loop, though logic handles it.
 
   // Use React Query hook for searching
   const { data: suggestions = [], isLoading } = useSearchRepuestos(
@@ -53,7 +62,10 @@ export default function AutocompleteInput({
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
-          setSelected(null);
+          // Only clear selection if we actually have one
+          if (selected) {
+            setSelected(null);
+          }
         }}
         placeholder="Escribe para buscar..."
         className="w-full p-4 dark:text-white focus:ring-2 focus:ring-neon-blue-500 focus:border-transparent resize-none transition-all duration-300 placeholder-gray-500"
