@@ -16,4 +16,5 @@ export interface CartItem {
 export interface Destination {
   id_localizacion: string;
   nombre: string;
+  telefono: string;
 }

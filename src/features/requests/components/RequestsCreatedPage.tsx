@@ -117,7 +117,6 @@ export default function RequestsCreatedPage() {
       // 4. Reset Form
       setComment("");
       setSelectedDestination("");
-      clearItems();
 
       // PASO 3: ¡INTEGRACIÓN DE WHATSAPP! 🟢
       // Solo lanzamos el WhatsApp si la BD guardó todo correctamente.
@@ -126,7 +125,7 @@ export default function RequestsCreatedPage() {
       if (selectedDestinationPhone?.telefono) {
         // Usamos la utilidad que creamos
         sendWhatsAppNotification(
-          selectedItems, 
+          cartItems, 
           {
             origen: selectedDestinationPhone.nombre,
             destino: currentLocation.nombre,
