@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import { sendWhatsAppNotification } from "@/lib/utils";
 
 export default function RequestsCreatedPage() {
   const { selectedItems, destinations, setDestinations, removeItem, clearItems } = useRequestsStore();
@@ -83,7 +84,7 @@ export default function RequestsCreatedPage() {
         items: selectedItems.map(item => ({ id_repuesto: item.id })),
       });
 
-      toast.success("Solicitud enviada exitosamente");
+      toast.success("Solicitud enviada exitosamente", { icon: '✅', duration: 5000 });
 
       // Reload history
       const historyData = await getRequestHistory();
@@ -93,6 +94,25 @@ export default function RequestsCreatedPage() {
       setComment("");
       setSelectedDestination("");
       clearItems();
+
+      // PASO 3: ¡INTEGRACIÓN DE WHATSAPP! 🟢
+      // Solo lanzamos el WhatsApp si la BD guardó todo correctamente.
+      const selectedDestinationPhone = destinations.find(dest => dest.id_localizacion === selectedDestination);
+
+      if (selectedDestinationPhone?.telefono) {
+        // Usamos la utilidad que creamos
+        sendWhatsAppNotification(
+          selectedItems, 
+          {
+            origen: selectedDestinationPhone.nombre,
+            destino: currentLocation.nombre,
+            solicitante: sessionData.user.email
+          },
+          selectedDestinationPhone.telefono
+        );
+      } else {
+        toast("Solicitud guardada, pero el destino no tiene WhatsApp configurado", { icon: '⚠️', duration: 5000 });
+      }
     } catch (error) {
       console.error("Error submitting request:", error);
       toast.error("Error al enviar la solicitud");

@@ -10,6 +10,7 @@ export interface RequestItem {
 export interface Destination {
   id_localizacion: string;
   nombre: string;
+  telefono: string;
 }
 
 interface RequestsStore {
