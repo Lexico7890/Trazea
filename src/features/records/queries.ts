@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { getListMovements, getTechniciansByLocation, markMovementAsDownloaded } from "./services";
+import { getListMovements, getTechniciansByLocation, markMovementAsDownloaded, getGarantiasDashboard, createWarranty } from "./services";
 
 interface MovementFilters {
     page: number;
@@ -14,15 +14,15 @@ interface MovementFilters {
 
 // Hook to search inventory items (for autocomplete)
 export function useSearchMovements(filters: MovementFilters) {
-  return useQuery({
-    queryKey: ["technical-movements", filters],
-    queryFn: () => getListMovements(filters),
-    placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    gcTime: 0,
-  });
+    return useQuery({
+        queryKey: ["technical-movements", filters],
+        queryFn: () => getListMovements(filters),
+        placeholderData: keepPreviousData,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+        gcTime: 0,
+    });
 }
 
 export function useTechnicians(locationId: string | undefined) {
@@ -40,6 +40,24 @@ export function useMarkMovementAsDownloaded() {
         mutationFn: (id: string) => markMovementAsDownloaded(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["technical-movements"] });
+        },
+    });
+}
+
+export function useGarantiasDashboard() {
+    return useQuery({
+        queryKey: ["garantias-dashboard"],
+        queryFn: () => getGarantiasDashboard(),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+}
+
+export function useCreateWarranty() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (warrantyData: any) => createWarranty(warrantyData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["garantias-dashboard"] });
         },
     });
 }

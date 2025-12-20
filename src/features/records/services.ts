@@ -106,3 +106,49 @@ export async function markMovementAsDownloaded(id: string) {
         throw new Error(error.message);
     }
 }
+
+export async function getGarantiasDashboard() {
+    const { data, error } = await supabase
+        .from('v_garantias_dashboard')
+        .select('*')
+        .order('fecha_reporte', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching warranties dashboard:', error);
+        throw new Error(error.message);
+    }
+
+    return data;
+}
+
+export async function uploadWarrantyImage(file: File) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+    const filePath = `warranty-evidence/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('imagenes-repuestos-garantias')
+        .upload(filePath, file);
+
+    if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw new Error(uploadError.message);
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+        .from('imagenes-repuestos-garantias')
+        .getPublicUrl(filePath);
+
+    return publicUrl;
+}
+
+export async function createWarranty(warrantyData: any) {
+    const { error } = await supabase
+        .from('garantias')
+        .insert([warrantyData]);
+
+    if (error) {
+        console.error('Error creating warranty:', error);
+        throw new Error(error.message);
+    }
+}

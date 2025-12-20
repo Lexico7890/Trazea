@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useUserStore } from "@/store/useUserStore";
-import { useTechnicians } from "../queries";
+import { useTechnicians, useCreateWarranty } from "../queries";
+import { uploadWarrantyImage } from "../services";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,10 +12,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 export default function GuaranteesForm() {
-  const { sessionData } = useUserStore();
+  const { currentLocation, sessionData } = useUserStore();
+  const createWarrantyMutation = useCreateWarranty();
 
   // State for form fields
-  const [selectedLocationId, setSelectedLocationId] = useState<string>("");
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [mileage, setMileage] = useState<string>(""); // Text as requested
   const [customerNotes, setCustomerNotes] = useState<string>("");
@@ -23,6 +24,8 @@ export default function GuaranteesForm() {
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
   const [warrantyReason, setWarrantyReason] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const selectedLocationId = currentLocation?.id_localizacion || "";
 
   // Fetch technicians based on selected location
   const { data: technicians } = useTechnicians(selectedLocationId);
@@ -34,11 +37,10 @@ export default function GuaranteesForm() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     // Basic validation
-    if (!selectedLocationId) return toast.info("Seleccione un taller");
+    if (!selectedLocationId) return toast.info("No hay una ubicación seleccionada");
     if (!orderNumber) return toast.info("Ingrese el número de orden");
     if (!mileage) return toast.info("Ingrese el kilometraje");
     if (!selectedPart) return toast.info("Seleccione un repuesto");
@@ -46,25 +48,55 @@ export default function GuaranteesForm() {
     if (!selectedTechnicianId) return toast.info("Seleccione un técnico");
     if (!warrantyReason) return toast.info("Ingrese la observación de garantía");
 
-    // TODO: Upload image to Supabase bucket
-    // Bucket name: [INSERT_BUCKET_NAME_HERE]
+    try {
+      let imageUrl = null;
+      if (selectedFile) {
+        toast.loading("Subiendo imagen...", { id: "warranty-upload" });
+        imageUrl = await uploadWarrantyImage(selectedFile);
+        toast.success("Imagen subida correctamente", { id: "warranty-upload" });
+      }
 
-    // Construct data object
-    const formData = {
-      fecha: new Date().toISOString(), // Current date
-      taller_id: selectedLocationId,
-      orden: orderNumber,
-      kilometraje: mileage,
-      observaciones_cliente: customerNotes,
-      repuesto_id: selectedPart.id_repuesto,
-      solicitante: applicant,
-      tecnico_id: selectedTechnicianId,
-      observacion_garantia: warrantyReason,
-      imagen: selectedFile ? selectedFile.name : null
-    };
+      const warrantyData = {
+        id_repuesto: selectedPart.id_repuesto,
+        referencia_repuesto: selectedPart.referencia,
+        nombre_repuesto: selectedPart.nombre,
+        id_localizacion: selectedLocationId,
+        id_usuario_reporta: sessionData?.user.id,
+        id_tecnico_asociado: selectedTechnicianId,
+        motivo_falla: warrantyReason,
+        url_evidencia_foto: imageUrl,
+        kilometraje: mileage,
+        orden: orderNumber,
+        solicitante: applicant,
+        comentarios_resolucion: customerNotes,
+        estado: "Pendiente",
+        // Optional fields from table structure (milage/order are not in table but user had them in form, maybe they go to observations?)
+        // The user didn't specify where to put 'orden' and 'kilometraje' in the new table structure.
+        // Looking at the table provided: id_garantia, id_repuesto, referencia_repuesto, nombre_repuesto, cantidad, id_localizacion, id_usuario_reporta, id_tecnico_asociado, motivo_falla, url_evidencia_foto, estado, comentarios_resolucion...
+        // I will stick to what the user provided in the SQL + form fields that match.
+      };
 
-    console.log("Form Data Submitted:", formData);
-    toast.success("Formulario listo para integración (UI Only)");
+      await createWarrantyMutation.mutateAsync(warrantyData);
+      
+      toast.success("Garantía registrada exitosamente");
+      
+      // Reset form
+      setOrderNumber("");
+      setMileage("");
+      setCustomerNotes("");
+      setSelectedPart(null);
+      setApplicant("");
+      setSelectedTechnicianId("");
+      setWarrantyReason("");
+      setSelectedFile(null);
+      // Reset file input manually if needed (actually it's uncontrolled in the input tag)
+      const fileInput = document.getElementById("image") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+
+    } catch (error) {
+      toast.error("Error al registrar la garantía");
+      console.error(error);
+    }
   };
 
   return (
@@ -76,21 +108,15 @@ export default function GuaranteesForm() {
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-          {/* Taller (Workshop) */}
+          {/* Taller - Hidden as it is taken from current location */}
           <div className="grid gap-2">
-            <Label htmlFor="location">Taller</Label>
-            <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
-              <SelectTrigger id="location">
-                <SelectValue placeholder="Seleccionar taller" />
-              </SelectTrigger>
-              <SelectContent>
-                {sessionData?.locations?.map((loc) => (
-                  <SelectItem key={loc.id_localizacion} value={loc.id_localizacion}>
-                    {loc.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+             <Label htmlFor="location">Taller</Label>
+             <Input 
+                id="location" 
+                value={currentLocation?.nombre || ""} 
+                readOnly 
+                className="bg-muted"
+             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

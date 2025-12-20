@@ -1,6 +1,7 @@
 import ListMovements from "./list-movements";
 import MovementsWorkshopForm from "./movements-workshop-form";
 import GuaranteesForm from "./GuaranteesForm";
+import GuaranteesDashboard from "./GuaranteesDashboard";
 import { useUserStore } from "@/store/useUserStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -33,8 +34,9 @@ export default function RecordsPage() {
         </TabsContent>
 
         <TabsContent value="garantias">
-          <div className="mt-4 flex justify-center">
+          <div className="mt-4 flex flex-col items-center">
             <GuaranteesForm />
+            <GuaranteesDashboard />
           </div>
         </TabsContent>
       </Tabs>
