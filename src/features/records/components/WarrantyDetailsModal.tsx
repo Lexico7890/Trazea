@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 interface WarrantyDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  warranty: any;
+  warranty: Record<string, unknown> | null;
 }
 
 export default function WarrantyDetailsModal({

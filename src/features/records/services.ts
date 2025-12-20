@@ -142,7 +142,7 @@ export async function uploadWarrantyImage(file: File) {
     return publicUrl;
 }
 
-export async function createWarranty(warrantyData: any) {
+export async function createWarranty(warrantyData: Record<string, unknown>) {
     const { error } = await supabase
         .from('garantias')
         .insert([warrantyData]);

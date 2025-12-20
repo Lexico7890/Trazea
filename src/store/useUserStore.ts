@@ -57,7 +57,7 @@ export interface AppPermissions {
     assign_locations: boolean;
   };
   // Permitimos propiedades adicionales ya que la estructura crecerá
-  [key: string]: any;
+  [key: string]: Record<string, boolean> | undefined;
 }
 
 interface Role {

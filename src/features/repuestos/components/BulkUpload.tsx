@@ -22,7 +22,7 @@ export function BulkUpload({ onSuccess }: BulkUploadProps) {
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const [uploadResult, setUploadResult] = useState<{ success: number; errors: any[] } | null>(null);
+    const [uploadResult, setUploadResult] = useState<{ success: number; errors: Array<{ row: unknown; error: unknown }> } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

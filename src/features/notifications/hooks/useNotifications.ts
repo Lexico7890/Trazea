@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useUserStore } from '@/store/useUserStore';
 import type { Notification } from '../types';
@@ -20,7 +20,7 @@ export const useNotifications = () => {
   const isTechnician = hasRole('tecnico');
 
   // Fetch initial notifications
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!userId) return;
 
     try {
@@ -60,7 +60,7 @@ export const useNotifications = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId, locationId, isTechnician]);
 
   // Mark a notification as read
   const markAsRead = async (notificationId: string) => {
@@ -135,7 +135,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, locationId, isTechnician]); // Re-subscribe if user context changes
+  }, [userId, locationId, isTechnician, fetchNotifications]); // Re-subscribe if user context changes
 
   return {
     notifications,

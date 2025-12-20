@@ -184,7 +184,7 @@ export default function GuaranteesForm() {
                   <SelectValue placeholder={selectedLocationId ? "Seleccionar técnico" : "Seleccione un taller primero"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {technicians?.map((tech: any) => (
+                  {technicians?.map((tech: Record<string, unknown>) => (
                     <SelectItem key={tech.id_usuario} value={tech.id_usuario}>
                       {tech.nombre_usuario}
                     </SelectItem>

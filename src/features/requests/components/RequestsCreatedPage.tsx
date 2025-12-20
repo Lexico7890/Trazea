@@ -46,7 +46,7 @@ export default function RequestsCreatedPage() {
       try {
         const locations = await getLocations();
         setDestinations(locations);
-      } catch (error) {
+      } catch {
         toast.error("Error al cargar las ubicaciones");
       }
     }
@@ -58,7 +58,7 @@ export default function RequestsCreatedPage() {
       try {
         const historyData = await getRequestHistory();
         setHistory(historyData);
-      } catch (error) {
+      } catch {
         toast.error("Error al cargar el historial");
       }
     }

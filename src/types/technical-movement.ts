@@ -1,7 +1,12 @@
 export interface TechnicalMovement {
-  // Placeholder for the 11 fields. User will populate this.
-  // Example:
-  // description: string;
-  // quantity: number;
-  [key: string]: any; 
+  id_localizacion?: string;
+  id_repuesto?: string;
+  id_usuario_responsable?: string;
+  id_tecnico_asignado?: string | null;
+  concepto?: string;
+  tipo?: string;
+  cantidad?: number;
+  numero_orden?: string | null;
+  descargada?: boolean;
+  [key: string]: unknown;
 }

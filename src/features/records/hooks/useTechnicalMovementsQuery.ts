@@ -47,7 +47,7 @@ export function useCreateTechnicalMovement() {
       await queryClient.cancelQueries({ queryKey: ['technical-movements'] });
       const previousMovements = queryClient.getQueryData(['technical-movements']);
 
-      queryClient.setQueryData(['technical-movements'], (old: any) => {
+      queryClient.setQueryData(['technical-movements'], (old: unknown) => {
         // Usamos un ID temporal para la UI mientras responde el servidor
         const tempItem = { ...newMovement, id_movimientos_tecnicos: 'temp-' + Date.now() };
         if (!old) return [tempItem];
@@ -57,7 +57,7 @@ export function useCreateTechnicalMovement() {
       return { previousMovements };
     },
     // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (error: any, _newMovement, context) => {
+    onError: (error: Error, _newMovement, context) => {
       if (context?.previousMovements) {
         queryClient.setQueryData(['technical-movements'], context.previousMovements);
       }

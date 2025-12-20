@@ -8,5 +8,5 @@ export interface Notification {
   prioridad: string;
   leida: boolean;
   fecha_creacion: string;
-  data: Record<string, any> | null;
+  data: Record<string, unknown> | null;
 }

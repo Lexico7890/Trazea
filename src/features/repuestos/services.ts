@@ -96,7 +96,7 @@ export async function deleteRepuesto(id: string): Promise<void> {
   }
 }
 
-export async function bulkUploadRepuestos(file: File): Promise<{ success: number; errors: any[] }> {
+export async function bulkUploadRepuestos(file: File): Promise<{ success: number; errors: Array<{ row: unknown; error: unknown }> }> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -110,7 +110,7 @@ export async function bulkUploadRepuestos(file: File): Promise<{ success: number
         let successCount = 0;
         const errors = [];
 
-        for (const row of jsonData as any[]) {
+        for (const row of jsonData as Array<Record<string, unknown>>) {
           try {
             // Validate and map row data to RepuestoFormData
             // This is a basic mapping, might need adjustment based on Excel structure

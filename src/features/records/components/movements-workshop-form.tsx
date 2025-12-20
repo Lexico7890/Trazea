@@ -51,40 +51,40 @@ export default function MovementsWorkshopForm() {
   const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
 
   useEffect(() => {
-    if (movementToEdit) {
-      // eslint-disable-next-line
-      setOrderNumber(movementToEdit.numero_orden || "");
-      // eslint-disable-next-line
-      setCountItems(movementToEdit.cantidad || 1);
+    if (!movementToEdit) return;
 
-      // Map 'tipo' string to ActionButtonGroup enum if possible
-      // Assuming movementToEdit.tipo matches the enum values
-      if (Object.values(ActionButtonGroup).includes(movementToEdit.tipo as ActionButtonGroup)) {
-        // eslint-disable-next-line
-        setActionButtonGroup(movementToEdit.tipo as ActionButtonGroup);
-      }
+    // Intentionally syncing form state with external edit data
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOrderNumber(movementToEdit.numero_orden || "");
+     
+    setCountItems(movementToEdit.cantidad || 1);
 
-      // Map 'concepto'
-      // Assuming movementToEdit.concepto matches TIPY_CONCEPT
-      if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
-        // eslint-disable-next-line
-        setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
-      }
-      if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
-          // eslint-disable-next-line
-          setSelected({
-              id_repuesto: movementToEdit.id_repuesto,
-              referencia: movementToEdit.repuesto_referencia || "",
-              nombre: movementToEdit.repuesto_nombre
-          });
-      }
-
-      if (movementToEdit.id_tecnico_asignado) {
-        // eslint-disable-next-line
-        setSelectedTechnicianId(movementToEdit.id_tecnico_asignado);
-      }
+    // Map 'tipo' string to ActionButtonGroup enum if possible
+    // Assuming movementToEdit.tipo matches the enum values
+    if (Object.values(ActionButtonGroup).includes(movementToEdit.tipo as ActionButtonGroup)) {
+       
+      setActionButtonGroup(movementToEdit.tipo as ActionButtonGroup);
     }
-    // eslint-disable-next-line
+
+    // Map 'concepto'
+    // Assuming movementToEdit.concepto matches TIPY_CONCEPT
+    if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
+       
+      setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
+    }
+    if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
+       
+      setSelected({
+        id_repuesto: movementToEdit.id_repuesto,
+        referencia: movementToEdit.repuesto_referencia || "",
+        nombre: movementToEdit.repuesto_nombre
+      });
+    }
+
+    if (movementToEdit.id_tecnico_asignado) {
+       
+      setSelectedTechnicianId(movementToEdit.id_tecnico_asignado);
+    }
   }, [movementToEdit]);
 
   const handleClear = () => {
@@ -185,7 +185,7 @@ export default function MovementsWorkshopForm() {
                   <SelectValue placeholder="Seleccionar técnico" />
                 </SelectTrigger>
                 <SelectContent>
-                  {technicians?.map((tech: any) => (
+                  {technicians?.map((tech: Record<string, unknown>) => (
                     <SelectItem key={tech.id_usuario} value={tech.id_usuario}>
                       {tech.nombre_usuario}
                     </SelectItem>

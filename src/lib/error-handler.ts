@@ -89,7 +89,7 @@ export function handleSupabaseError(error: unknown, showToast = true): AppError 
 
   // Detectar tipo de error
   if (error && typeof error === 'object') {
-    if ('__isAuthError' in error || (error as any).status === 400) {
+    if ('__isAuthError' in error || (error as Record<string, unknown>).status === 400) {
       appError = handleAuthError(error as AuthError);
     } else if ('code' in error && 'message' in error && 'details' in error) {
       appError = handleDatabaseError(error as PostgrestError);

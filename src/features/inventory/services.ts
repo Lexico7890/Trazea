@@ -161,7 +161,7 @@ export async function searchRepuestos(query: string, id_localizacion: string): P
     return [];
   }
 
-  let fromDate = id_localizacion ? 'v_inventario_completo' : 'repuestos';
+  const fromDate = id_localizacion ? 'v_inventario_completo' : 'repuestos';
 
   const { data, error } = await supabase
     .from(fromDate)

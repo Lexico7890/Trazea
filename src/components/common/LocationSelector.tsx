@@ -71,7 +71,7 @@ export function LocationSelector() {
         };
 
         initLocation();
-    }, [isAuthenticated, currentLocation, sessionData?.user?.id, setCurrentLocation]);
+    }, [isAuthenticated, currentLocation, sessionData?.user?.id, setCurrentLocation, savedLocationId]);
 
     const handleSelectLocation = (location: UserLocation) => {
         localStorage.setItem('minca_location_id', location.id_localizacion.toString());

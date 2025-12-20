@@ -124,7 +124,7 @@ export default function RepuestosPage() {
         }
     };
 
-    const handleSubmitForm = async (formData: any) => {
+    const handleSubmitForm = async (formData: Record<string, unknown>) => {
         try {
             if (editingRepuesto) {
                 await updateMutation.mutateAsync({ id: editingRepuesto.id_repuesto, data: formData });
@@ -132,7 +132,7 @@ export default function RepuestosPage() {
                 await createMutation.mutateAsync(formData);
             }
             setIsSheetOpen(false);
-        } catch (error) {
+        } catch {
             // Error handled in mutation
         }
     };

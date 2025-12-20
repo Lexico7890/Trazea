@@ -55,7 +55,7 @@ export function useGarantiasDashboard() {
 export function useCreateWarranty() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (warrantyData: any) => createWarranty(warrantyData),
+        mutationFn: (warrantyData: Record<string, unknown>) => createWarranty(warrantyData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["garantias-dashboard"] });
         },
