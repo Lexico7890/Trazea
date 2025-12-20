@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 interface InventoryItemMock {
   id: number;
@@ -38,6 +39,9 @@ export function InventoryImageUploadModal({
   );
   const [items, setItems] = useState<InventoryItemMock[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isDragging, setIsDragging] = useState(false);
+  const [isDragError, setIsDragError] = useState(false);
+
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -48,12 +52,63 @@ export function InventoryImageUploadModal({
       setStep("initial");
       setItems([]);
       setSelectedIds(new Set());
+      setIsDragging(false);
+      setIsDragError(false);
     }
   }, [isOpen]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       startLoadingProcess();
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Check if dragged item is an image
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      const item = e.dataTransfer.items[0];
+      if (item.kind === 'file' && !item.type.startsWith('image/')) {
+        setIsDragError(true);
+        setIsDragging(true);
+        return;
+      }
+    }
+
+    setIsDragError(false);
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setIsDragError(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setIsDragError(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+
+      if (!file.type.startsWith('image/')) {
+        toast.error("Por favor sube un archivo de imagen válido.");
+        return;
+      }
+
+      // Manually set the file input files
+      if (fileInputRef.current) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInputRef.current.files = dataTransfer.files;
+        startLoadingProcess();
+      }
     }
   };
 
@@ -125,25 +180,62 @@ export function InventoryImageUploadModal({
                 onChange={handleFileSelect}
               />
 
-              <Button
-                size="lg"
-                className="w-full"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="mr-2 h-5 w-5" />
-                Cargar Imagen
-              </Button>
+              {isMobile ? (
+                 <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="mr-2 h-5 w-5" />
+                      Cargar Imagen
+                    </Button>
 
-              {isMobile && (
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="w-full"
-                  onClick={() => cameraInputRef.current?.click()}
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => cameraInputRef.current?.click()}
+                    >
+                      <Camera className="mr-2 h-5 w-5" />
+                      Tomar Foto
+                    </Button>
+                 </div>
+              ) : (
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors w-full",
+                    isDragError
+                      ? "border-destructive bg-destructive/10"
+                      : isDragging
+                        ? "border-primary bg-primary/10"
+                        : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
+                  )}
                 >
-                  <Camera className="mr-2 h-5 w-5" />
-                  Tomar Foto
-                </Button>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className={cn(
+                      "p-4 rounded-full bg-background border",
+                      isDragError ? "border-destructive text-destructive" : "border-muted-foreground/20 text-muted-foreground"
+                    )}>
+                       <Upload className="h-8 w-8" />
+                    </div>
+                    <div className="space-y-1">
+                       <p className="text-lg font-medium">
+                         Arrastra y suelta una imagen aquí
+                       </p>
+                       <p className="text-sm text-muted-foreground">
+                         o haz clic para seleccionar
+                       </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      PNG, JPG, WEBP
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           )}
