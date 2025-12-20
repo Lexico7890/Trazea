@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import type { InventoryParams, PaginatedInventoryResponse, InventoryItem } from './types';
 
+let id_localizacion = localStorage.getItem('minca_location_id');
+
 /**
  * Fetches paginated inventory data from Supabase view v_inventario_completo
  */
@@ -23,7 +25,8 @@ export async function getInventory(
   // Start building the query
   let query = supabase
     .from('v_inventario_completo')
-    .select('*', { count: 'exact' });
+    .select('*', { count: 'exact' })
+    .eq('id_localizacion', id_localizacion);
 
   // Apply search filter (search in nombre or referencia)
   if (search && search.trim()) {
@@ -74,6 +77,7 @@ export async function getAllInventoryItems(): Promise<InventoryItem[]> {
   const { data, error } = await supabase
     .from('v_inventario_completo')
     .select('*')
+    .eq('id_localizacion', id_localizacion)
     .order('nombre', { ascending: true })
     .limit(1000);
 
@@ -142,6 +146,7 @@ export async function searchInventoryItems(query: string): Promise<InventoryItem
   const { data, error } = await supabase
     .from('v_inventario_completo')
     .select('*')
+    .eq('id_localizacion', id_localizacion)
     .or(`nombre.ilike.%${query}%,referencia.ilike.%${query}%`)
     .limit(50);
 
@@ -166,6 +171,7 @@ export async function searchRepuestos(query: string, id_localizacion: string): P
   const { data, error } = await supabase
     .from(fromDate)
     .select('*')
+    .eq('id_localizacion', id_localizacion)
     .or(`nombre.ilike.%${query}%,referencia.ilike.%${query}%`)
     .limit(50);
 

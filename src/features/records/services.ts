@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
+let id_localizacion = localStorage.getItem('minca_location_id');
+
 interface MovementFilters {
     page: number;
     pageSize: number;
@@ -25,7 +27,8 @@ export async function getListMovements(filters: MovementFilters) {
 
     let query = supabase
         .from('v_movimientos_detallados')
-        .select('*', { count: 'exact' });
+        .select('*', { count: 'exact' })
+        .eq('id_localizacion', id_localizacion);
 
     // Apply filters
     if (technicianId) {
@@ -111,6 +114,7 @@ export async function getGarantiasDashboard() {
     const { data, error } = await supabase
         .from('v_garantias_dashboard')
         .select('*')
+        .eq('id_localizacion', id_localizacion)
         .order('fecha_reporte', { ascending: false });
 
     if (error) {
