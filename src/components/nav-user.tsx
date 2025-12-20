@@ -2,10 +2,11 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
+  MapPin,
   Sparkles,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
 import {
   Avatar,
@@ -41,7 +42,8 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const { logout } = useLogin()
-  const { currentLocation } = useUserStore()
+  const { currentLocation, setCurrentLocation } = useUserStore()
+  const navigate = useNavigate()
   console.log(currentLocation)
 
   return (
@@ -95,9 +97,15 @@ export function NavUser({
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem
+                onClick={() => {
+                  localStorage.removeItem("minca_location_id")
+                  setCurrentLocation(null)
+                  navigate("/repuestos")
+                }}
+              >
+                <MapPin />
+                Ubicación
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
