@@ -216,7 +216,9 @@ export function InventoryImageUploadModal({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         className={`sm:max-w-md transition-all duration-300 ${
-          step === "results" ? "sm:max-w-2xl max-h-[80vh] overflow-y-auto" : ""
+          step === "results"
+            ? "sm:max-w-2xl h-[90vh] flex flex-col"
+            : ""
         }`}
       >
         <DialogHeader>
@@ -381,8 +383,8 @@ export function InventoryImageUploadModal({
           )}
 
           {step === "results" && (
-            <div className="w-full space-y-4">
-              <div className="border rounded-md">
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 border rounded-md overflow-y-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
