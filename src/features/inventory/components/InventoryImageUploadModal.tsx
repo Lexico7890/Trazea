@@ -65,6 +65,7 @@ export function InventoryImageUploadModal({
   const [isDragging, setIsDragging] = useState(false);
   const [isDragError, setIsDragError] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isMobile = useIsMobile();
   const { currentLocation } = useUserStore();
@@ -79,6 +80,7 @@ export function InventoryImageUploadModal({
       setSelectedIds(new Set());
       setIsDragging(false);
       setIsDragError(false);
+      setErrorMessage(null);
     }
   }, [isOpen]);
 
@@ -206,7 +208,9 @@ export function InventoryImageUploadModal({
       }
     } catch (err: any) {
       console.error("Error en el proceso:", err);
-      toast.error(err.message || "Ocurrió un error inesperado");
+      const message = err.message || "Ocurrió un error inesperado";
+      setErrorMessage(message);
+      toast.error(message);
       setStep("error");
     }
   };
@@ -383,9 +387,14 @@ export function InventoryImageUploadModal({
                 alt="Vista previa de la imagen seleccionada"
                 className="max-h-48 rounded-md border"
               />
-              <p className="text-destructive text-center">
+              <p className="text-destructive text-center font-semibold">
                 No se pudo procesar la imagen.
               </p>
+              {errorMessage && (
+                <div className="w-full p-2 text-xs text-center bg-destructive/10 text-destructive rounded-md">
+                  <p>{errorMessage}</p>
+                </div>
+              )}
               <Button
                 onClick={() => startLoadingProcess()}
                 variant="secondary"
