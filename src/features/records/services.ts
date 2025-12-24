@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-let id_localizacion = localStorage.getItem('minca_location_id');
+const id_localizacion = localStorage.getItem('minca_location_id');
 
 interface MovementFilters {
     page: number;

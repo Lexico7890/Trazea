@@ -478,6 +478,7 @@ export function InventoryImageUploadModal({
                     })}
                   </TableBody>
                 </Table>
+                </TooltipProvider>
               </div>
 
               <div className="flex justify-end pt-2">

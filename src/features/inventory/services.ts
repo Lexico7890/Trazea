@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { InventoryParams, PaginatedInventoryResponse, InventoryItem } from './types';
 
-let id_localizacion = localStorage.getItem('minca_location_id');
+const id_localizacion = localStorage.getItem('minca_location_id');
 
 /**
  * Fetches paginated inventory data from Supabase view v_inventario_completo
