@@ -217,7 +217,7 @@ export function InventoryImageUploadModal({
       <DialogContent
         className={`sm:max-w-md transition-all duration-300 ${
           step === "results"
-            ? "sm:max-w-2xl h-[90vh] flex flex-col"
+            ? "sm:max-w-2xl max-h-[90vh] flex flex-col"
             : ""
         }`}
       >
@@ -383,7 +383,7 @@ export function InventoryImageUploadModal({
           )}
 
           {step === "results" && (
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 flex flex-col min-h-0 space-y-4">
               <div className="flex-1 border rounded-md overflow-y-auto">
                 <Table>
                   <TableHeader>
@@ -400,9 +400,11 @@ export function InventoryImageUploadModal({
                       const isSelected = selectedIds.has(item.id_repuesto);
 
                       const getConfidenceColorClass = (percentage: number) => {
-                        if (percentage <= 0.6) return "bg-red-500/20";
-                        if (percentage <= 0.95) return "bg-yellow-500/20";
-                        return "bg-green-500/20";
+                        if (percentage <= 0.6)
+                          return "bg-red-500/10 dark:bg-red-900/20";
+                        if (percentage <= 0.95)
+                          return "bg-yellow-500/10 dark:bg-yellow-900/20";
+                        return "bg-green-500/10 dark:bg-green-900/20";
                       };
 
                       const getConfidenceDotClass = (percentage: number) => {
@@ -417,7 +419,7 @@ export function InventoryImageUploadModal({
                           className={cn(
                             "cursor-pointer",
                             isSelected
-                              ? "bg-green-600/50 hover:bg-green-600/60"
+                              ? "bg-green-200 hover:bg-green-300/80 dark:bg-green-800/50 dark:hover:bg-green-800/60"
                               : getConfidenceColorClass(item.porcentage)
                           )}
                           onClick={() => toggleSelection(item.id_repuesto)}
