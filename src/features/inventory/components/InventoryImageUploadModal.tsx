@@ -40,6 +40,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { useUserStore } from "@/store/useUserStore";
 
 interface ScannedItem {
   id_repuesto: string;
@@ -66,6 +67,7 @@ export function InventoryImageUploadModal({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const isMobile = useIsMobile();
+  const { currentLocation } = useUserStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -136,6 +138,13 @@ export function InventoryImageUploadModal({
     const file = fileToProcess || selectedFile;
     if (!file) return;
 
+    if (!currentLocation) {
+      toast.error(
+        "Ubicación no seleccionada. Por favor, selecciona una ubicación antes de subir una imagen."
+      );
+      return;
+    }
+
     setStep("loading");
     const bucketName = "repuestos"; // Asegúrate de que este bucket exista en Supabase
 
@@ -150,7 +159,7 @@ export function InventoryImageUploadModal({
       const fileName = `${Date.now()}_${Math.random()
         .toString(36)
         .substring(7)}.${fileExt}`;
-      const filePath = `temp/${fileName}`; // Carpeta temp/
+      const filePath = `temp/${currentLocation.id_localizacion}/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from(bucketName)
