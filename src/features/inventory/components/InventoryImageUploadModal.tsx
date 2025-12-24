@@ -7,9 +7,21 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Camera, Upload, Loader2, Save, RefreshCcw } from "lucide-react";
+import {
+  Camera,
+  Upload,
+  Loader2,
+  Save,
+  RefreshCcw,
+  HelpCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Table,
@@ -23,9 +35,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
-interface InventoryItem {
-  nombre: string;
+interface ScannedItem {
+  id_repuesto: string;
+  nombre_detectado: string;
+  nombre_real: string;
+  referencia: string;
   cantidad: number;
+  porcentage: number;
 }
 
 export function InventoryImageUploadModal({
@@ -37,7 +53,7 @@ export function InventoryImageUploadModal({
   const [step, setStep] = useState<"initial" | "loading" | "results" | "error">(
     "initial"
   );
-  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [items, setItems] = useState<ScannedItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDragging, setIsDragging] = useState(false);
   const [isDragError, setIsDragError] = useState(false);
@@ -115,17 +131,19 @@ export function InventoryImageUploadModal({
     if (!file) return;
 
     setStep("loading");
-    const bucketName = 'repuestos'; // Asegúrate de que este bucket exista en Supabase
+    const bucketName = "repuestos"; // Asegúrate de que este bucket exista en Supabase
 
     try {
       // ---------------------------------------------------------
       // PASO 1: Subir imagen al Storage de Supabase
       // ---------------------------------------------------------
       console.log("Subiendo imagen al Storage...");
-      
+
       // Creamos un nombre único
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(7)}.${fileExt}`;
       const filePath = `temp/${fileName}`; // Carpeta temp/
 
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -142,31 +160,35 @@ export function InventoryImageUploadModal({
       // PASO 2: Invocar la Edge Function con la RUTA
       // ---------------------------------------------------------
       console.log("Invocando Edge Function...");
-      
-      const { data, error } = await supabase.functions.invoke("escanear-repuestos", {
-        body: { 
-          imagePath: uploadData.path, 
-          bucketName: bucketName 
-        },
-      });
+
+      const { data, error } = await supabase.functions.invoke(
+        "escanear-repuestos",
+        {
+          body: {
+            imagePath: uploadData.path,
+            bucketName: bucketName,
+          },
+        }
+      );
 
       if (error) {
-         // Intentar leer el mensaje de error JSON si existe
-         let msg = error.message;
-         try { msg = JSON.parse(error.message).error || msg } catch(e){}
-         throw new Error(msg);
+        // Intentar leer el mensaje de error JSON si existe
+        let msg = error.message;
+        try {
+          msg = JSON.parse(error.message).error || msg;
+        } catch (e) {}
+        throw new Error(msg);
       }
 
       // ---------------------------------------------------------
       // PASO 3: Procesar respuesta
       // ---------------------------------------------------------
-      if (data && Array.isArray(data.repuestos)) {
-        setItems(data.repuestos);
+      if (data && Array.isArray(data.match)) {
+        setItems(data.match);
         setStep("results");
       } else {
         throw new Error("Formato de respuesta inválido");
       }
-
     } catch (err: any) {
       console.error("Error en el proceso:", err);
       toast.error(err.message || "Ocurrió un error inesperado");
@@ -174,12 +196,12 @@ export function InventoryImageUploadModal({
     }
   };
 
-  const toggleSelection = (itemName: string) => {
+  const toggleSelection = (itemId: string) => {
     const newSelected = new Set(selectedIds);
-    if (newSelected.has(itemName)) {
-      newSelected.delete(itemName);
+    if (newSelected.has(itemId)) {
+      newSelected.delete(itemId);
     } else {
-      newSelected.add(itemName);
+      newSelected.add(itemId);
     }
     setSelectedIds(newSelected);
   };
@@ -198,7 +220,43 @@ export function InventoryImageUploadModal({
         }`}
       >
         <DialogHeader>
-          <DialogTitle>Cargar Inventario por Imagen</DialogTitle>
+          <div className="flex items-center gap-2">
+            <DialogTitle>Cargar Inventario por Imagen</DialogTitle>
+            <Popover>
+              <PopoverTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+              </PopoverTrigger>
+              <PopoverContent className="w-80 text-sm">
+                <div className="space-y-4">
+                  <p className="font-medium">
+                    Leyenda de Nivel de Confianza
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-green-500" />
+                    <span>
+                      <strong>Verde (96%-100%):</strong> Alta confianza. El
+                      repuesto fue identificado con alta seguridad.
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-yellow-500" />
+                    <span>
+                      <strong>Amarillo (61%-95%):</strong> Confianza media.
+                      Verifica que el nombre real sea correcto.
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-red-500" />
+                    <span>
+                      <strong>Rojo (&lt;61%):</strong> Confianza baja. Es muy
+                      probable que el repuesto no sea el correcto. Se recomienda
+                      ingresarlo manualmente si no estás seguro.
+                    </span>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
           <DialogDescription>
             {step === "initial" &&
               "Selecciona una imagen o toma una foto para procesar el inventario."}
@@ -329,34 +387,64 @@ export function InventoryImageUploadModal({
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[50px]">Select</TableHead>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead className="text-right">Cantidad</TableHead>
+                      <TableHead>Nombre Detectado</TableHead>
+                      <TableHead>Nombre Real</TableHead>
+                      <TableHead>Cantidad</TableHead>
+                      <TableHead className="text-right">Confianza</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.map((item, index) => {
-                      const isSelected = selectedIds.has(item.nombre);
+                    {items.map((item) => {
+                      const isSelected = selectedIds.has(item.id_repuesto);
+
+                      const getConfidenceColorClass = (percentage: number) => {
+                        if (percentage <= 0.6) return "bg-red-500/20";
+                        if (percentage <= 0.95) return "bg-yellow-500/20";
+                        return "bg-green-500/20";
+                      };
+
+                      const getConfidenceDotClass = (percentage: number) => {
+                        if (percentage <= 0.6) return "bg-red-500";
+                        if (percentage <= 0.95) return "bg-yellow-500";
+                        return "bg-green-500";
+                      };
+
                       return (
                         <TableRow
-                          key={`${item.nombre}-${index}`}
-                          className={
+                          key={item.id_repuesto}
+                          className={cn(
+                            "cursor-pointer",
                             isSelected
-                              ? "bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50"
-                              : ""
-                          }
-                          onClick={() => toggleSelection(item.nombre)}
+                              ? "bg-green-600/50 hover:bg-green-600/60"
+                              : getConfidenceColorClass(item.porcentage)
+                          )}
+                          onClick={() => toggleSelection(item.id_repuesto)}
                         >
                           <TableCell>
                             <Checkbox
                               checked={isSelected}
-                              onCheckedChange={() => toggleSelection(item.nombre)}
+                              onCheckedChange={() =>
+                                toggleSelection(item.id_repuesto)
+                              }
                             />
                           </TableCell>
                           <TableCell className="font-medium">
-                            {item.nombre}
+                            {item.nombre_detectado}
                           </TableCell>
+                          <TableCell>{item.nombre_real}</TableCell>
+                          <TableCell>{item.cantidad}</TableCell>
                           <TableCell className="text-right">
-                            {item.cantidad}
+                            <div className="flex items-center justify-end gap-2">
+                              <div
+                                className={cn(
+                                  "h-2.5 w-2.5 rounded-full",
+                                  getConfidenceDotClass(item.porcentage)
+                                )}
+                              />
+                              <span>
+                                {`${(item.porcentage * 100).toFixed(0)}%`}
+                              </span>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
