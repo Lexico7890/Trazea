@@ -289,7 +289,12 @@ export function InventoryImageUploadModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center justify-center p-4 min-h-[200px]">
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center p-4 min-h-[200px]",
+            step === "results" && "flex-1 min-h-0"
+          )}
+        >
           {step === "initial" && (
             <div className="flex flex-col gap-4 w-full max-w-xs">
               {/* Hidden Inputs */}
