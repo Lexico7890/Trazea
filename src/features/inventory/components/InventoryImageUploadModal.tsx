@@ -31,6 +31,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -385,10 +391,11 @@ export function InventoryImageUploadModal({
           {step === "results" && (
             <div className="flex-1 flex flex-col min-h-0 space-y-4">
               <div className="flex-1 border rounded-md overflow-y-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">Select</TableHead>
+                <TooltipProvider>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50px]">Select</TableHead>
                       <TableHead>Nombre Detectado</TableHead>
                       <TableHead>Nombre Real</TableHead>
                       <TableHead>Cantidad</TableHead>
@@ -432,10 +439,26 @@ export function InventoryImageUploadModal({
                               }
                             />
                           </TableCell>
-                          <TableCell className="font-medium">
-                            {item.nombre_detectado}
+                          <TableCell className="font-medium max-w-[200px] truncate">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>{item.nombre_detectado}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{item.nombre_detectado}</p>
+                              </TooltipContent>
+                            </Tooltip>
                           </TableCell>
-                          <TableCell>{item.nombre_real}</TableCell>
+                          <TableCell className="max-w-[200px] truncate">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span>{item.nombre_real}</span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{item.nombre_real}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TableCell>
                           <TableCell>{item.cantidad}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
