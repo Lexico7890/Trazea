@@ -412,7 +412,7 @@ export function InventoryImageUploadModal({
           )}
 
           {step === "results" && (
-            <div className="flex-1 flex flex-col min-h-0 space-y-4">
+            <div className="flex-1 flex flex-col min-h-0 space-y-4 h-full w-full overflow-y-auto overflow-x-auto">
               <div className="flex-1 border rounded-md overflow-y-auto overflow-x-auto">
                 <TooltipProvider>
                   <Table>
