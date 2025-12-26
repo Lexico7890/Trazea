@@ -25,6 +25,7 @@ import RequestsPage from "./features/requests/components/RequestsPage";
 import RequestsCreatedPage from "./features/requests/components/RequestsCreatedPage";
 import RequestsSentPage from "./features/requests/components/RequestsSentPage";
 import { Toaster } from "./components/ui/sonner";
+import ConteoPage from "./features/inventory/components/ConteoPage";
 import { useUserStore } from "@/store/useUserStore";
 import { LoginPage } from "./features/login/components/login-page";
 import { useSupabaseAuthListener } from "./hooks/useSupabaseAuthListener";
@@ -42,6 +43,7 @@ const ROUTE_NAMES: Record<string, string> = {
   "/solicitudes/creadas": "Solicitudes Creadas",
   "/solicitudes/enviadas": "Solicitudes Enviadas",
   "/inventario": "Inventario (Legacy)",
+  "/inventario/conteo": "Conteo de Inventario",
 };
 
 function App() {
@@ -142,6 +144,7 @@ function App() {
                           For now, I'll protect it with 'inventario' as well. */}
                       <Route element={<ProtectedRoute routeKey="inventario" />}>
                          <Route path="/inventario" element={<Inventory />} />
+                         <Route path="/inventario/conteo" element={<ConteoPage />} />
                       </Route>
 
                       <Route element={<ProtectedRoute routeKey="solicitudes" />}>

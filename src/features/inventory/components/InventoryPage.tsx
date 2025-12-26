@@ -6,9 +6,10 @@ import { InventoryTableSkeleton } from "./InventoryTableSkeleton";
 import { useInventoryFilters } from "../hooks/useInventoryFilters";
 import { useInventoryQuery } from "../hooks/useInventoryQuery";
 import { useMemo, useState } from "react";
-import { AlertCircle, Plus, RefreshCw } from "lucide-react";
+import { AlertCircle, Plus, RefreshCw, FileScan } from "lucide-react";
 import type { InventoryParams } from "../types";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -71,6 +72,14 @@ export default function InventoryPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Inventario de Repuestos</h1>
         <div className="flex gap-2">
+          {!hasRole('tecnico') && (
+            <Link to="/inventario/conteo">
+              <Button variant="outline">
+                <FileScan className="h-4 w-4 mr-2" />
+                Conteo
+              </Button>
+            </Link>
+          )}
           {!hasRole('tecnico') && (
             <InventoryImageUploadModal
               trigger={
