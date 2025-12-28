@@ -6,10 +6,21 @@ import { InventoryTableSkeleton } from "./InventoryTableSkeleton";
 import { useInventoryFilters } from "../hooks/useInventoryFilters";
 import { useInventoryQuery } from "../hooks/useInventoryQuery";
 import { useMemo, useState } from "react";
-import { AlertCircle, Plus, RefreshCw, FileScan } from "lucide-react";
+import {
+  AlertCircle,
+  Plus,
+  RefreshCw,
+  FileScan,
+  MoreVertical,
+} from "lucide-react";
 import type { InventoryParams } from "../types";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -71,24 +82,115 @@ export default function InventoryPage() {
     <div className="container mx-auto p-2 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Inventario de Repuestos</h1>
-        <div className="flex gap-2">
-          {!hasRole('tecnico') && (
-            <Link to="/inventario/conteo">
-              <Button variant="outline">
-                <FileScan className="h-4 w-4 mr-2" />
-                Conteo
-              </Button>
-            </Link>
-          )}
-          {!hasRole('tecnico') && (
-            <InventoryImageUploadModal
-              trigger={
-                <Button variant="outline" size="icon">
-                  <Camera className="h-4 w-4" />
+        <div className="flex items-center gap-2">
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-2">
+            {!hasRole("tecnico") && (
+              <Link to="/inventario/conteo">
+                <Button variant="outline">
+                  <FileScan className="h-4 w-4 mr-2" />
+                  Conteo
                 </Button>
-              }
-            />
-          )}
+              </Link>
+            )}
+            {!hasRole("tecnico") && (
+              <InventoryImageUploadModal
+                trigger={
+                  <Button variant="outline" size="icon">
+                    <Camera className="h-4 w-4" />
+                  </Button>
+                }
+              />
+            )}
+            {!hasRole("tecnico") && (
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Agregar al Inventario</DialogTitle>
+                    <DialogDescription>
+                      Selecciona un repuesto y la cantidad para agregar al
+                      inventario actual.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+
+          {/* Mobile Actions (Popover) */}
+          <div className="md:hidden">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-2">
+                <div className="flex flex-col gap-2">
+                  {!hasRole("tecnico") && (
+                    <Link to="/inventario/conteo">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                      >
+                        <FileScan className="h-4 w-4 mr-2" />
+                        Conteo
+                      </Button>
+                    </Link>
+                  )}
+                  {!hasRole("tecnico") && (
+                    <InventoryImageUploadModal
+                      trigger={
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                        >
+                          <Camera className="h-4 w-4 mr-2" />
+                          Tomar Foto
+                        </Button>
+                      }
+                    />
+                  )}
+                  {!hasRole("tecnico") && (
+                    <Dialog
+                      open={isDialogOpen}
+                      onOpenChange={setIsDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Agregar al Inventario</DialogTitle>
+                          <DialogDescription>
+                            Selecciona un repuesto y la cantidad para agregar
+                            al inventario actual.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <InventoryForm
+                          onSuccess={() => setIsDialogOpen(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Refresh button visible on all screen sizes */}
           <Button
             variant="outline"
             size="icon"
@@ -99,25 +201,6 @@ export default function InventoryPage() {
               className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
             />
           </Button>
-          {!hasRole('tecnico') && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Agregar al Inventario</DialogTitle>
-                  <DialogDescription>
-                    Selecciona un repuesto y la cantidad para agregar al inventario
-                    actual.
-                  </DialogDescription>
-                </DialogHeader>
-                <InventoryForm onSuccess={() => setIsDialogOpen(false)} />
-              </DialogContent>
-            </Dialog>
-          )}
         </div>
       </div>
 
