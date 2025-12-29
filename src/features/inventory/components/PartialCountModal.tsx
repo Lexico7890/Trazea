@@ -59,7 +59,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
       )
     );
   };
-
+  //TODO: se debe cambiar la columna de CSA por un input editable
   const handleSave = () => {
     // Placeholder for save logic
     console.log('Saving partial count:', items);
@@ -88,7 +88,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
               {/* Desktop Headers */}
               <div className="hidden md:grid md:grid-cols-4 gap-4 pb-2 border-b font-semibold text-sm text-muted-foreground">
                 <div className="md:col-span-2">Repuesto</div>
-                <div className="text-center">Sistema</div>
+                <div className="text-center">CSA</div>
                 <div className="text-center">Real</div>
               </div>
               {/* Items List */}
@@ -112,7 +112,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
                         type="number"
                         value={item.real ?? ''}
                         onChange={(e) => handleRealChange(item.id_repuesto, e.target.value)}
-                        className="text-center h-9"
+                        className="text-center h-9 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-16"
                         placeholder="0"
                       />
                     </div>
