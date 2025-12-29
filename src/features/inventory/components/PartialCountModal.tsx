@@ -32,8 +32,8 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
   const { currentLocation } = useUserStore();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['partialCountItems', currentLocation?.id],
-    queryFn: () => generatePartialCountItems(currentLocation!.id),
+    queryKey: ['partialCountItems', currentLocation?.id_localizacion],
+    queryFn: () => generatePartialCountItems(currentLocation!.id_localizacion),
     enabled: !!currentLocation && isOpen,
   });
 
