@@ -1,12 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { FileUpload } from './FileUpload';
 import { ConteoHistoryTable } from './ConteoHistoryTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,14 +10,13 @@ import { toast } from 'sonner';
 
 export default function ConteoPage() {
   const [files, setFiles] = useState<File[]>([]);
-  const [countType, setCountType] = useState<'completo' | 'parcial'>('parcial');
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: (processedData: { REF: string; CANT: number }[]) =>
-      sendCountData(processedData, countType),
+      sendCountData(processedData, 'completo'), // Always send as 'completo'
     onSuccess: () => {
-      toast.success('Conteo enviado exitosamente.');
+      toast.success('Conteo completo enviado exitosamente.');
       setFiles([]);
       queryClient.invalidateQueries({ queryKey: ['countHistory'] });
     },
@@ -74,27 +66,10 @@ export default function ConteoPage() {
         {/* Left side: File Upload */}
         <Card>
           <CardHeader>
-            <CardTitle>Cargar Archivos de Conteo</CardTitle>
+            <CardTitle>Cargar Archivo de Conteo Completo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <FileUpload files={files} onFilesChange={setFiles} />
-
-            <div className="space-y-2">
-              <label htmlFor="countType" className="font-semibold">Tipo de Conteo</label>
-              <Select
-                value={countType}
-                onValueChange={(value) => setCountType(value as 'completo' | 'parcial')}
-                disabled={mutation.isPending}
-              >
-                <SelectTrigger id="countType">
-                  <SelectValue placeholder="Selecciona un tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="completo">Completo</SelectItem>
-                  <SelectItem value="parcial">Parcial</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             <Button onClick={handleSend} disabled={files.length === 0 || mutation.isPending}>
               {mutation.isPending ? 'Enviando...' : 'Enviar Conteo'}

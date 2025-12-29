@@ -144,9 +144,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.2
         version: 19.2.3(@types/react@19.2.5)
-      '@types/react-dropzone':
-        specifier: ^5.1.0
-        version: 5.1.0(react@19.2.0)
       '@vitejs/plugin-react':
         specifier: ^5.1.0
         version: 5.1.1(rolldown-vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(terser@5.44.1))
@@ -1721,10 +1718,6 @@ packages:
     resolution: {integrity: sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==}
     peerDependencies:
       '@types/react': ^19.2.0
-
-  '@types/react-dropzone@5.1.0':
-    resolution: {integrity: sha512-VCdDCwSsr1MT2frsVl5p8qH+LWwUGzsaNtGkEQekHviZqK0dmTbiIp2Pzfb8lTkH4oTE2JtBbWnbuM6B4FH80A==}
-    deprecated: This is a stub types definition. react-dropzone provides its own type definitions, so you do not need this installed.
 
   '@types/react@19.2.5':
     resolution: {integrity: sha512-keKxkZMqnDicuvFoJbzrhbtdLSPhj/rZThDlKWCDbgXmUg0rEUFtRssDXKYmtXluZlIqiC5VqkCgRwzuyLHKHw==}
@@ -5280,12 +5273,6 @@ snapshots:
   '@types/react-dom@19.2.3(@types/react@19.2.5)':
     dependencies:
       '@types/react': 19.2.5
-
-  '@types/react-dropzone@5.1.0(react@19.2.0)':
-    dependencies:
-      react-dropzone: 14.3.8(react@19.2.0)
-    transitivePeerDependencies:
-      - react
 
   '@types/react@19.2.5':
     dependencies:
