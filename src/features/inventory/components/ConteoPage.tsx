@@ -7,9 +7,12 @@ import { read, utils } from 'xlsx';
 import { sendCountData } from '../services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { PartialCountModal } from './PartialCountModal';
+import { ClipboardList } from 'lucide-react';
 
 export default function ConteoPage() {
   const [files, setFiles] = useState<File[]>([]);
+  const [isPartialCountModalOpen, setPartialCountModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -60,8 +63,15 @@ export default function ConteoPage() {
     <div className="container mx-auto p-2 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold">Conteo de Inventario</h1>
+        <Button variant="outline" onClick={() => setPartialCountModalOpen(true)}>
+          <ClipboardList className="h-4 w-4 mr-2" />
+          Conteo Parcial
+        </Button>
       </div>
-
+      <PartialCountModal
+        isOpen={isPartialCountModalOpen}
+        onOpenChange={setPartialCountModalOpen}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left side: File Upload */}
         <Card>

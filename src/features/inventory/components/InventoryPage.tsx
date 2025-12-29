@@ -12,7 +12,6 @@ import {
   RefreshCw,
   FileScan,
   MoreVertical,
-  ClipboardList,
 } from "lucide-react";
 import type { InventoryParams } from "../types";
 import { Button } from "@/components/ui/button";
@@ -34,11 +33,9 @@ import { InventoryForm } from "./InventoryForm";
 import { useUserStore } from "@/store/useUserStore";
 import { InventoryImageUploadModal } from "./InventoryImageUploadModal";
 import { Camera } from "lucide-react";
-import { PartialCountModal } from "./PartialCountModal";
 
 export default function InventoryPage() {
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
-  const [isPartialCountModalOpen, setPartialCountModalOpen] = useState(false);
   const { hasRole } = useUserStore();
   const {
     filters,
@@ -89,16 +86,10 @@ export default function InventoryPage() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-2">
             {!hasRole("tecnico") && (
-               <Button variant="outline" onClick={() => setPartialCountModalOpen(true)}>
-                <ClipboardList className="h-4 w-4 mr-2" />
-                Conteo Parcial
-              </Button>
-            )}
-            {!hasRole("tecnico") && (
               <Link to="/inventario/conteo">
                 <Button variant="outline">
                   <FileScan className="h-4 w-4 mr-2" />
-                  Conteo Completo
+                  Conteo
                 </Button>
               </Link>
             )}
@@ -143,23 +134,13 @@ export default function InventoryPage() {
               <PopoverContent className="w-auto p-2">
                 <div className="flex flex-col gap-2">
                   {!hasRole("tecnico") && (
-                     <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => setPartialCountModalOpen(true)}
-                    >
-                      <ClipboardList className="h-4 w-4 mr-2" />
-                      Conteo Parcial
-                    </Button>
-                  )}
-                  {!hasRole("tecnico") && (
                     <Link to="/inventario/conteo">
                       <Button
                         variant="ghost"
                         className="w-full justify-start"
                       >
                         <FileScan className="h-4 w-4 mr-2" />
-                        Conteo Completo
+                        Conteo
                       </Button>
                     </Link>
                   )}
@@ -222,10 +203,6 @@ export default function InventoryPage() {
           </Button>
         </div>
       </div>
-       <PartialCountModal
-        isOpen={isPartialCountModalOpen}
-        onOpenChange={setPartialCountModalOpen}
-      />
 
       <Card>
         <CardHeader>
