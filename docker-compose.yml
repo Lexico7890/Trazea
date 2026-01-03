@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+      args:
+        PUBLIC_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        PUBLIC_SUPABASE_ANON_TOKEN: ${VITE_SUPABASE_ANON_KEY}
+    ports:
+      - "5173:5173"
+    container_name: minca-inventory
+    env_file:
+      - .env
+    volumes:
+      - .:/app # Sincroniza tu código (Host -> Contenedor)
+      - /app/node_modules # Protege los módulos instalados en el contenedor
+    environment:
+      - VITE_WATCH_USE_POLLING=true # Ayuda a detectar cambios en Windows/Mac
+    command: pnpm run dev -- --host 0.0.0.0 --port 5173
