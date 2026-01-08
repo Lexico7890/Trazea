@@ -1,10 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
-import { InventoryFilters } from "../../../features/inventory/components/InventoryFilters";
-import { InventoryTable } from "../../../features/inventory/components/InventoryTable";
 import { Pagination } from "@/components/common/Pagination";
-import { InventoryTableSkeleton } from "../../../features/inventory/components/InventoryTableSkeleton";
-import { useInventoryFilters } from "../../../features/inventory/hooks/useInventoryFilters";
-import { useInventoryQuery } from "../../../features/inventory/hooks/useInventoryQuery";
 import { useMemo, useState } from "react";
 import {
   AlertCircle,
@@ -28,11 +23,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/dialog";
-import { InventoryForm } from "../../../features/inventario-crear-repuesto/ui/InventoryForm";
-import { useUserStore } from "@/entities/user/model/useUserStore";
-import { InventoryImageUploadModal } from "../../../features/inventory/components/InventoryImageUploadModal";
 import { Camera } from "lucide-react";
 import type { InventoryParams } from "@/entities/inventario";
+import { InventoryForm } from "@/features/inventario-crear-repuesto";
+import { useUserStore } from "@/entities/user";
+import { InventoryFilters, useInventoryFilters, useInventoryQuery } from "@/features/inventory-filters";
+import { InventoryImageUploadModal } from "./InventoryImageUploadModal";
+import { InventoryTableSkeleton } from "./InventoryTableSkeleton";
+import { InventoryTable } from "./InventoryTable";
 
 export default function InventoryPage() {
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
