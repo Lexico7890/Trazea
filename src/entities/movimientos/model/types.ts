@@ -1,11 +1,3 @@
-export enum TIPY_CONCEPT {
-  GARANTIA = "garantia",
-  PRESTAMO = "prestamo",
-  VENTA = "venta",
-  COTIZACION = "cotizacion",
-  DEVOLUCION = "devolucion",
-}
-
 export interface TechnicalMovement {
   id_localizacion?: string;
   id_repuesto?: string;
@@ -17,4 +9,22 @@ export interface TechnicalMovement {
   numero_orden?: string | null;
   descargada?: boolean;
   [key: string]: unknown;
+}
+
+export interface MovementFilters {
+  page: number;
+  pageSize: number;
+  technicianId?: string;
+  startDate?: string;
+  endDate?: string;
+  orderNumber?: string;
+  concept?: string;
+  downloaded?: string;
+}
+
+export interface MovementDetailsModalProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  movement: any | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }

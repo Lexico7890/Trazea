@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/ui/form";
-import AutocompleteInput from "@/components/AutocompleteInput";
+import AutocompleteInput from "@/shared/ui/AutocompleteInput";
 import { useUserStore } from "@/entities/user/model/useUserStore";
 import { createInventoryItem } from "../api";
 import { insertInventorySchema, type InsertInventoryFormValues } from "../model/schemas";

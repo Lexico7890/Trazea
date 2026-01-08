@@ -20,20 +20,20 @@ import {
 } from "./shared/ui/breadcrumb";
 import InventoryPage from "./pages/inventario/ui/InventoryPage";
 import RepuestosPage from "./features/repuestos/components/RepuestosPage";
-import RecordsPage from "./features/records/components/records-page";
+import RecordsPage from "./pages/records/ui/records-page";
 import RequestsPage from "./features/requests/components/RequestsPage";
 import RequestsCreatedPage from "./features/requests/components/RequestsCreatedPage";
 import RequestsSentPage from "./features/requests/components/RequestsSentPage";
 import { Toaster } from "./shared/ui/sonner";
-import ConteoPage from "./features/inventory/components/ConteoPage";
+import ConteoPage from "./pages/count/ui/ConteoPage";
 import { useUserStore } from "@/entities/user/model/useUserStore";
-import { LoginPage } from "./features/login/components/login-page";
+import { LoginPage } from "./pages/auth/ui/login-page";
 import { useSupabaseAuthListener } from "./shared/lib/useSupabaseAuthListener";
-import { UpdatePasswordPage } from "./features/login/components/update-password-page";
+import { UpdatePasswordPage } from "./pages/auth/ui/update-password-page";
 
 import { LocationSelector } from "./components/common/LocationSelector";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { NotificationsMenu } from "./features/notifications/components/NotificationsMenu";
+import { NotificationsMenu } from "./widgets/notifications/ui/NotificationsMenu";
 
 const ROUTE_NAMES: Record<string, string> = {
   "/": "Inventario",
