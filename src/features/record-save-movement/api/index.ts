@@ -3,7 +3,7 @@ import { supabase } from '@/shared/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-export function createTechnicalMovementQuery() {
+export function useCreateTechnicalMovement() {
     const queryClient = useQueryClient();
 
     return useMutation({

@@ -1,8 +1,8 @@
 import type { TechnicalMovement } from "@/entities/movimientos";
-import { createTechnicalMovementQuery } from "../api";
+import { useCreateTechnicalMovement } from "../api";
 
 export const useTechnicalMovements = () => {
-    const createTechnicalMovementMutation = createTechnicalMovementQuery();
+    const createTechnicalMovementMutation = useCreateTechnicalMovement();
 
     const handleCreateTechnicalMovement = async (movementData: TechnicalMovement) => {
         try {

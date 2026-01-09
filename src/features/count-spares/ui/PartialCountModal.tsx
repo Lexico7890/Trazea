@@ -27,7 +27,10 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
 
   useEffect(() => {
     if (data) {
-      setItems(data);
+      const timeout = setTimeout(() => {
+        setItems(data);
+      }, 0);
+      return () => clearTimeout(timeout);
     }
   }, [data]);
 

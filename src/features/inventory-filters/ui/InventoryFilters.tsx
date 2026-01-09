@@ -10,18 +10,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import type { InventoryFiltersProps } from "../model/types";
 
-export const ESTADOS_STOCK = [
-    { value: 'all', label: 'Todos estados de stock' },
-    { value: 'BAJO', label: 'Bajo' },
-    { value: 'OK', label: 'Ok' },
-    { value: 'CRITICO', label: 'Crítico' }
-] as const;
-
-export const ESTADOS = [
-    { value: 'all', label: 'Todos los estados' },
-    { value: 'active', label: 'Activos' },
-    { value: 'discontinued', label: 'Descontinuados' },
-] as const;
+import { ESTADOS_STOCK, ESTADOS } from "../model/constants";
 
 export function InventoryFilters({
     search,

@@ -192,7 +192,9 @@ export function InventoryImageUploadModal({
         let msg = error.message;
         try {
           msg = JSON.parse(error.message).error || msg;
-        } catch (e) {}
+        } catch {
+          /* empty */
+        }
         throw new Error(msg);
       }
 
@@ -205,9 +207,9 @@ export function InventoryImageUploadModal({
       } else {
         throw new Error("Formato de respuesta inválido");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error en el proceso:", err);
-      const message = err.message || "Ocurrió un error inesperado";
+      const message = err instanceof Error ? err.message : "Ocurrió un error inesperado";
       setErrorMessage(message);
       toast.error(message);
       setStep("error");
@@ -233,11 +235,10 @@ export function InventoryImageUploadModal({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
-        className={`sm:max-w-md transition-all duration-300 ${
-          step === "results"
+        className={`sm:max-w-md transition-all duration-300 ${step === "results"
             ? "sm:max-w-2xl max-h-[90vh] flex flex-col"
             : ""
-        }`}
+          }`}
       >
         <DialogHeader>
           <div className="flex items-center gap-2">
@@ -314,26 +315,26 @@ export function InventoryImageUploadModal({
               />
 
               {isMobile ? (
-                 <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
-                    <Button
-                      size="lg"
-                      className="w-full"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="mr-2 h-5 w-5" />
-                      Cargar Imagen
-                    </Button>
+                <div className="flex flex-col gap-4 w-full max-w-xs mx-auto">
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="mr-2 h-5 w-5" />
+                    Cargar Imagen
+                  </Button>
 
-                    <Button
-                      size="lg"
-                      variant="secondary"
-                      className="w-full"
-                      onClick={() => cameraInputRef.current?.click()}
-                    >
-                      <Camera className="mr-2 h-5 w-5" />
-                      Tomar Foto
-                    </Button>
-                 </div>
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => cameraInputRef.current?.click()}
+                  >
+                    <Camera className="mr-2 h-5 w-5" />
+                    Tomar Foto
+                  </Button>
+                </div>
               ) : (
                 <div
                   onDragOver={handleDragOver}
@@ -354,15 +355,15 @@ export function InventoryImageUploadModal({
                       "p-4 rounded-full bg-background border",
                       isDragError ? "border-destructive text-destructive" : "border-muted-foreground/20 text-muted-foreground"
                     )}>
-                       <Upload className="h-8 w-8" />
+                      <Upload className="h-8 w-8" />
                     </div>
                     <div className="space-y-1">
-                       <p className="text-lg font-medium">
-                         Arrastra y suelta una imagen aquí
-                       </p>
-                       <p className="text-sm text-muted-foreground">
-                         o haz clic para seleccionar
-                       </p>
+                      <p className="text-lg font-medium">
+                        Arrastra y suelta una imagen aquí
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        o haz clic para seleccionar
+                      </p>
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
                       PNG, JPG, WEBP
@@ -418,94 +419,94 @@ export function InventoryImageUploadModal({
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[50px]">Select</TableHead>
-                      <TableHead className="min-w-[200px]">
-                        Nombre Detectado
-                      </TableHead>
-                      <TableHead className="min-w-[200px]">
-                        Nombre Real
-                      </TableHead>
-                      <TableHead>Cantidad</TableHead>
-                      <TableHead className="text-right min-w-[100px]">
-                        Confianza
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {items.map((item) => {
-                      const isSelected = selectedIds.has(item.id_repuesto);
+                        <TableHead className="min-w-[200px]">
+                          Nombre Detectado
+                        </TableHead>
+                        <TableHead className="min-w-[200px]">
+                          Nombre Real
+                        </TableHead>
+                        <TableHead>Cantidad</TableHead>
+                        <TableHead className="text-right min-w-[100px]">
+                          Confianza
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {items.map((item) => {
+                        const isSelected = selectedIds.has(item.id_repuesto);
 
-                      const getConfidenceColorClass = (percentage: number) => {
-                        if (percentage <= 0.6)
-                          return "bg-red-500/10 dark:bg-red-900/20";
-                        if (percentage <= 0.95)
-                          return "bg-yellow-500/10 dark:bg-yellow-900/20";
-                        return "bg-green-500/10 dark:bg-green-900/20";
-                      };
+                        const getConfidenceColorClass = (percentage: number) => {
+                          if (percentage <= 0.6)
+                            return "bg-red-500/10 dark:bg-red-900/20";
+                          if (percentage <= 0.95)
+                            return "bg-yellow-500/10 dark:bg-yellow-900/20";
+                          return "bg-green-500/10 dark:bg-green-900/20";
+                        };
 
-                      const getConfidenceDotClass = (percentage: number) => {
-                        if (percentage <= 0.6) return "bg-red-500";
-                        if (percentage <= 0.95) return "bg-yellow-500";
-                        return "bg-green-500";
-                      };
+                        const getConfidenceDotClass = (percentage: number) => {
+                          if (percentage <= 0.6) return "bg-red-500";
+                          if (percentage <= 0.95) return "bg-yellow-500";
+                          return "bg-green-500";
+                        };
 
-                      return (
-                        <TableRow
-                          key={item.id_repuesto}
-                          className={cn(
-                            "cursor-pointer",
-                            isSelected
-                              ? "bg-green-200 hover:bg-green-300/80 dark:bg-green-800/50 dark:hover:bg-green-800/60"
-                              : getConfidenceColorClass(item.porcentage)
-                          )}
-                          onClick={() => toggleSelection(item.id_repuesto)}
-                        >
-                          <TableCell>
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={() =>
-                                toggleSelection(item.id_repuesto)
-                              }
-                            />
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>{item.nombre_detectado}</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{item.nombre_detectado}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span>{item.nombre_real}</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{item.nombre_real}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell>{item.cantidad}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <div
-                                className={cn(
-                                  "h-2.5 w-2.5 rounded-full",
-                                  getConfidenceDotClass(item.porcentage)
-                                )}
+                        return (
+                          <TableRow
+                            key={item.id_repuesto}
+                            className={cn(
+                              "cursor-pointer",
+                              isSelected
+                                ? "bg-green-200 hover:bg-green-300/80 dark:bg-green-800/50 dark:hover:bg-green-800/60"
+                                : getConfidenceColorClass(item.porcentage)
+                            )}
+                            onClick={() => toggleSelection(item.id_repuesto)}
+                          >
+                            <TableCell>
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={() =>
+                                  toggleSelection(item.id_repuesto)
+                                }
                               />
-                              <span>
-                                {`${(item.porcentage * 100).toFixed(0)}%`}
-                              </span>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>{item.nombre_detectado}</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{item.nombre_detectado}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>{item.nombre_real}</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{item.nombre_real}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TableCell>
+                            <TableCell>{item.cantidad}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <div
+                                  className={cn(
+                                    "h-2.5 w-2.5 rounded-full",
+                                    getConfidenceDotClass(item.porcentage)
+                                  )}
+                                />
+                                <span>
+                                  {`${(item.porcentage * 100).toFixed(0)}%`}
+                                </span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
                 </TooltipProvider>
               </div>
 
