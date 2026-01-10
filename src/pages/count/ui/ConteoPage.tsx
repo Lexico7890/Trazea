@@ -35,7 +35,9 @@ export function ConteoPage() {
       const workbook = read(arrayBuffer, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = utils.sheet_to_json<{ 'REF.'?: string; 'CANT.'?: number }>(worksheet);
+      const jsonData = utils.sheet_to_json<{ 'REF.'?: string; 'CANT.'?: number }>(worksheet, {
+        range: 1, // Skip the first row to use the second row as headers
+      });
 
       const mappedData = jsonData.map(row => ({
         REF: row['REF.'],
