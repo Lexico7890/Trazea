@@ -1,15 +1,17 @@
 import { supabase } from "@/shared/api";
 
+const id_localizacion = localStorage.getItem('minca_location_id');
+
 /**
  * Sends the processed inventory count data to the backend.
  * This is a placeholder and will call a Supabase function.
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function sendCountData(processedData: any, type: 'completo') {
+export async function sendCountData(processedData: any) {
     const { data, error } = await supabase.rpc('procesar_comparacion_excel', {
-        items: processedData,
-        tipo_conteo: type,
+        p_id_localizacion: id_localizacion,
+        p_datos_excel: processedData,
     });
 
     if (error) {
