@@ -7,6 +7,6 @@ export interface CountItem {
     id_repuesto: string;
     referencia: string;
     nombre: string;
-    cantidad_sistema: number;
+    cantidad_sistema?: number;
     real?: number;
 }
