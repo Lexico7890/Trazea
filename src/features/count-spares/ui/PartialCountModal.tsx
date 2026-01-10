@@ -50,7 +50,15 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
       )
     );
   };
-  //TODO: se debe cambiar la columna de CSA por un input editable
+
+  const handleSystemChange = (id_repuesto: string, value: string) => {
+    const numericValue = value === '' ? undefined : parseInt(value, 10);
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id_repuesto === id_repuesto ? { ...item, cantidad_sistema: numericValue } : item
+      )
+    );
+  };
   const handleSave = () => {
     // Placeholder for save logic
     console.log('Saving partial count:', items);
@@ -61,7 +69,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Conteo Parcial</DialogTitle>
+          <DialogTitle>Conteo Parcial ed</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[60vh] overflow-y-auto">
@@ -94,7 +102,13 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
                     {/* System Quantity */}
                     <div className="text-center">
                       <p className="md:hidden text-xs font-semibold text-muted-foreground">Sistema</p>
-                      <p className="font-mono text-lg">{item.cantidad_sistema}</p>
+                      <Input
+                        type="number"
+                        value={item.cantidad_sistema ?? ''}
+                        onChange={(e) => handleSystemChange(item.id_repuesto, e.target.value)}
+                        className="text-center h-9 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-16 mx-auto"
+                        placeholder="0"
+                      />
                     </div>
                     {/* Real Input */}
                     <div className="text-center">
