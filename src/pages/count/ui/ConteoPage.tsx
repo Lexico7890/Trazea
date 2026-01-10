@@ -35,12 +35,14 @@ export function ConteoPage() {
       const workbook = read(arrayBuffer, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = utils.sheet_to_json<{ REF?: string; CANT?: number }>(worksheet, {
-        header: ['REF', 'CANT'],
-        range: 1, // Skip header row
-      });
+      const jsonData = utils.sheet_to_json<{ 'REF.'?: string; 'CANT.'?: number }>(worksheet);
 
-      const filteredData = jsonData
+      const mappedData = jsonData.map(row => ({
+        REF: row['REF.'],
+        CANT: row['CANT.'],
+      }));
+
+      const filteredData = mappedData
         .filter(row => row.CANT !== undefined && row.CANT > 0 && row.REF !== undefined)
         .map(row => ({ REF: String(row.REF), CANT: Number(row.CANT) }));
 
