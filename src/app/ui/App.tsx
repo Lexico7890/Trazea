@@ -14,7 +14,7 @@ import { InventoryPage } from "@/pages/inventario";
 import { RepuestosPage } from "@/pages/spares";
 import { RecordsPage } from "@/pages/records";
 import Inventory from "@/pages/Inventory";
-import { ConteoPage } from "@/pages/count";
+import { ConteoPage, ResultadosConteoPage } from "@/pages/count";
 import { RequestsPage } from "@/pages/requests";
 import { RequestsCreatedPage } from "@/features/spares-request-workshop";
 import { RequestsSentPage } from "@/features/requests-sended";
@@ -119,6 +119,7 @@ function App() {
                       <Route element={<ProtectedRoute routeKey="inventario" />}>
                         <Route path="/inventario" element={<Inventory />} />
                         <Route path="/inventario/conteo" element={<ConteoPage />} />
+                        <Route path="/inventario/conteo/resultados" element={<ResultadosConteoPage />} />
                       </Route>
 
                       <Route element={<ProtectedRoute routeKey="solicitudes" />}>

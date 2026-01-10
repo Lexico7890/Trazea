@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { read, utils } from 'xlsx';
@@ -13,14 +14,16 @@ export function ConteoPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [isPartialCountModalOpen, setPartialCountModalOpen] = useState(false);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: (processedData: { REF: string; CANT: number }[]) =>
-      sendCountData(processedData), // Always send as 'completo'
-    onSuccess: () => {
+      sendCountData(processedData),
+    onSuccess: (data) => {
       toast.success('Conteo completo enviado exitosamente.');
       setFiles([]);
       queryClient.invalidateQueries({ queryKey: ['countHistory'] });
+      navigate('/inventario/conteo/resultados', { state: { results: data } });
     },
     onError: (error) => {
       toast.error(`Error al enviar el conteo: ${error.message}`);

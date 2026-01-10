@@ -1,1 +1,2 @@
-export { ConteoPage } from "./ui/ConteoPage";
+export * from './ui/ConteoPage';
+export * from './ui/ResultadosConteoPage';
