@@ -16,7 +16,7 @@ export function ConteoPage() {
 
   const mutation = useMutation({
     mutationFn: (processedData: { REF: string; CANT: number }[]) =>
-      sendCountData(processedData, 'completo'), // Always send as 'completo'
+      sendCountData(processedData), // Always send as 'completo'
     onSuccess: () => {
       toast.success('Conteo completo enviado exitosamente.');
       setFiles([]);
