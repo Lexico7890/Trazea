@@ -28,7 +28,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
   useEffect(() => {
     if (data) {
       const timeout = setTimeout(() => {
-        setItems(data.map((item: CountItem) => ({ ...item, cantidad_sistema: 0 })));
+        setItems(data)
       }, 0);
       return () => clearTimeout(timeout);
     }
@@ -69,7 +69,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Conteo Parcial ed</DialogTitle>
+          <DialogTitle>Conteo Parcial</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[60vh] overflow-y-auto">
@@ -96,7 +96,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
                   <div key={item.id_repuesto} className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 py-3 items-center">
                     {/* Item Info */}
                     <div className="col-span-2 md:col-span-2">
-                      <p className="font-bold text-sm">{item.referencia}</p>
+                      <p className="font-bold text-sm">{item.ref_excel}</p>
                       <p className="text-xs text-muted-foreground truncate">{item.nombre}</p>
                     </div>
                     {/* System Quantity */}

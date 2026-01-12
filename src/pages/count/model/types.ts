@@ -6,7 +6,7 @@ export interface FileUploadProps {
 export interface CountResult {
     referencia: string;
     nombre: string;
-    cantidad_csa: number;
+    cant_excel: number;
     cantidad_sistema: number;
     diferencia: number;
     existe_en_bd: boolean;

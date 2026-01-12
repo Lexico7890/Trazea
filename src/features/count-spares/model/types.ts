@@ -5,7 +5,7 @@ export interface PartialCountModalProps {
 
 export interface CountItem {
     id_repuesto: string;
-    referencia: string;
+    ref_excel: string;
     nombre: string;
     cantidad_sistema?: number;
     real?: number;

@@ -54,7 +54,7 @@ export function CountTable({
                                         <TableCell>{startIndex + index + 1}</TableCell>
                                         <TableCell>{item.referencia}</TableCell>
                                         <TableCell>{item.nombre}</TableCell>
-                                        <TableCell>{item.cantidad_csa}</TableCell>
+                                        <TableCell>{item.cant_excel}</TableCell>
                                         <TableCell>{item.cantidad_sistema}</TableCell>
                                         <TableCell>
                                             <Input
