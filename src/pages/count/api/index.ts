@@ -16,8 +16,9 @@ interface RegistrarConteoParams {
  */
 export async function getCountHistory() {
     const { data, error } = await supabase
-        .from('conteo')
-        .select('fecha, tipo, usuario')
+        .from('vista_historial_conteos')
+        .select('*')
+        .eq('localizacion', localStorage.getItem('minca_location_id'))
         .order('fecha', { ascending: false });
 
     if (error) {

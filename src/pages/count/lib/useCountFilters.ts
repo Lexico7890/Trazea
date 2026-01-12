@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { CountResult, CountFilters, DiferenciaFilter, ExistsFilter } from '../types';
+import type { CountFilters, CountResult, DiferenciaFilter, ExistsFilter } from '../model/types';
 
 export function useCountFilters(results: CountResult[], itemsPerPage: number = 10) {
     const [filters, setFilters] = useState<CountFilters>({

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { CountResult } from '../types';
+import { type CountResult } from '../model/types';
 
 export function useCountResults(initialResults: CountResult[]) {
     const [results, setResults] = useState<CountResult[]>(

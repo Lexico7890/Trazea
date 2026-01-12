@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
-import { CountFilters, DiferenciaFilter, ExistsFilter } from '../../model/types';
+import type { CountFilters, DiferenciaFilter, ExistsFilter } from '../model/types';
 
 interface FilterSectionProps {
     filters: CountFilters;

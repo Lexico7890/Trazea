@@ -23,3 +23,14 @@ export interface CountFilters {
     existeEnBd: ExistsFilter;
     existeEnUbicacion: ExistsFilter;
 }
+
+export interface CountTableProps {
+    paginatedResults: CountResult[];
+    startIndex: number;
+    currentPage: number;
+    totalPages: number;
+    filteredCount: number;
+    endIndex: number;
+    onPqChange: (referencia: string, value: string) => void;
+    onPageChange: (page: number) => void;
+}

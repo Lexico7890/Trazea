@@ -3,18 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { CountResult } from '../../model/types';
-
-interface CountTableProps {
-    paginatedResults: CountResult[];
-    startIndex: number;
-    currentPage: number;
-    totalPages: number;
-    filteredCount: number;
-    endIndex: number;
-    onPqChange: (referencia: string, value: string) => void;
-    onPageChange: (page: number) => void;
-}
+import type { CountResult, CountTableProps } from '../model/types';
 
 function getRowClass(result: CountResult): string {
     if (!result.existe_en_bd) {
