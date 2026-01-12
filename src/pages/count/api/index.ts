@@ -6,6 +6,7 @@ interface RegistrarConteoParams {
     tipo: string;
     total_items_auditados: number;
     total_diferencia_encontrada: number;
+    total_items_pq: number;
     observaciones?: string;
     items: any[];
 }
@@ -37,6 +38,7 @@ export async function registrarConteo(params: RegistrarConteoParams) {
         p_tipo: params.tipo,
         p_total_items_auditados: params.total_items_auditados,
         p_total_diferencia_encontrada: params.total_diferencia_encontrada,
+        p_total_items_pq: params.total_items_pq,
         p_observaciones: params.observaciones || null,
         p_items: params.items,
     });
