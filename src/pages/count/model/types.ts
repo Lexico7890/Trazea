@@ -12,6 +12,7 @@ export interface CountResult {
     existe_en_bd: boolean;
     existe_en_ubicacion: boolean;
     cantidad_pq: number;
+    _id?: string;
 }
 
 export type DiferenciaFilter = 'all' | 'positive' | 'negative';
@@ -31,6 +32,6 @@ export interface CountTableProps {
     totalPages: number;
     filteredCount: number;
     endIndex: number;
-    onPqChange: (referencia: string, value: string) => void;
+    onPqChange: (itemId: string, value: string) => void;
     onPageChange: (page: number) => void;
 }

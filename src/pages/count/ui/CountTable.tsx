@@ -50,7 +50,7 @@ export function CountTable({
                         <TableBody>
                             {paginatedResults.length > 0 ? (
                                 paginatedResults.map((item, index) => (
-                                    <TableRow key={item.referencia} className={getRowClass(item)}>
+                                    <TableRow key={item._id || item.referencia} className={getRowClass(item)}>
                                         <TableCell>{startIndex + index + 1}</TableCell>
                                         <TableCell>{item.referencia}</TableCell>
                                         <TableCell>{item.nombre}</TableCell>
@@ -61,7 +61,7 @@ export function CountTable({
                                                 type="number"
                                                 min="0"
                                                 value={item.cantidad_pq === 0 ? '' : item.cantidad_pq}
-                                                onChange={(e) => onPqChange(item.referencia, e.target.value)}
+                                                onChange={(e) => onPqChange(item._id || item.referencia, e.target.value)}
                                                 className="w-20 h-8"
                                                 placeholder="0"
                                             />

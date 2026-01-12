@@ -55,6 +55,9 @@ export function ResultadosConteoPage() {
         return;
       }
 
+      // Eliminar el campo _id temporal antes de enviar
+      const itemsToSend = results.map(({ _id, ...item }) => item);
+
       await registrarConteo({
         id_localizacion,
         id_usuario,
@@ -63,7 +66,7 @@ export function ResultadosConteoPage() {
         total_diferencia_encontrada: totalDiferenciaEncontrada,
         total_items_pq: totalItemsPq,
         observaciones: observaciones || undefined,
-        items: results,
+        items: itemsToSend,
       });
 
       toast.success('El conteo ha sido registrado correctamente.');
