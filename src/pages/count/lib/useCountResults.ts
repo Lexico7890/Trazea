@@ -18,7 +18,7 @@ export function useCountResults(initialResults: CountResult[]) {
         setResults((prevResults) => {
             return prevResults.map((item) => {
                 if (item._id === itemId) {
-                    const newDiferencia = item.cant_excel + numValue - item.cantidad_sistema;
+                    const newDiferencia = (numValue + item.cantidad_sistema) - item.cant_excel;
                     return {
                         ...item,
                         cantidad_pq: numValue,

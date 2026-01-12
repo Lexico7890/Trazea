@@ -12,7 +12,10 @@ function getRowClass(result: CountResult): string {
     if (!result.existe_en_ubicacion) {
         return 'bg-orange-500/20 hover:bg-orange-500/30';
     }
-    if (result.diferencia !== 0) {
+    if (result.diferencia > 0) {
+        return 'bg-green-500/20 hover:bg-green-500/30';
+    }
+    if (result.diferencia < 0) {
         return 'bg-yellow-500/20 hover:bg-yellow-500/30';
     }
     return '';
