@@ -60,9 +60,10 @@ export function CountTable({
                                             <Input
                                                 type="number"
                                                 min="0"
-                                                value={item.cantidad_pq}
+                                                value={item.cantidad_pq === 0 ? '' : item.cantidad_pq}
                                                 onChange={(e) => onPqChange(item.referencia, e.target.value)}
                                                 className="w-20 h-8"
+                                                placeholder="0"
                                             />
                                         </TableCell>
                                         <TableCell>{item.diferencia}</TableCell>

@@ -5,13 +5,14 @@ export function useCountResults(initialResults: CountResult[]) {
     const [results, setResults] = useState<CountResult[]>(
         initialResults.map((item) => ({
             ...item,
-            cantidad_pq: 0,
+            cantidad_pq: item.cantidad_pq || 0,
         }))
     );
 
     const handlePqChange = useCallback((referencia: string, value: string) => {
+        // Permitir valores vacíos
         const numValue = value === '' ? 0 : parseInt(value, 10);
-        if (isNaN(numValue)) return;
+        if (value !== '' && isNaN(numValue)) return;
 
         setResults((prevResults) =>
             prevResults.map((item) => {
