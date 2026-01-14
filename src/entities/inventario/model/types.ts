@@ -28,6 +28,7 @@ export interface InventoryParams {
     search?: string;
     estado_stock?: string;
     descontinuado?: boolean;
+    is_new?: boolean;
 }
 
 export interface PaginatedInventoryResponse {

@@ -10,6 +10,7 @@ export function useInventoryFilters() {
         limit: 10,
         orderBy: 'fecha_ingreso_inventario',
         direction: 'desc',
+        isNew: false,
     });
 
     const updateSearch = useCallback((search: string) => {
@@ -23,6 +24,10 @@ export function useInventoryFilters() {
     const updateDescontinuado = useCallback((descontinuado: string) => {
         console.log(descontinuado);
         setFilters(prev => ({ ...prev, descontinuado, page: 1 }));
+    }, []);
+
+    const updateIsNew = useCallback((isNew: boolean) => {
+        setFilters(prev => ({ ...prev, isNew, page: 1 }));
     }, []);
 
     const updatePage = useCallback((page: number) => {
@@ -50,6 +55,7 @@ export function useInventoryFilters() {
             limit: 10,
             orderBy: 'fecha_ingreso_inventario',
             direction: 'desc',
+            isNew: false,
         });
     }, []);
 
@@ -58,6 +64,7 @@ export function useInventoryFilters() {
         updateSearch,
         updateStockState,
         updateDescontinuado,
+        updateIsNew,
         updatePage,
         updateLimit,
         updateSort,

@@ -1,6 +1,6 @@
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Sparkles } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,12 +16,14 @@ export function InventoryFilters({
     search,
     estado_stock,
     descontinuado,
+    isNew,
     onSearchChange,
     onEstadoStockChange,
     onDescontinuadoChange,
+    onIsNewChange,
     onReset,
 }: InventoryFiltersProps) {
-    const hasActiveFilters = search !== '' || estado_stock !== 'all' || descontinuado !== 'all';
+    const hasActiveFilters = search !== '' || estado_stock !== 'all' || descontinuado !== 'all' || isNew;
 
     const selectedEstadoStock = ESTADOS_STOCK.find(t => t.value === estado_stock)?.label || 'Estados de Stock';
     const selectedEstado = ESTADOS.find(e => e.value === descontinuado)?.label || 'Todos los estados';
@@ -81,6 +83,16 @@ export function InventoryFilters({
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                {/* New Filter Toggle */}
+                <Button
+                    variant={isNew ? "default" : "outline"}
+                    onClick={() => onIsNewChange(!isNew)}
+                    className={`gap-2 ${isNew ? 'bg-red-500 hover:bg-red-600 border-transparent text-white' : ''}`}
+                >
+                    <Sparkles className="h-4 w-4" />
+                    Solo Nuevos
+                </Button>
             </div>
 
             {/* Reset Button */}

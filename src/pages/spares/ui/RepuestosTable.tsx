@@ -42,7 +42,8 @@ export function RepuestosTable({
     onSort,
     onEdit,
     onDelete,
-}: RepuestosTableProps) {
+    canDelete = true,
+}: RepuestosTableProps & { canDelete?: boolean }) {
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
         toast.success("Referencia copiada al portapapeles");
@@ -131,13 +132,15 @@ export function RepuestosTable({
                                                 <Edit className="mr-2 h-4 w-4" />
                                                 Editar
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => onDelete(item.id_repuesto)}
-                                                className="text-destructive focus:text-destructive"
-                                            >
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                Eliminar
-                                            </DropdownMenuItem>
+                                            {canDelete && (
+                                                <DropdownMenuItem
+                                                    onClick={() => onDelete(item.id_repuesto)}
+                                                    className="text-destructive focus:text-destructive"
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    Eliminar
+                                                </DropdownMenuItem>
+                                            )}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
