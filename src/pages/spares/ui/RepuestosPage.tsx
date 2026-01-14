@@ -19,13 +19,17 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
-import { useRepuestosMutations, useRepuestosQuery, type Repuesto, type RepuestosParams } from "@/entities/repuestos";
+import { useRepuestosMutations, useRepuestosQuery, type Repuesto, type RepuestosParams, type RepuestoFormData } from "@/entities/repuestos";
 import { BulkUpload } from "@/features/spares-upload";
 import { RepuestosFilters } from "./RepuestosFilters";
 import { RepuestosTable } from "./RepuestosTable";
 import { RepuestosForm } from "@/features/spares-create";
 import { Pagination } from "@/widgets/pagination";
 import { useUserStore } from "@/entities/user";
+import { useRequestsStore } from "@/features/spares-request-workshop";
+import { toast } from "sonner";
+
+type ActionType = 'solicitar' | null;
 
 export function RepuestosPage() {
     // State for filters
@@ -56,8 +60,9 @@ export function RepuestosPage() {
     const { data, isLoading, isError, refetch, isRefetching } = useRepuestosQuery(filters);
     const { createMutation, updateMutation, deleteMutation } = useRepuestosMutations();
 
-    // Permissions
-    const { hasRole } = useUserStore();
+    // Stores
+    const { sessionData, hasRole } = useUserStore();
+    const { addItemToCart } = useRequestsStore();
     const isTecnico = hasRole("tecnico");
 
     // Handlers
@@ -128,17 +133,64 @@ export function RepuestosPage() {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleSubmitForm = async (formData: any) => {
+    const handleSubmitForm = async (formData: RepuestoFormData, selectedAction: ActionType) => {
         try {
-            if (editingRepuesto) {
-                await updateMutation.mutateAsync({ id: editingRepuesto.id_repuesto, data: formData });
-            } else {
-                await createMutation.mutateAsync(formData);
+            // Determine if there are changes to save
+            const hasChanges = editingRepuesto
+                ? JSON.stringify(formData) !== JSON.stringify({
+                    referencia: editingRepuesto.referencia,
+                    nombre: editingRepuesto.nombre,
+                    cantidad_minima: editingRepuesto.cantidad_minima,
+                    descontinuado: editingRepuesto.descontinuado,
+                    tipo: editingRepuesto.tipo,
+                    fecha_estimada: editingRepuesto.fecha_estimada,
+                    url_imagen: editingRepuesto.url_imagen || "",
+                })
+                : true; // Always true for new items
+
+            if (!hasChanges && !selectedAction) {
+                toast.info("No hay cambios para guardar.");
+                setIsSheetOpen(false);
+                return;
             }
+
+            // Perform Update or Create
+            if (hasChanges) {
+                if (editingRepuesto) {
+                    await updateMutation.mutateAsync({ id: editingRepuesto.id_repuesto, data: formData });
+                } else {
+                    await createMutation.mutateAsync(formData);
+                }
+            }
+
+            // Handle Action
+            if (selectedAction === 'solicitar' && editingRepuesto) {
+                if (!sessionData?.user?.id || !sessionData?.id_localizacion) {
+                    toast.error("No se pudo identificar al usuario o localización para la solicitud.");
+                } else {
+                    await addItemToCart(
+                        sessionData.user.id,
+                        sessionData.id_localizacion,
+                        editingRepuesto.id_repuesto
+                    );
+                    toast.success(`"${editingRepuesto.nombre}" agregado a solicitudes.`);
+                }
+            }
+
+            // Combine toast messages
+            if (hasChanges && selectedAction) {
+                toast.success("Repuesto actualizado y solicitud enviada.");
+            } else if (!hasChanges && selectedAction) {
+                // This case is handled by the addItemToCart toast already
+            } else if (hasChanges && !selectedAction) {
+                toast.success(editingRepuesto ? "Repuesto actualizado." : "Repuesto creado.");
+            }
+
+
             setIsSheetOpen(false);
-        } catch {
-            // Error handled in mutation
+        } catch (error) {
+            // Error is handled by the mutation hooks
+            console.error("Error en handleSubmitForm:", error)
         }
     };
 

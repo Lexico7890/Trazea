@@ -17,12 +17,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/shared/ui/select";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Repuesto, RepuestoFormData } from "@/entities/repuestos";
+
+type ActionType = 'solicitar' | null;
 
 interface RepuestosFormProps {
     initialData?: Repuesto;
-    onSubmit: (data: RepuestoFormData) => void;
+    onSubmit: (data: RepuestoFormData, selectedAction: ActionType) => void;
     isLoading?: boolean;
     onCancel: () => void;
     readOnly?: boolean;
@@ -35,6 +37,7 @@ export function RepuestosForm({
     onCancel,
     readOnly = false,
 }: RepuestosFormProps) {
+    const [selectedAction, setSelectedAction] = useState<ActionType>(null);
     const form = useForm<RepuestoFormData>({
         defaultValues: {
             referencia: "",
@@ -59,11 +62,35 @@ export function RepuestosForm({
                 url_imagen: initialData.url_imagen || "",
             });
         }
+        // Reset action when data changes
+        setSelectedAction(null);
     }, [initialData, form]);
+
+    const handleFormSubmit = (data: RepuestoFormData) => {
+        onSubmit(data, selectedAction);
+    };
+
+    const toggleAction = (action: ActionType) => {
+        if (readOnly) return;
+        setSelectedAction(prev => (prev === action ? null : action));
+    };
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
+            <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4 p-4">
+                {initialData && ( // Solo mostrar si estamos editando
+                    <div className="grid grid-cols-1 gap-3">
+                        <Button
+                            type="button"
+                            variant={selectedAction === "solicitar" ? "default" : "outline"}
+                            className="w-full bg-blue-300 hover:bg-blue-400"
+                            onClick={() => toggleAction('solicitar')}
+                            disabled={readOnly}
+                        >
+                            Solicitar
+                        </Button>
+                    </div>
+                )}
                 <fieldset disabled={readOnly} className="space-y-4">
                     <FormField
                         control={form.control}
