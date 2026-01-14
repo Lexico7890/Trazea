@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -65,11 +66,13 @@ export function InventoryImageUploadModal({
   const [isDragError, setIsDragError] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const isMobile = useIsMobile();
   const { currentLocation } = useUserStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isOpen) {
@@ -78,8 +81,10 @@ export function InventoryImageUploadModal({
       setItems([]);
       setSelectedIds(new Set());
       setIsDragging(false);
+      setIsDragging(false);
       setIsDragError(false);
       setErrorMessage(null);
+      setIsSaving(false);
     }
   }, [isOpen]);
 
@@ -226,9 +231,44 @@ export function InventoryImageUploadModal({
     setSelectedIds(newSelected);
   };
 
-  const handleSave = () => {
-    setIsOpen(false);
-    toast.success("Repuestos cargados al inventario correctamente");
+  const handleSave = async () => {
+    if (!currentLocation) {
+      toast.error("No se ha seleccionado una ubicación");
+      return;
+    }
+
+    const selectedItems = items.filter((item) => selectedIds.has(item.id_repuesto));
+
+    if (selectedItems.length === 0) {
+      toast.error("No hay items seleccionados para guardar");
+      return;
+    }
+
+    const data = selectedItems.map((item) => {
+      return {
+        id_repuesto: item.id_repuesto,
+        cantidad: item.cantidad,
+      };
+    });
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.rpc("importar_inventario_masivo", {
+        p_id_localizacion: currentLocation.id_localizacion,
+        p_datos_importacion: data,
+      });
+
+      if (error) throw error;
+
+      toast.success("Repuestos cargados al inventario correctamente");
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      setIsOpen(false);
+    } catch (error: any) {
+      console.error("Error guardando inventario:", error);
+      toast.error(error.message || "Error al guardar el inventario");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -236,8 +276,8 @@ export function InventoryImageUploadModal({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         className={`sm:max-w-md transition-all duration-300 ${step === "results"
-            ? "sm:max-w-2xl max-h-[90vh] flex flex-col"
-            : ""
+          ? "sm:max-w-2xl max-h-[90vh] flex flex-col"
+          : ""
           }`}
       >
         <DialogHeader>
@@ -511,9 +551,22 @@ export function InventoryImageUploadModal({
               </div>
 
               <div className="flex justify-end pt-2">
-                <Button onClick={handleSave} className="w-full sm:w-auto">
-                  <Save className="mr-2 h-4 w-4" />
-                  Guardar ({selectedIds.size})
+                <Button
+                  onClick={handleSave}
+                  className="w-full sm:w-auto"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Guardar ({selectedIds.size})
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
