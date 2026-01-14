@@ -46,6 +46,7 @@ export const useLogin = () => {
                 return;
             }
 
+            localStorage.removeItem('minca_location_id');
             clearUser();
             sonnerToast.success('Sesión cerrada exitosamente');
             navigate('/login');

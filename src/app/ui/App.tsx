@@ -3,7 +3,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { ThemeProvider, useSupabaseAuthListener } from "@/shared/lib";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/shared/ui/sidebar";
 import { Separator } from "@/shared/ui/separator";
-import { useUserStore } from "@/entities/user";
+import { useUserStore, NoRoleModal } from "@/entities/user";
 import { ROUTE_NAMES } from "../constants";
 import { LoginPage, UpdatePasswordPage } from "@/pages/auth";
 import { LocationSelector } from "@/entities/locations";
@@ -57,6 +57,7 @@ function App() {
           element={
             isAuthenticated ? (
               <SidebarProvider>
+                <NoRoleModal />
                 <LocationSelector />
                 <AppSidebar />
                 <SidebarInset>
