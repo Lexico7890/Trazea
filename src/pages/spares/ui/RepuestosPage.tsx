@@ -61,7 +61,7 @@ export function RepuestosPage() {
     const { createMutation, updateMutation, deleteMutation } = useRepuestosMutations();
 
     // Stores
-    const { sessionData, hasRole } = useUserStore();
+    const { sessionData, currentLocation, hasRole } = useUserStore();
     const { addItemToCart } = useRequestsStore();
     const isTecnico = hasRole("tecnico");
 
@@ -165,12 +165,12 @@ export function RepuestosPage() {
 
             // Handle Action
             if (selectedAction === 'solicitar' && editingRepuesto) {
-                if (!sessionData?.user?.id || !sessionData?.id_localizacion) {
+                if (!sessionData?.user?.id || !currentLocation?.id_localizacion) {
                     toast.error("No se pudo identificar al usuario o localización para la solicitud.");
                 } else {
                     await addItemToCart(
                         sessionData.user.id,
-                        sessionData.id_localizacion,
+                        currentLocation.id_localizacion,
                         editingRepuesto.id_repuesto
                     );
                     toast.success(`"${editingRepuesto.nombre}" agregado a solicitudes.`);
