@@ -25,6 +25,7 @@ import { RepuestosFilters } from "./RepuestosFilters";
 import { RepuestosTable } from "./RepuestosTable";
 import { RepuestosForm } from "@/features/spares-create";
 import { Pagination } from "@/widgets/pagination";
+import { useUserStore } from "@/entities/user";
 
 export function RepuestosPage() {
     // State for filters
@@ -54,6 +55,10 @@ export function RepuestosPage() {
     // Queries and Mutations
     const { data, isLoading, isError, refetch, isRefetching } = useRepuestosQuery(filters);
     const { createMutation, updateMutation, deleteMutation } = useRepuestosMutations();
+
+    // Permissions
+    const { hasRole } = useUserStore();
+    const isTecnico = hasRole("tecnico");
 
     // Handlers
     const handleSearchChange = (value: string) => {
@@ -150,10 +155,14 @@ export function RepuestosPage() {
                     >
                         <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
                     </Button>
-                    <BulkUpload onSuccess={() => refetch()} />
-                    <Button onClick={handleCreate} className="w-full sm:w-auto">
-                        <Plus className="h-4 w-4" />
-                    </Button>
+                    {!isTecnico && (
+                        <>
+                            <BulkUpload onSuccess={() => refetch()} />
+                            <Button onClick={handleCreate} className="w-full sm:w-auto">
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -189,6 +198,7 @@ export function RepuestosPage() {
                                 onSort={handleSort}
                                 onEdit={handleEdit}
                                 onDelete={handleDeleteClick}
+                                canDelete={!isTecnico}
                             />
                             <div className="mt-4">
                                 <Pagination
@@ -209,10 +219,18 @@ export function RepuestosPage() {
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="sm:max-w-[540px] overflow-y-auto">
                     <SheetHeader>
-                        <SheetTitle>{editingRepuesto ? "Editar Repuesto" : "Nuevo Repuesto"}</SheetTitle>
+                        <SheetTitle>
+                            {editingRepuesto
+                                ? isTecnico
+                                    ? "Detalles del Repuesto"
+                                    : "Editar Repuesto"
+                                : "Nuevo Repuesto"}
+                        </SheetTitle>
                         <SheetDescription>
                             {editingRepuesto
-                                ? "Modifica los datos del repuesto aquí."
+                                ? isTecnico
+                                    ? "Información detallada del repuesto."
+                                    : "Modifica los datos del repuesto aquí."
                                 : "Ingresa los datos para crear un nuevo repuesto."}
                         </SheetDescription>
                     </SheetHeader>
@@ -222,6 +240,7 @@ export function RepuestosPage() {
                             onSubmit={handleSubmitForm}
                             onCancel={() => setIsSheetOpen(false)}
                             isLoading={createMutation.isPending || updateMutation.isPending}
+                            readOnly={isTecnico}
                         />
                     </div>
                 </SheetContent>

@@ -1,8 +1,6 @@
 import { supabase } from '@/shared/api/supabase';
 import type { InventoryItem, InventoryParams, PaginatedInventoryResponse } from '../model/types';
 
-const id_localizacion = localStorage.getItem('minca_location_id');
-
 /**
  * Fetches paginated inventory data from Supabase view v_inventario_completo
  */
@@ -17,7 +15,21 @@ export async function getInventory(
         search,
         estado_stock,
         descontinuado,
+        is_new,
     } = params;
+
+    // Get location dynamically and validate
+    const id_localizacion = localStorage.getItem('minca_location_id');
+
+    if (!id_localizacion || id_localizacion === 'null') {
+        return {
+            items: [],
+            total_count: 0,
+            page,
+            limit,
+            page_count: 0,
+        };
+    }
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit;
@@ -41,6 +53,12 @@ export async function getInventory(
     // Apply descontinuado filter
     if (descontinuado !== undefined) {
         query = query.eq('descontinuado', descontinuado);
+    }
+
+    // Apply is_new filter
+    if (is_new) {
+        const now = new Date().toISOString();
+        query = query.gt('nuevo_hasta', now);
     }
 
     // Apply ordering
@@ -74,6 +92,12 @@ export async function getInventory(
  * Get all inventory items (for autocomplete or dropdowns)
  */
 export async function getAllInventoryItems(): Promise<InventoryItem[]> {
+    const id_localizacion = localStorage.getItem('minca_location_id');
+
+    if (!id_localizacion || id_localizacion === 'null') {
+        return [];
+    }
+
     const { data, error } = await supabase
         .from('v_inventario_completo')
         .select('*')
@@ -126,6 +150,12 @@ export async function updateItemComplete(
  */
 export async function searchInventoryItems(query: string): Promise<InventoryItem[]> {
     if (!query.trim()) {
+        return [];
+    }
+
+    const id_localizacion = localStorage.getItem('minca_location_id');
+
+    if (!id_localizacion || id_localizacion === 'null') {
         return [];
     }
 

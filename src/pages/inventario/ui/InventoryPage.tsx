@@ -44,6 +44,7 @@ export default function InventoryPage() {
     updateLimit,
     updateSort,
     resetFilters,
+    updateIsNew,
   } = useInventoryFilters();
 
   // Build API params from filters
@@ -68,6 +69,11 @@ export default function InventoryPage() {
     // Add descontinuado filter
     if (filters.descontinuado !== 'all') {
       params.descontinuado = filters.descontinuado === 'discontinued';
+    }
+
+    // Add is_new filter
+    if (filters.isNew) {
+      params.is_new = true;
     }
 
     return params;
@@ -214,6 +220,8 @@ export default function InventoryPage() {
             onSearchChange={updateSearch}
             onEstadoStockChange={updateStockState}
             onDescontinuadoChange={updateDescontinuado}
+            isNew={filters.isNew}
+            onIsNewChange={updateIsNew}
             onReset={resetFilters}
           />
         </CardContent>
