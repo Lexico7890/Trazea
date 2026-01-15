@@ -5,7 +5,7 @@ export function useCountResults(initialResults: CountResult[]) {
     const [results, setResults] = useState<CountResult[]>(() => {
         return initialResults.map((item, index) => ({
             ...item,
-            _id: `item-${index}-${item.referencia}`,
+            _id: `item-${index}-${item.ref_excel}`,
             cantidad_pq: item.cantidad_pq || 0,
         }));
     });
@@ -18,7 +18,7 @@ export function useCountResults(initialResults: CountResult[]) {
         setResults((prevResults) => {
             return prevResults.map((item) => {
                 if (item._id === itemId) {
-                    const newDiferencia = (numValue + item.cantidad_sistema) - item.cantidad_csa;
+                    const newDiferencia = (numValue + item.cantidad_sistema) - item.cant_excel;
                     return {
                         ...item,
                         cantidad_pq: numValue,
