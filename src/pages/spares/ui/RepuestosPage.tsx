@@ -29,8 +29,6 @@ import { useUserStore } from "@/entities/user";
 import { useRequestsStore } from "@/features/spares-request-workshop";
 import { toast } from "sonner";
 
-type ActionType = 'solicitar' | null;
-
 export function RepuestosPage() {
     // State for filters
     const [filters, setFilters] = useState<RepuestosParams>({
@@ -133,16 +131,30 @@ export function RepuestosPage() {
         }
     };
 
-    const handleSubmitForm = async (formData: RepuestoFormData, selectedAction: ActionType) => {
+    const handleSolicitar = async (repuesto: Repuesto) => {
+        if (!sessionData?.user?.id || !currentLocation?.id_localizacion) {
+            toast.error("No se pudo identificar al usuario o localización para la solicitud.");
+            return;
+        }
         try {
-            // Create a mutable copy of formData to safely modify it
+            await addItemToCart(
+                sessionData.user.id,
+                currentLocation.id_localizacion,
+                repuesto.id_repuesto
+            );
+            toast.success(`"${repuesto.nombre}" agregado a solicitudes.`);
+        } catch (error) {
+            console.error("Error al solicitar repuesto:", error);
+            toast.error("Ocurrió un error al procesar la solicitud.");
+        }
+    };
+
+    const handleSubmitForm = async (formData: RepuestoFormData) => {
+        try {
             const dataToSubmit: Partial<RepuestoFormData> = { ...formData };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            delete (dataToSubmit as any)['cantidad_minima'];
 
-            // Do not send 'cantidad_minima' to the repuestos table update
-            delete (dataToSubmit as Partial<RepuestoFormData> & { cantidad_minima?: number })['cantidad_minima'];
-
-            // Determine if there are changes to save by comparing with the original data
-            // We must also exclude 'cantidad_minima' from the comparison object
             const originalDataForComparison = editingRepuesto ? {
                 referencia: editingRepuesto.referencia,
                 nombre: editingRepuesto.nombre,
@@ -156,50 +168,23 @@ export function RepuestosPage() {
                 ? JSON.stringify(dataToSubmit) !== JSON.stringify(originalDataForComparison)
                 : true;
 
-            if (!hasChanges && !selectedAction) {
+            if (!hasChanges) {
                 toast.info("No hay cambios para guardar.");
                 setIsSheetOpen(false);
                 return;
             }
 
-            // Perform Update or Create
-            if (hasChanges) {
-                if (editingRepuesto) {
-                    await updateMutation.mutateAsync({ id: editingRepuesto.id_repuesto, data: dataToSubmit });
-                } else {
-                    // For creation, we might need the original formData with 'cantidad_minima'
-                    // but the user says it's not in the table, so we send the modified one.
-                    await createMutation.mutateAsync(dataToSubmit as RepuestoFormData);
-                }
+            if (editingRepuesto) {
+                await updateMutation.mutateAsync({ id: editingRepuesto.id_repuesto, data: dataToSubmit });
+            } else {
+                await createMutation.mutateAsync(dataToSubmit as RepuestoFormData);
             }
 
-            // Handle Action
-            if (selectedAction === 'solicitar' && editingRepuesto) {
-                if (!sessionData?.user?.id || !currentLocation?.id_localizacion) {
-                    toast.error("No se pudo identificar al usuario o localización para la solicitud.");
-                } else {
-                    await addItemToCart(
-                        sessionData.user.id,
-                        currentLocation.id_localizacion,
-                        editingRepuesto.id_repuesto
-                    );
-                    toast.success(`"${editingRepuesto.nombre}" agregado a solicitudes.`);
-                }
-            }
-
-            // Combine toast messages
-            if (hasChanges && selectedAction) {
-                toast.success("Repuesto actualizado y solicitud enviada.");
-            } else if (!hasChanges && selectedAction) {
-                // This case is handled by the addItemToCart toast already
-            } else if (hasChanges && !selectedAction) {
-                toast.success(editingRepuesto ? "Repuesto actualizado." : "Repuesto creado.");
-            }
-
+            toast.success(editingRepuesto ? "Repuesto actualizado." : "Repuesto creado.");
             setIsSheetOpen(false);
         } catch (error) {
-            // Error is handled by the mutation hooks
-            console.error("Error en handleSubmitForm:", error)
+            // Error is handled by the mutation hooks, but good to log
+            console.error("Error en handleSubmitForm:", error);
         }
     };
 
@@ -259,6 +244,7 @@ export function RepuestosPage() {
                                 onSort={handleSort}
                                 onEdit={handleEdit}
                                 onDelete={handleDeleteClick}
+                                onSolicitar={handleSolicitar}
                                 canDelete={!isTecnico}
                             />
                             <div className="mt-4">

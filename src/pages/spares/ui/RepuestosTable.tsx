@@ -11,10 +11,11 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { Button } from "@/shared/ui/button";
-import { MoreHorizontal, ArrowUpDown, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, ArrowUpDown, Edit, Trash2, ShoppingCart } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -42,8 +43,9 @@ export function RepuestosTable({
     onSort,
     onEdit,
     onDelete,
+    onSolicitar,
     canDelete = true,
-}: RepuestosTableProps & { canDelete?: boolean }) {
+}: RepuestosTableProps & { canDelete?: boolean, onSolicitar: (item: Repuesto) => void }) {
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text);
         toast.success("Referencia copiada al portapapeles");
@@ -128,6 +130,11 @@ export function RepuestosTable({
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                                             <DropdownMenuItem onClick={() => onSolicitar(item)}>
+                                                 <ShoppingCart className="mr-2 h-4 w-4" />
+                                                 Solicitar
+                                             </DropdownMenuItem>
+                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={() => onEdit(item)}>
                                                 <Edit className="mr-2 h-4 w-4" />
                                                 Editar
