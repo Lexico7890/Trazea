@@ -5,7 +5,7 @@ export function useCountResults(initialResults: CountResult[]) {
     const [results, setResults] = useState<CountResult[]>(() => {
         return initialResults.map((item, index) => ({
             ...item,
-            _id: `item-${index}-${item.ref_excel}`,
+            _id: `item-${index}-${item.referencia}`,
             cantidad_pq: item.cantidad_pq || 0,
         }));
     });

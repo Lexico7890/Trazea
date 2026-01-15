@@ -2,7 +2,7 @@ export interface Repuesto {
     id_repuesto: string;
     referencia: string;
     nombre: string;
-    stock_minimo: number;
+    cantidad_minima: number;
     descontinuado: boolean;
     tipo: string;
     fecha_estimada: string | null;
@@ -32,7 +32,7 @@ export interface PaginatedRepuestosResponse {
 export interface RepuestoFormData {
     referencia: string;
     nombre: string;
-    stock_minimo: number;
+    cantidad_minima: number;
     descontinuado: boolean;
     tipo: string;
     fecha_estimada?: string | null;

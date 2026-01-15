@@ -42,7 +42,7 @@ export function RepuestosForm({
         defaultValues: {
             referencia: "",
             nombre: "",
-            stock_minimo: 0,
+            cantidad_minima: 0,
             descontinuado: false,
             tipo: "General",
             fecha_estimada: null,
@@ -55,7 +55,7 @@ export function RepuestosForm({
             form.reset({
                 referencia: initialData.referencia,
                 nombre: initialData.nombre,
-                stock_minimo: initialData.stock_minimo,
+                cantidad_minima: initialData.cantidad_minima,
                 descontinuado: initialData.descontinuado,
                 tipo: initialData.tipo,
                 fecha_estimada: initialData.fecha_estimada,
@@ -157,11 +157,11 @@ export function RepuestosForm({
 
                         <FormField
                             control={form.control}
-                            name="stock_minimo"
+                            name="cantidad_minima"
                             rules={{ required: "La cantidad mínima es obligatoria", min: 0 }}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Stock Mínimo</FormLabel>
+                                    <FormLabel>Cantidad Mínima</FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
