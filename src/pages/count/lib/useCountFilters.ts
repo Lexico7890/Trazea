@@ -13,7 +13,7 @@ export function useCountFilters(results: CountResult[], itemsPerPage: number = 1
 
     const filteredResults = useMemo(() => {
         return results.filter((item) => {
-            if (filters.referencia && !item.referencia.toLowerCase().includes(filters.referencia.toLowerCase())) {
+            if (filters.referencia && !item.ref_excel.toLowerCase().includes(filters.referencia.toLowerCase())) {
                 return false;
             }
 

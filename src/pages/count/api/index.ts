@@ -33,7 +33,7 @@ export async function getCountHistory() {
  * Registers a new inventory count with all its details.
  */
 export async function registrarConteo(params: RegistrarConteoParams) {
-    const { data, error } = await supabase.rpc('registrar_conteo', {
+    const { data, error } = await supabase.rpc('guardar_cierre_conteo', {
         p_id_localizacion: params.id_localizacion,
         p_id_usuario: params.id_usuario,
         p_tipo: params.tipo,

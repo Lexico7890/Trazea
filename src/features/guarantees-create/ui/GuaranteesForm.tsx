@@ -48,6 +48,7 @@ export function GuaranteesForm() {
     if (!applicant) return toast.info("Ingrese el solicitante");
     if (!selectedTechnicianId) return toast.info("Seleccione un técnico");
     if (!warrantyReason) return toast.info("Ingrese la observación de garantía");
+    if (!selectedFile) return toast.info("Debe adjuntar una imagen como evidencia");
 
     try {
       let imageUrl = null;

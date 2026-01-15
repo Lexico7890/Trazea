@@ -61,7 +61,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
 
   const updateItem = (id_repuesto: string, field: keyof CountItem, value: string) => {
     const numericValue = value === '' ? 0 : parseInt(value, 10);
-     if (isNaN(numericValue)) return;
+    if (isNaN(numericValue)) return;
 
     setItems(prevItems =>
       prevItems.map(item => {
@@ -89,7 +89,13 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
     const total_items_pq = items.reduce((sum, item) => sum + (item.pq || 0), 0);
 
     // Prepare items for submission, remove client-side only fields if any
-    const itemsToSend = items.map(({ diferencia, ...item }) => item);
+    // Prepare items for submission, mapping to backend expected format
+    const itemsToSend = items.map(item => ({
+      id_repuesto: item.id_repuesto,
+      cantidad_real: item.real || 0,
+      cantidad_csa: item.cantidad_sistema || 0,
+      cantidad_pq: item.pq || 0
+    }));
 
     mutation.mutate({
       id_localizacion: currentLocation.id_localizacion,
@@ -161,7 +167,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
                         placeholder="0"
                       />
                     </div>
-                     {/* PQ Input */}
+                    {/* PQ Input */}
                     <div className="text-center">
                       <p className="md:hidden text-xs font-semibold text-muted-foreground">PQ</p>
                       <Input
@@ -174,7 +180,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
                     </div>
                     {/* Difference */}
                     <div className="text-center">
-                       <p className="md:hidden text-xs font-semibold text-muted-foreground">Diferencia</p>
+                      <p className="md:hidden text-xs font-semibold text-muted-foreground">Diferencia</p>
                       <p className={`font-bold text-sm ${item.diferencia && item.diferencia < 0 ? 'text-destructive' : ''}`}>
                         {item.diferencia ?? 0}
                       </p>
@@ -189,7 +195,7 @@ export function PartialCountModal({ isOpen, onOpenChange }: PartialCountModalPro
         <DialogFooter>
           <Button onClick={handleSave} disabled={isLoading || isError || mutation.isPending}>
             {mutation.isPending ? 'Guardando...' : 'Guardar'}
-            </Button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
