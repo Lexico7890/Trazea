@@ -16,8 +16,6 @@ import {
 import { Button } from "@/shared/ui/button";
 import { MoreHorizontal, ArrowUpDown, Edit, Trash2, ShoppingCart, Eye } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
 import { toast } from "sonner";
 import type { Repuesto } from "@/entities/repuestos";
 import type { RepuestosTableProps } from "../model/types";
