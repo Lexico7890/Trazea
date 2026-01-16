@@ -35,3 +35,25 @@ export interface CountTableProps {
     onPqChange: (itemId: string, value: string) => void;
     onPageChange: (page: number) => void;
 }
+
+export interface RegistrarConteoParams {
+    id_localizacion: string;
+    id_usuario: string;
+    tipo: string;
+    total_items_auditados: number;
+    total_diferencia_encontrada: number;
+    total_items_pq: number;
+    observaciones?: string;
+    items: any[];
+}
+
+export interface CountDetail {
+    id_conteo: string;
+    fecha_conteo: string;
+    tipo_conteo: string;
+    usuario_responsable: string;
+    total_items_auditados: number;
+    total_diferencia_encontrada: number;
+    total_items_pq: number;
+    observaciones: string | null;
+}

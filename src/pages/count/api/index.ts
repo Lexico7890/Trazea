@@ -1,15 +1,5 @@
 import { supabase } from "@/shared/api";
-
-interface RegistrarConteoParams {
-    id_localizacion: string;
-    id_usuario: string;
-    tipo: string;
-    total_items_auditados: number;
-    total_diferencia_encontrada: number;
-    total_items_pq: number;
-    observaciones?: string;
-    items: any[];
-}
+import type { CountDetail, RegistrarConteoParams } from "../model/types";
 
 /**
  * Fetches the history of inventory counts from the 'conteo' table.
@@ -23,6 +13,28 @@ export async function getCountHistory() {
 
     if (error) {
         console.error('Error fetching count history:', error);
+        throw new Error(error.message);
+    }
+
+    return data;
+}
+
+/**
+ * Fetches the details of a specific count from vista_detalle_conteos
+ */
+export async function getCountDetails(idConteo: string): Promise<CountDetail | null> {
+    console.log('Fetching count details for ID:', idConteo);
+
+    const { data, error } = await supabase
+        .from('vista_detalle_conteos')
+        .select('*')
+        .eq('id_conteo', idConteo)
+        .single();
+
+    console.log('Count details response:', { data, error });
+
+    if (error) {
+        console.error('Error fetching count details:', error);
         throw new Error(error.message);
     }
 
