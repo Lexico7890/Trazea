@@ -24,12 +24,13 @@ export async function bulkUploadRepuestos(file: File): Promise<{ success: number
                         const repuestoData: RepuestoFormData = {
                             referencia: r.referencia || "",
                             nombre: r.nombre || "",
-                            cantidad_minima: Number(r.cantidad_minima) || 0,
                             descontinuado: r.descontinuado === 'TRUE' || r.descontinuado === true,
                             tipo: r.tipo || 'General',
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             fecha_estimada: r.fecha_estimada ? new Date(r.fecha_estimada as any).toISOString() : null,
                             url_imagen: r.url_imagen || null,
+                            marca: r.marca || "MINCA",
+                            descripcion: r.descripcion || "",
                         };
 
                         await createRepuesto(repuestoData);
