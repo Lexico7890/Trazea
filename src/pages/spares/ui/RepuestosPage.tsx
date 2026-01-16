@@ -24,6 +24,7 @@ import { BulkUpload } from "@/features/spares-upload";
 import { RepuestosFilters } from "./RepuestosFilters";
 import { RepuestosTable } from "./RepuestosTable";
 import { RepuestosForm } from "@/features/spares-create";
+import { ImagePreviewModal } from "./ImagePreviewModal";
 import { Pagination } from "@/widgets/pagination";
 import { useUserStore } from "@/entities/user";
 import { useRequestsStore } from "@/features/spares-request-workshop";
@@ -53,6 +54,10 @@ export function RepuestosPage() {
 
     // State for Delete Dialog
     const [deleteId, setDeleteId] = useState<string | null>(null);
+
+    // State for Image Preview Modal
+    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+    const [selectedRepuestoForImage, setSelectedRepuestoForImage] = useState<Repuesto | null>(null);
 
     // Queries and Mutations
     const { data, isLoading, isError, refetch, isRefetching } = useRepuestosQuery(filters);
@@ -122,6 +127,11 @@ export function RepuestosPage() {
 
     const handleDeleteClick = (id: string) => {
         setDeleteId(id);
+    };
+
+    const handleShowImage = (repuesto: Repuesto) => {
+        setSelectedRepuestoForImage(repuesto);
+        setIsImageModalOpen(true);
     };
 
     const handleConfirmDelete = async () => {
@@ -245,6 +255,7 @@ export function RepuestosPage() {
                                 onSort={handleSort}
                                 onEdit={handleEdit}
                                 onDelete={handleDeleteClick}
+                                onShowImage={handleShowImage}
                                 onRequest={handleRequest}
                                 canDelete={!isTecnico}
                             />
@@ -314,6 +325,13 @@ export function RepuestosPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Image Preview Modal */}
+            <ImagePreviewModal
+                isOpen={isImageModalOpen}
+                onClose={() => setIsImageModalOpen(false)}
+                repuesto={selectedRepuestoForImage}
+            />
         </div>
     );
 }
