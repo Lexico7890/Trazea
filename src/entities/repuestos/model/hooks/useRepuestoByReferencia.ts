@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/shared/api/supabase';
-import { Repuesto } from '../types';
+import type { Repuesto } from '../types';
 
 const fetchRepuestoByReferencia = async (referencia: string): Promise<Repuesto | null> => {
   const { data, error } = await supabase

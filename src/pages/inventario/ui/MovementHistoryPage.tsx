@@ -63,7 +63,7 @@ export function MovementHistoryPage() {
                         </div>
                         <div className="flex justify-between">
                             <span className="font-semibold">Stock Actual</span>
-                            <span>{repuesto.stock_actual || 'N/A'} unidades</span>
+                            <span>{movements.length > 0 ? `${movements[0].stock_acumulado} unidades` : 'N/A'}</span>
                         </div>
                     </CardContent>
                 </Card>
