@@ -65,7 +65,7 @@ export function OrderFollowForm() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <FormField
+                        <FormField<FormValues>
                             control={form.control}
                             name="number"
                             render={({ field }) => (
@@ -89,7 +89,7 @@ export function OrderFollowForm() {
                             )}
                         />
 
-                        <FormField
+                        <FormField<FormValues>
                             control={form.control}
                             name="id_scooter_type"
                             render={({ field }) => (
@@ -130,7 +130,7 @@ export function OrderFollowForm() {
                         />
                     </div>
 
-                    <FormField
+                    <FormField<FormValues>
                         control={form.control}
                         name="level"
                         render={({ field }) => (
