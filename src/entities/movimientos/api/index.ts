@@ -18,7 +18,9 @@ export async function getListMovements(filters: MovementFilters) {
     let query = supabase
         .from('v_movimientos_detallados')
         .select('*', { count: 'exact' })
-        .eq('id_localizacion', id_localizacion);
+        .eq('id_localizacion', id_localizacion)
+        .order('fecha', { ascending: false }) // Como segundo criterio
+        .range(0, 9);
 
     // Apply filters
     if (technicianId) {
@@ -44,7 +46,7 @@ export async function getListMovements(filters: MovementFilters) {
     }
 
     if (orderNumber) {
-        query = query.ilike('numero_orden', `%${orderNumber}%`);
+        query = query.ilike('numero_orden_texto', `%${orderNumber}%`);
     }
 
     if (concept && concept !== 'all') {

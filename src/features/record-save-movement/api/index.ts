@@ -23,7 +23,7 @@ export function useCreateTechnicalMovement() {
 
             // 2. Llamamos a la función RPC en lugar de hacer .insert()
             const { data, error } = await supabase
-                .rpc('registrar_movimiento_tecnico', rpcParams);
+                .rpc('registrar_movimiento_tecnico_garantia', rpcParams);
 
             // 3. Manejo de errores de Red/Supabase
             if (error) throw error;

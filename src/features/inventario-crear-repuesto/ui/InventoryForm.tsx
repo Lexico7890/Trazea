@@ -17,6 +17,8 @@ import { createInventoryItem } from "../api";
 import { insertInventorySchema, type InsertInventoryFormValues } from "../model/schemas";
 import { useUserStore } from "@/entities/user";
 import { AutocompleteInput } from "@/entities/inventario";
+import type { AutocompleteInputRef } from "@/entities/inventario/model/types";
+import { useRef } from "react";
 
 interface InventoryFormProps {
   onSuccess?: () => void;
@@ -25,6 +27,8 @@ interface InventoryFormProps {
 export function InventoryForm({ onSuccess }: InventoryFormProps) {
   const queryClient = useQueryClient();
   const { sessionData, currentLocation } = useUserStore();
+  const idLocalizacion = currentLocation?.id_localizacion || sessionData?.locations?.[0]?.id_localizacion;
+  const autocompleteRef = useRef<AutocompleteInputRef>(null);
 
   const form = useForm<InsertInventoryFormValues>({
     resolver: zodResolver(insertInventorySchema),
@@ -40,6 +44,7 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
       toast.success("Repuesto agregado al inventario correctamente");
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       form.reset();
+      autocompleteRef.current?.clear();
       onSuccess?.();
     },
     onError: (error) => {
@@ -49,7 +54,6 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
 
   const onSubmit = (values: InsertInventoryFormValues) => {
     // Try to get location from currentLocation (selected by user) or fallback to first assigned location
-    const idLocalizacion = currentLocation?.id_localizacion || sessionData?.locations?.[0]?.id_localizacion;
 
     if (!idLocalizacion) {
       toast.error("No se encontró una localización válida para el usuario");
@@ -80,7 +84,8 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
                 <AutocompleteInput
                   selected={field.value}
                   setSelected={(val) => field.onChange(val)}
-                  id_localizacion={undefined}
+                  id_localizacion={idLocalizacion}
+                  ref={autocompleteRef}
                 />
               </FormControl>
               <FormMessage />
