@@ -7,19 +7,23 @@ const PAGE_SIZE = 10;
 const fetchMovementHistory = async ({
   pageParam = 0,
   referencia,
+  idLocalizacion,
 }: {
   pageParam?: number;
   referencia: string;
+  idLocalizacion: string;
 }): Promise<MovementHistoryItem[]> => {
   const from = pageParam * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
+  console.log("referencia", referencia);
+  console.log("idLocalizacion", idLocalizacion);
 
   const { data, error } = await supabase
     .from('vista_timeline_repuesto')
     .select('*')
-    .eq('referencia', referencia)
-    .order('fecha_movimiento', { ascending: false })
-    .order('created_at', { ascending: false })
+    .eq('id_repuesto', referencia)
+    .eq('id_localizacion', idLocalizacion)
+    .order('fecha', { ascending: false })
     .range(from, to);
 
   if (error) {
@@ -29,17 +33,16 @@ const fetchMovementHistory = async ({
   return data || [];
 };
 
-export const useMovementHistory = (referencia: string) => {
+export const useMovementHistory = (referencia: string, idLocalizacion: string) => {
   return useInfiniteQuery({
-    queryKey: ['movementHistory', referencia],
-    queryFn: ({ pageParam }) => fetchMovementHistory({ pageParam, referencia }),
+    queryKey: ['movementHistory', referencia, idLocalizacion], // Añade idLocalizacion aquí también
+    queryFn: ({ pageParam }) => fetchMovementHistory({ pageParam, referencia, idLocalizacion }),
     initialPageParam: 0,
+    // --- ESTA ES LA CLAVE ---
+    enabled: !!referencia && !!idLocalizacion,
+    // ------------------------
     getNextPageParam: (lastPage, allPages) => {
-      // If the last page had fewer items than the page size, there are no more pages.
-      if (lastPage.length < PAGE_SIZE) {
-        return undefined;
-      }
-      // Otherwise, return the next page number.
+      if (lastPage.length < PAGE_SIZE) return undefined;
       return allPages.length;
     },
   });
