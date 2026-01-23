@@ -4,7 +4,7 @@ import type { Repuesto } from '../types';
 
 const fetchRepuestoByReferencia = async (referencia: string): Promise<Repuesto | null> => {
   const { data, error } = await supabase
-    .from('repuestos')
+    .from('vista_repuestos_inventario')
     .select('*')
     .eq('referencia', referencia)
     .single();
