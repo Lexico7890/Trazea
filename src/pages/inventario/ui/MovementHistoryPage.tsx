@@ -181,7 +181,7 @@ export function MovementHistoryPage() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Columna Izquierda - Detalles del Repuesto */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 lg:sticky lg:top-8 h-fit">
                 <Card className="overflow-hidden border-none shadow-xl bg-card text-card-foreground">
                     <div className="relative">
                         <div className="bg-[#f0f0eb] p-8 flex justify-center items-center h-[300px]">
