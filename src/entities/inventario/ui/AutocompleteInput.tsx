@@ -11,7 +11,7 @@ export interface AutocompleteInputRef {
 
 export const AutocompleteInput = forwardRef<AutocompleteInputRef, AutocompleteInputProps>(
   (props, ref) => {
-    const { selected, setSelected, id_localizacion } = props;
+    const { selected, setSelected, id_localizacion, searchSource = 'inventory' } = props;
     const [query, setQuery] = useState(selected?.nombre || "");
     const [debouncedQuery, setDebouncedQuery] = useState("");
 
@@ -45,7 +45,7 @@ export const AutocompleteInput = forwardRef<AutocompleteInputRef, AutocompleteIn
     const { data: suggestions = [], isLoading } = useSearchSpares(
       debouncedQuery,
       !selected && debouncedQuery.length > 0, // ✅ Solo busca si hay texto
-      id_localizacion || ""
+      searchSource === 'inventory' ? id_localizacion || "" : ""
     );
 
     // When the user selects a suggestion

@@ -86,6 +86,7 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
                   setSelected={(val) => field.onChange(val)}
                   id_localizacion={idLocalizacion}
                   ref={autocompleteRef}
+                  searchSource="spares"
                 />
               </FormControl>
               <FormMessage />

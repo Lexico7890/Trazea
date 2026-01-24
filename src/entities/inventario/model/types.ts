@@ -42,8 +42,9 @@ export interface PaginatedInventoryResponse {
 export interface AutocompleteInputProps {
     selected?: { id_repuesto: string, referencia: string, nombre: string } | null;
     setSelected: (selection: { id_repuesto: string, referencia: string, nombre: string } | null) => void;
-    id_localizacion: string | undefined;
+    id_localizacion?: string;
     placeholder?: string;
+    searchSource?: 'inventory' | 'spares';
 }
 
 // Exporta este tipo para que los componentes padres lo usen
