@@ -14,15 +14,22 @@ import { getCountHistory } from "../api";
 import { Button } from '@/shared/ui/button';
 import { useState } from 'react';
 import { ConteoDetailModal } from './ConteoDetailModal';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function ConteoHistoryTable() {
   const [selectedCountId, setSelectedCountId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  const { data: history, isLoading, isError, error } = useQuery({
-    queryKey: ['countHistory'],
-    queryFn: getCountHistory,
+  const { data: result, isLoading, isError, error } = useQuery({
+    queryKey: ['countHistory', page, pageSize],
+    queryFn: () => getCountHistory(page, pageSize),
   });
+
+  const history = result?.data || [];
+  const totalCount = result?.count || 0;
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const handleViewDetails = (id: string) => {
     setSelectedCountId(id);
@@ -72,12 +79,11 @@ export function ConteoHistoryTable() {
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
                       onClick={() => handleViewDetails(item.id_conteo || item.id)}
-                      className="gap-2"
+                      title="Ver Detalle"
                     >
                       <Eye className="h-4 w-4" />
-                      Ver Detalle
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -91,6 +97,28 @@ export function ConteoHistoryTable() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="text-sm text-muted-foreground mr-4">
+          Página {page} de {totalPages || 1}
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPage((old) => Math.max(old - 1, 1))}
+          disabled={page === 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPage((old) => (!totalPages || old >= totalPages ? old : old + 1))}
+          disabled={page >= totalPages}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
 
       <ConteoDetailModal

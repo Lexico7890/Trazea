@@ -33,8 +33,8 @@ export function DataTablePagination({
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
-        <div className="flex items-center justify-between px-2">
-            <div className="flex-1 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-2 gap-4 sm:gap-0">
+            <div className="flex-1 text-sm text-muted-foreground w-full sm:w-auto text-center sm:text-left">
                 Total {totalCount} registros.
             </div>
             <div className="flex items-center space-x-6 lg:space-x-8">

@@ -2,21 +2,25 @@ import { supabase } from "@/shared/api";
 import type { CountDetail, RegistrarConteoParams } from "../model/types";
 
 /**
- * Fetches the history of inventory counts from the 'conteo' table.
+ * Fetches the history of inventory counts from the 'conteo' table with pagination.
  */
-export async function getCountHistory() {
-    const { data, error } = await supabase
+export async function getCountHistory(page = 1, pageSize = 10) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, count, error } = await supabase
         .from('vista_historial_conteos')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('localizacion', localStorage.getItem('minca_location_id'))
-        .order('fecha', { ascending: false });
+        .order('fecha', { ascending: false })
+        .range(from, to);
 
     if (error) {
         console.error('Error fetching count history:', error);
         throw new Error(error.message);
     }
 
-    return data;
+    return { data, count };
 }
 
 /**
