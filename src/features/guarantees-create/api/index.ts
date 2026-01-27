@@ -1,12 +1,25 @@
 import { supabase } from "@/shared/api";
 
 export async function createGuarantee(warrantyData: Record<string, unknown>) {
+    // Check if we have an ID to update an existing record
+    debugger
     const { error } = await supabase
         .from('garantias')
-        .insert([warrantyData]);
+        .update({
+            estado: warrantyData.estado,
+            comentarios_resolucion: warrantyData.comentarios_resolucion,
+            kilometraje: warrantyData.kilometraje,
+            motivo_falla: warrantyData.motivo_falla,
+            solicitante: warrantyData.solicitante,
+            url_evidencia_foto: warrantyData.url_evidencia_foto,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id_garantia', warrantyData.id_garantia)
+        .select()
+        .single();
 
     if (error) {
-        console.error('Error creating warranty:', error);
+        console.error('Error updating guarantee status:', error);
         throw new Error(error.message);
     }
 }

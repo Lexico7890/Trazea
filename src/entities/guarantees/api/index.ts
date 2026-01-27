@@ -16,3 +16,22 @@ export async function getGarantiasDashboard() {
 
     return data;
 }
+
+export async function updateGuaranteeStatus(id: string, status: string) {
+    const { data, error } = await supabase
+        .from('garantias')
+        .update({
+            estado: status,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id_garantia', id)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error updating guarantee status:', error);
+        throw new Error(error.message);
+    }
+
+    return data;
+}

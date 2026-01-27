@@ -1,5 +1,7 @@
 
 
+import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useUserStore } from "@/entities/user";
 import { MovementsWorkshopForm } from "@/features/record-save-movement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
@@ -10,13 +12,32 @@ import { GuaranteesDashboard } from "@/entities/guarantees";
 export function RecordsPage() {
   const { checkMenuPermission } = useUserStore();
   const showForm = checkMenuPermission("registros", "show_form_register");
+  const location = useLocation();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedWarranty, setSelectedWarranty] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("registros");
+
+  useEffect(() => {
+    if (location.state?.defaultTab) {
+      setActiveTab(location.state.defaultTab);
+    }
+  }, [location.state]);
+
+  const handleSendWarranty = (data: any) => {
+    console.log("RecordsPage received warranty to send:", data);
+    setSelectedWarranty(data);
+
+    // Optional: scroll to top to see form if needed, or ensuring tab is open
+    // Since form is above dashboard in the layout:
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Registros</h1>
       <p>Esta es la página de registros.</p>
 
-      <Tabs defaultValue="registros" className="mt-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
         <TabsList>
           <TabsTrigger value="registros">Registros</TabsTrigger>
           <TabsTrigger value="garantias">Garantías</TabsTrigger>
@@ -37,8 +58,8 @@ export function RecordsPage() {
 
         <TabsContent value="garantias">
           <div className="mt-4 flex flex-col items-center">
-            <GuaranteesForm />
-            <GuaranteesDashboard />
+            <GuaranteesForm prefillData={selectedWarranty} />
+            <GuaranteesDashboard onSendWarranty={handleSendWarranty} />
           </div>
         </TabsContent>
       </Tabs>

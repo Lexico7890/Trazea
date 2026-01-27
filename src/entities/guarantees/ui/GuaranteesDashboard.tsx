@@ -12,7 +12,7 @@ import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Label } from "@/shared/ui/label";
-import { useGarantiasDashboard } from "../lib/useGuaranteesDashboard";
+import { useGarantiasDashboard, useUpdateGuaranteeStatus } from "../lib/useGuaranteesDashboard";
 import { format } from "date-fns";
 import {
   HoverCard,
@@ -20,12 +20,18 @@ import {
   HoverCardTrigger,
 } from "@/shared/ui/hover-card";
 import { Badge } from "@/shared/ui/badge";
+import { toast } from "sonner";
 
-export function GuaranteesDashboard() {
+interface GuaranteesDashboardProps {
+  onSendWarranty?: (warranty: any) => void;
+}
+
+export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Use the specific hook for the dashboard view
   const { data: warranties = [], isLoading, isError, error } = useGarantiasDashboard();
+  const updateStatusMutation = useUpdateGuaranteeStatus();
 
   // Client-side filtering
   const filteredWarranties = Array.isArray(warranties) ? warranties.filter((w: any) => {
@@ -36,6 +42,23 @@ export function GuaranteesDashboard() {
       w.nombre_repuesto?.toLowerCase().includes(searchLower)
     );
   }) : [];
+
+  const getStatusColor = (status: string) => {
+    const lowerStatus = status?.toLowerCase() || '';
+    if (lowerStatus === 'sin enviar') return 'bg-orange-500 text-white border-transparent shadow-[0_0_12px_-3px_rgba(249,115,22,0.8)] hover:bg-orange-600 hover:shadow-[0_0_15px_-3px_rgba(249,115,22,1)] transition-all';
+    if (lowerStatus === 'pendiente') return 'bg-blue-500 text-white border-transparent shadow-[0_0_12px_-3px_rgba(59,130,246,0.8)] hover:bg-blue-600 hover:shadow-[0_0_15px_-3px_rgba(59,130,246,1)] transition-all';
+    if (lowerStatus === 'aprobada' || lowerStatus === 'aprobado') return 'bg-green-500 text-white border-transparent shadow-[0_0_12px_-3px_rgba(34,197,94,0.8)] hover:bg-green-600 hover:shadow-[0_0_15px_-3px_rgba(34,197,94,1)] transition-all';
+    return 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const handleUpdateStatus = async (id: string, newStatus: string) => {
+    try {
+      await updateStatusMutation.mutateAsync({ id, status: newStatus });
+      toast.success(`Estado actualizado a ${newStatus}`);
+    } catch (error) {
+      toast.error("Error al actualizar el estado");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -140,7 +163,10 @@ export function GuaranteesDashboard() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.estado === 'pendiente' ? 'secondary' : 'default'} className="uppercase text-[10px]">
+                    <Badge
+                      variant="outline"
+                      className={`uppercase text-[10px] ${getStatusColor(item.estado)}`}
+                    >
                       {item.estado}
                     </Badge>
                   </TableCell>
@@ -155,7 +181,12 @@ export function GuaranteesDashboard() {
                       <HoverCardContent className="w-80 p-0 overflow-hidden" align="end">
                         <div className="bg-muted/50 p-3 border-b flex justify-between items-center">
                           <h4 className="font-semibold text-sm">Detalle de Garantía</h4>
-                          <Badge variant="outline" className="text-[10px] bg-background">{item.estado}</Badge>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${getStatusColor(item.estado)}`}
+                          >
+                            {item.estado}
+                          </Badge>
                         </div>
                         <div className="p-4 space-y-4">
                           <div className="grid grid-cols-2 gap-3 text-sm">
@@ -191,17 +222,38 @@ export function GuaranteesDashboard() {
                             </div>
                           )}
 
-                          <div className="pt-2">
-                            <Button
-                              size="sm"
-                              className="w-full text-xs h-8"
-                              variant="secondary"
-                              onClick={() => alert("Funcionalidad pendiente")}
-                            >
-                              Cambiar Estado
-                            </Button>
-                          </div>
+                          {/* Botón Enviar para garantías sin enviar */}
+                          {(item.estado === 'Sin enviar' || item.estado === 'sin enviar') && (
+                            <div className="pt-2 border-t">
+                              <Button
+                                size="sm"
+                                className="w-full text-xs h-8 bg-orange-600 hover:bg-orange-700 text-white"
+                                onClick={() => {
+                                  if (onSendWarranty) {
+                                    onSendWarranty(item);
+                                  }
+                                }}
+                              >
+                                Enviar Garantia
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Botón Gestionado para garantías pendientes */}
+                          {(item.estado === 'Pendiente' || item.estado === 'pendiente') && (
+                            <div className="pt-2 border-t">
+                              <Button
+                                size="sm"
+                                className="w-full text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={() => handleUpdateStatus(item.id_garantia, 'Aprobada')}
+                                disabled={updateStatusMutation.isPending}
+                              >
+                                {updateStatusMutation.isPending ? 'Actualizando...' : 'Gestionado'}
+                              </Button>
+                            </div>
+                          )}
                         </div>
+
                       </HoverCardContent>
                     </HoverCard>
                   </TableCell>
