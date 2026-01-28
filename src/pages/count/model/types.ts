@@ -57,3 +57,18 @@ export interface CountDetail {
     total_items_pq: number;
     observaciones: string | null;
 }
+
+export interface CountDetailItem {
+    id_detalle_conteo: string;
+    id_conteo: string;
+    id_repuesto: string;
+    fecha_detalle: string;
+    referencia: string;
+    nombre_repuesto: string;
+    cantidad_sistema: number;
+    cantidad_csa: number;
+    cantidad_pq: number;
+    diferencia: number;
+    estado_diferencia: 'FALTANTE' | 'SOBRANTE' | 'CUADRADO';
+    diferencia_absoluta: number;
+}

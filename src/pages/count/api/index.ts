@@ -1,5 +1,5 @@
 import { supabase } from "@/shared/api";
-import type { CountDetail, RegistrarConteoParams } from "../model/types";
+import type { CountDetail, CountDetailItem, RegistrarConteoParams } from "../model/types";
 
 /**
  * Fetches the history of inventory counts from the 'conteo' table with pagination.
@@ -43,6 +43,24 @@ export async function getCountDetails(idConteo: string): Promise<CountDetail | n
     }
 
     return data;
+}
+
+/**
+ * Fetches the items/details of a specific count from vista_detalles_conteo
+ */
+export async function getCountDetailItems(idConteo: string): Promise<CountDetailItem[]> {
+    const { data, error } = await supabase
+        .from('vista_detalles_conteo')
+        .select('*')
+        .eq('id_conteo', idConteo)
+        .order('fecha_detalle', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching count detail items:', error);
+        throw new Error(error.message);
+    }
+
+    return data || [];
 }
 
 /**

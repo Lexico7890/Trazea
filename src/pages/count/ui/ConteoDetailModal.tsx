@@ -5,7 +5,7 @@ import {
     DialogTitle,
 } from "@/shared/ui/dialog";
 import { useQuery } from '@tanstack/react-query';
-import { getCountDetails } from '../api';
+import { getCountDetails, getCountDetailItems } from '../api';
 import { Skeleton } from '@/shared/ui/skeleton';
 import {
     AlertTriangle,
@@ -21,6 +21,14 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from '@/shared/ui/badge';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/shared/ui/table";
 
 interface ConteoDetailModalProps {
     isOpen: boolean;
@@ -35,11 +43,39 @@ export function ConteoDetailModal({ isOpen, onClose, idConteo }: ConteoDetailMod
         enabled: !!idConteo && isOpen,
     });
 
+    const { data: detailItems, isLoading: isLoadingItems } = useQuery({
+        queryKey: ['countDetailItems', idConteo],
+        queryFn: () => getCountDetailItems(idConteo!),
+        enabled: !!idConteo && isOpen,
+    });
+
     const hasDifferences = details && details.total_diferencia_encontrada > 0;
+
+    const getRowClassName = (estado: string) => {
+        switch (estado) {
+            case 'FALTANTE':
+                return 'bg-red-500/10 hover:bg-red-500/20';
+            case 'SOBRANTE':
+                return 'bg-blue-500/10 hover:bg-blue-500/20';
+            default:
+                return '';
+        }
+    };
+
+    const getEstadoBadge = (estado: string) => {
+        switch (estado) {
+            case 'FALTANTE':
+                return <Badge variant="destructive" className="bg-red-500/80 text-xs">{estado}</Badge>;
+            case 'SOBRANTE':
+                return <Badge className="bg-blue-500/80 text-white text-xs">{estado}</Badge>;
+            default:
+                return <Badge variant="secondary" className="text-xs">{estado}</Badge>;
+        }
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden">
+            <DialogContent className="sm:max-w-[800px] max-h-[85vh] p-0 overflow-hidden flex flex-col">
                 {isLoading ? (
                     <div className="p-6 space-y-4">
                         <Skeleton className="h-8 w-3/4" />
@@ -112,8 +148,8 @@ export function ConteoDetailModal({ isOpen, onClose, idConteo }: ConteoDetailMod
                             </div>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 space-y-4">
+                        {/* Content - Scrollable area */}
+                        <div className="p-6 space-y-4 overflow-y-auto flex-1">
                             {/* Basic Info Grid */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
@@ -207,6 +243,75 @@ export function ConteoDetailModal({ isOpen, onClose, idConteo }: ConteoDetailMod
                                     </p>
                                 </div>
                             )}
+
+                            {/* Items Table */}
+                            <div className="mt-4">
+                                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                                    <Package className="h-4 w-4" />
+                                    Repuestos Contados
+                                </h4>
+                                {isLoadingItems ? (
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-10 w-full" />
+                                        <Skeleton className="h-10 w-full" />
+                                        <Skeleton className="h-10 w-full" />
+                                    </div>
+                                ) : detailItems && detailItems.length > 0 ? (
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-muted/50">
+                                                    <TableHead className="w-12 text-center">#</TableHead>
+                                                    <TableHead>Referencia</TableHead>
+                                                    <TableHead>Nombre</TableHead>
+                                                    <TableHead className="text-center">Sistema</TableHead>
+                                                    <TableHead className="text-center">CSA</TableHead>
+                                                    <TableHead className="text-center">PQ</TableHead>
+                                                    <TableHead className="text-center">Diferencia</TableHead>
+                                                    <TableHead className="text-center">Estado</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {detailItems.map((item, index) => (
+                                                    <TableRow
+                                                        key={item.id_detalle_conteo}
+                                                        className={getRowClassName(item.estado_diferencia)}
+                                                    >
+                                                        <TableCell className="text-center font-medium text-muted-foreground">
+                                                            {index + 1}
+                                                        </TableCell>
+                                                        <TableCell className="font-mono text-sm">
+                                                            {item.referencia}
+                                                        </TableCell>
+                                                        <TableCell className="max-w-[200px] truncate" title={item.nombre_repuesto}>
+                                                            {item.nombre_repuesto}
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            {item.cantidad_sistema}
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            {item.cantidad_csa}
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            {item.cantidad_pq}
+                                                        </TableCell>
+                                                        <TableCell className="text-center font-semibold">
+                                                            {item.diferencia > 0 ? '+' : ''}{item.diferencia}
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            {getEstadoBadge(item.estado_diferencia)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 text-muted-foreground text-sm border rounded-lg">
+                                        No hay repuestos registrados en este conteo
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </>
                 ) : null}
