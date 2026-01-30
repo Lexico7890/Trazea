@@ -6,8 +6,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/table";
-import { Loader2, Search, Info, User, Wrench, MapPin, Activity, Image } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Search, Info, User, Wrench, MapPin, Activity, Image, ChevronLeft, ChevronRight, Filter, X, Calendar } from "lucide-react";
+import { useState, useMemo } from "react";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent } from "@/shared/ui/card";
@@ -21,27 +21,128 @@ import {
 } from "@/shared/ui/hover-card";
 import { Badge } from "@/shared/ui/badge";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 interface GuaranteesDashboardProps {
   onSendWarranty?: (warranty: any) => void;
 }
 
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
+const STATUS_OPTIONS = [
+  { value: "all", label: "Todos los estados" },
+  { value: "sin enviar", label: "Sin enviar" },
+  { value: "pendiente", label: "Pendiente" },
+  { value: "aprobada", label: "Aprobada" },
+];
+
 export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps) {
+  // Search and filters state
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Use the specific hook for the dashboard view
   const { data: warranties = [], isLoading, isError, error } = useGarantiasDashboard();
   const updateStatusMutation = useUpdateGuaranteeStatus();
 
-  // Client-side filtering
-  const filteredWarranties = Array.isArray(warranties) ? warranties.filter((w: any) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      w.orden?.toLowerCase().includes(searchLower) ||
-      w.referencia_repuesto?.toLowerCase().includes(searchLower) ||
-      w.nombre_repuesto?.toLowerCase().includes(searchLower)
-    );
-  }) : [];
+  // Combined filtering logic
+  const filteredWarranties = useMemo(() => {
+    if (!Array.isArray(warranties)) return [];
+
+    return warranties.filter((w: any) => {
+      // Search filter
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = !searchTerm || (
+        w.orden?.toLowerCase().includes(searchLower) ||
+        w.referencia_repuesto?.toLowerCase().includes(searchLower) ||
+        w.nombre_repuesto?.toLowerCase().includes(searchLower) ||
+        w.tecnico_responsable?.toLowerCase().includes(searchLower) ||
+        w.solicitante?.toLowerCase().includes(searchLower)
+      );
+
+      // Status filter
+      const matchesStatus = statusFilter === "all" ||
+        w.estado?.toLowerCase() === statusFilter.toLowerCase();
+
+      // Date filters
+      let matchesDateFrom = true;
+      let matchesDateTo = true;
+
+      if (dateFrom && w.fecha_reporte) {
+        const itemDate = new Date(w.fecha_reporte);
+        const fromDate = new Date(dateFrom);
+        matchesDateFrom = itemDate >= fromDate;
+      }
+
+      if (dateTo && w.fecha_reporte) {
+        const itemDate = new Date(w.fecha_reporte);
+        const toDate = new Date(dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        matchesDateTo = itemDate <= toDate;
+      }
+
+      return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo;
+    });
+  }, [warranties, searchTerm, statusFilter, dateFrom, dateTo]);
+
+  // Pagination logic
+  const totalItems = filteredWarranties.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedWarranties = filteredWarranties.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  const handleFilterChange = () => {
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    handleFilterChange();
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatusFilter(value);
+    handleFilterChange();
+  };
+
+  const handleDateFromChange = (value: string) => {
+    setDateFrom(value);
+    handleFilterChange();
+  };
+
+  const handleDateToChange = (value: string) => {
+    setDateTo(value);
+    handleFilterChange();
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1);
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setDateFrom("");
+    setDateTo("");
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = searchTerm || statusFilter !== "all" || dateFrom || dateTo;
 
   const getStatusColor = (status: string) => {
     const lowerStatus = status?.toLowerCase() || '';
@@ -55,7 +156,7 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
     try {
       await updateStatusMutation.mutateAsync({ id, status: newStatus });
       toast.success(`Estado actualizado a ${newStatus}`);
-    } catch (error) {
+    } catch {
       toast.error("Error al actualizar el estado");
     }
   };
@@ -93,33 +194,107 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
         </div>
       </div>
 
+      {/* Filters Card */}
       <Card className="border-none shadow-sm bg-muted/40 backdrop-blur-sm">
         <CardContent className="p-4">
-          <div className="flex items-end gap-4">
-            <div className="space-y-2 flex-1 max-w-sm">
-              <Label className="text-xs font-bold uppercase text-muted-foreground">Buscar</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por orden o repuesto..."
-                  className="pl-9 bg-background shadow-sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+          <div className="space-y-4">
+            {/* Search and filter toggle row */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+              <div className="space-y-2 flex-1 w-full sm:max-w-sm">
+                <Label className="text-xs font-bold uppercase text-muted-foreground">Buscar</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por orden, repuesto, técnico..."
+                    className="pl-9 bg-background shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant={showFilters ? "default" : "outline"}
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filtros
+                  {hasActiveFilters && (
+                    <span className="ml-1 h-5 w-5 rounded-full bg-primary-foreground text-primary text-xs flex items-center justify-center">
+                      !
+                    </span>
+                  )}
+                </Button>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    onClick={clearAllFilters}
+                    className="hover:bg-destructive/10 hover:text-destructive transition-colors gap-2"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpiar
+                  </Button>
+                )}
               </div>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => setSearchTerm("")}
-              className="hover:bg-destructive/10 hover:text-destructive transition-colors"
-            >
-              Limpiar
-            </Button>
+            {/* Advanced filters */}
+            {showFilters && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
+                {/* Status filter */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase text-muted-foreground">Estado</Label>
+                  <Select value={statusFilter} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date from filter */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    Fecha desde
+                  </Label>
+                  <Input
+                    type="date"
+                    className="bg-background"
+                    value={dateFrom}
+                    onChange={(e) => handleDateFromChange(e.target.value)}
+                  />
+                </div>
+
+                {/* Date to filter */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    Fecha hasta
+                  </Label>
+                  <Input
+                    type="date"
+                    className="bg-background"
+                    value={dateTo}
+                    onChange={(e) => handleDateToChange(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
+      {/* Table */}
       <div className="rounded-xl border bg-card shadow-lg overflow-hidden transition-all duration-300">
         <div className="overflow-x-auto">
           <Table>
@@ -134,8 +309,7 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {filteredWarranties.map((item: any) => (
+              {paginatedWarranties.map((item: any) => (
                 <TableRow
                   key={item.id_garantia}
                   className="group hover:bg-muted/30 transition-colors"
@@ -259,16 +433,117 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
                   </TableCell>
                 </TableRow>
               ))}
-              {filteredWarranties.length === 0 && (
+              {paginatedWarranties.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-12">
-                    <p className="text-muted-foreground">No hay garantías registradas.</p>
+                    <p className="text-muted-foreground">
+                      {hasActiveFilters
+                        ? "No se encontraron garantías con los filtros aplicados."
+                        : "No hay garantías registradas."}
+                    </p>
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination */}
+        {totalItems > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-muted/30">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Mostrar</span>
+              <Select value={String(itemsPerPage)} onValueChange={handleItemsPerPageChange}>
+                <SelectTrigger className="w-[70px] h-8 bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={String(option)}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span>por página</span>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                {startIndex + 1}-{Math.min(endIndex, totalItems)} de {totalItems}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 -ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex items-center gap-1 mx-2">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 -ml-2" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
