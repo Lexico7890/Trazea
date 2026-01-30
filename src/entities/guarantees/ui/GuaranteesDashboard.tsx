@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui/table";
-import { Loader2, Search, Info, User, Wrench, MapPin, Activity, Image, ChevronLeft, ChevronRight, Filter, X, Calendar } from "lucide-react";
+import { Loader2, Search, Info, User, Wrench, MapPin, Activity, Image, ChevronLeft, ChevronRight, X, Calendar } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
@@ -47,7 +47,6 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -197,100 +196,81 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
       {/* Filters Card */}
       <Card className="border-none shadow-sm bg-muted/40 backdrop-blur-sm">
         <CardContent className="p-4">
-          <div className="space-y-4">
-            {/* Search and filter toggle row */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-              <div className="space-y-2 flex-1 w-full sm:max-w-sm">
-                <Label className="text-xs font-bold uppercase text-muted-foreground">Buscar</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar por orden, repuesto, técnico..."
-                    className="pl-9 bg-background shadow-sm"
-                    value={searchTerm}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant={showFilters ? "default" : "outline"}
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="gap-2"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filtros
-                  {hasActiveFilters && (
-                    <span className="ml-1 h-5 w-5 rounded-full bg-primary-foreground text-primary text-xs flex items-center justify-center">
-                      !
-                    </span>
-                  )}
-                </Button>
-
-                {hasActiveFilters && (
-                  <Button
-                    variant="outline"
-                    onClick={clearAllFilters}
-                    className="hover:bg-destructive/10 hover:text-destructive transition-colors gap-2"
-                  >
-                    <X className="h-4 w-4" />
-                    Limpiar
-                  </Button>
-                )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="space-y-2 lg:col-span-1">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">Buscar</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Orden, repuesto, técnico..."
+                  className="pl-9 bg-background shadow-sm"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                />
               </div>
             </div>
 
-            {/* Advanced filters */}
-            {showFilters && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
-                {/* Status filter */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase text-muted-foreground">Estado</Label>
-                  <Select value={statusFilter} onValueChange={handleStatusChange}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Seleccionar estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUS_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            {/* Status filter */}
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-muted-foreground">Estado</Label>
+              <Select value={statusFilter} onValueChange={handleStatusChange}>
+                <SelectTrigger className="bg-background">
+                  <SelectValue placeholder="Seleccionar estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-                {/* Date from filter */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    Fecha desde
-                  </Label>
-                  <Input
-                    type="date"
-                    className="bg-background"
-                    value={dateFrom}
-                    onChange={(e) => handleDateFromChange(e.target.value)}
-                  />
-                </div>
+            {/* Date from filter */}
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Fecha desde
+              </Label>
+              <Input
+                type="date"
+                className="bg-background"
+                value={dateFrom}
+                onChange={(e) => handleDateFromChange(e.target.value)}
+              />
+            </div>
 
-                {/* Date to filter */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    Fecha hasta
-                  </Label>
-                  <Input
-                    type="date"
-                    className="bg-background"
-                    value={dateTo}
-                    onChange={(e) => handleDateToChange(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
+            {/* Date to filter */}
+            <div className="space-y-2">
+              <Label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                Fecha hasta
+              </Label>
+              <Input
+                type="date"
+                className="bg-background"
+                value={dateTo}
+                onChange={(e) => handleDateToChange(e.target.value)}
+              />
+            </div>
           </div>
+
+          {/* Clear filters button */}
+          {hasActiveFilters && (
+            <div className="mt-4 flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllFilters}
+                className="hover:bg-destructive/10 hover:text-destructive transition-colors gap-2"
+              >
+                <X className="h-4 w-4" />
+                Limpiar filtros
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
