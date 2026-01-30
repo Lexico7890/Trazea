@@ -1,4 +1,4 @@
-import { useState, type FormEvent, useEffect, useRef } from "react";
+import { useState, type FormEvent, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
