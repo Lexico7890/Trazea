@@ -132,14 +132,14 @@ export function ConteoDetailModal({ isOpen, onClose, idConteo }: ConteoDetailMod
                                 {/* Status message */}
                                 <div className="mt-3">
                                     {hasDifferences ? (
-                                        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 border-l-4 border-amber-500">
-                                            <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
-                                                ⚠️ Se encontraron <span className="font-bold text-lg">{details.total_diferencia_encontrada}</span> diferencia(s) en este conteo
+                                        <div className="bg-amber-950/90 backdrop-blur-sm rounded-lg p-3 border-l-4 border-amber-500">
+                                            <p className="text-sm font-medium text-amber-200">
+                                                ⚠️ Se encontraron <span className="font-bold text-lg text-amber-100">{details.total_diferencia_encontrada}</span> diferencia(s) en este conteo
                                             </p>
                                         </div>
                                     ) : (
-                                        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 border-l-4 border-emerald-500">
-                                            <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                                        <div className="bg-emerald-950/90 backdrop-blur-sm rounded-lg p-3 border-l-4 border-emerald-500">
+                                            <p className="text-sm font-medium text-emerald-200">
                                                 ✓ Todos los items coinciden con el sistema
                                             </p>
                                         </div>
