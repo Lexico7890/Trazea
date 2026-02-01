@@ -15,6 +15,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMenuBadge,
 } from "@/shared/ui/sidebar"
 import { Link } from "react-router-dom"
 
@@ -26,13 +27,13 @@ export function NavMain({
     url: string
     icon: LucideIcon
     isActive?: boolean
+    badge?: string
     items?: {
       title: string
       url: string
     }[]
   }[]
 }) {
-  console.log(items)
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -44,6 +45,11 @@ export function NavMain({
                 <Link to={item.url} className="flex items-center gap-2">
                   <item.icon />
                   <span>{item.title}</span>
+                  {item.badge && (
+                    <SidebarMenuBadge className="bg-red-500/10 text-red-500 border-red-500/20">
+                      {item.badge}
+                    </SidebarMenuBadge>
+                  )}
                 </Link>
               </SidebarMenuButton>
               {item.items?.length ? (

@@ -31,6 +31,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 'permissionKey' debe coincidir con las claves en sessionData.user.role.permissions.menu
   const allNavItems = [
     {
+      title: "Dynamo",
+      url: "/dynamo",
+      icon: Bot,
+      badge: "Beta",
+      items: [],
+    },
+    {
       title: "Mi inventario",
       url: "/",
       icon: Warehouse,
@@ -73,12 +80,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: "/solicitudes/enviadas",
         },
       ],
-    },
-    {
-      title: "Dynamo",
-      url: "/dynamo",
-      icon: Bot,
-      items: [],
     },
     // Items sin 'permissionKey' se mostrarán siempre (o se pueden proteger con otra lógica)
     // Por ahora los ocultamos o dejamos como estáticos si no están en el objeto de permisos
