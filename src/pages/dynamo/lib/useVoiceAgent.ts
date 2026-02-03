@@ -122,6 +122,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   const isUnmountedRef = useRef(false);
   const isListeningRef = useRef(false);
   const hasReceivedResultRef = useRef(false);
+  const currentTranscriptRef = useRef<string>(""); // Guardar transcript actual para usar en stop
 
   // Estados derivados
   const isListening = status === "listening";
@@ -365,6 +366,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     setError(null);
     setTranscript(null);
     hasReceivedResultRef.current = false;
+    currentTranscriptRef.current = ""; // Reset transcript ref
 
     const SpeechRecognitionClass = getSpeechRecognition();
     if (!SpeechRecognitionClass) {
@@ -431,6 +433,9 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
         const displayTranscript = finalTranscript || interimTranscript;
         log("Display transcript:", displayTranscript);
         setTranscript(displayTranscript);
+
+        // Guardar en ref para usar cuando se detenga
+        currentTranscriptRef.current = displayTranscript;
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -491,6 +496,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
         log("Recognition ended", {
           wasListening: isListeningRef.current,
           finalTranscript,
+          currentTranscript: currentTranscriptRef.current,
           hasReceivedResult: hasReceivedResultRef.current
         });
 
@@ -502,10 +508,12 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
           return;
         }
 
-        // Si tenemos transcript, procesarlo
-        if (finalTranscript.trim()) {
-          log("Processing final transcript:", finalTranscript);
-          processTranscript(finalTranscript);
+        // Usar finalTranscript si existe, o el transcript actual del ref
+        const transcriptToProcess = finalTranscript.trim() || currentTranscriptRef.current.trim();
+
+        if (transcriptToProcess) {
+          log("Processing transcript:", transcriptToProcess);
+          processTranscript(transcriptToProcess);
         } else if (wasListening && !hasReceivedResultRef.current) {
           // Solo mostrar error si estábamos escuchando y no recibimos ningún resultado
           log("No transcript received, showing error");
@@ -518,9 +526,12 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
           );
           setStatus("idle");
         } else {
-          log("Recognition ended without final transcript but had interim results");
+          log("Recognition ended without any transcript");
           setStatus("idle");
         }
+
+        // Limpiar la referencia del recognition
+        recognitionRef.current = null;
       };
 
       recognitionRef.current = recognition;
@@ -570,6 +581,13 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   const resetSession = useCallback(() => {
     log("resetSession called");
     sessionIdRef.current = null;
+    currentTranscriptRef.current = "";
+    hasReceivedResultRef.current = false;
+    isListeningRef.current = false;
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+      recognitionRef.current = null;
+    }
     setTranscript(null);
     setLastResponse(null);
     setError(null);

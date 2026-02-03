@@ -59,7 +59,7 @@ export function DynamoPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-8 p-4">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-6 p-4">
       {/* Título */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-3">
@@ -77,8 +77,8 @@ export function DynamoPage() {
         </p>
       </div>
 
-      {/* Círculo estilo Sesame */}
-      <div className="relative flex items-center justify-center">
+      {/* Contenedor del círculo con altura fija para evitar saltos */}
+      <div className="relative flex items-center justify-center h-64 md:h-72">
         {/* Ondas de animación cuando está activo */}
         {isActive && (
           <>
@@ -129,7 +129,7 @@ export function DynamoPage() {
         {/* Efecto de resplandor */}
         <div
           className={cn(
-            "absolute inset-0 w-40 h-40 md:w-52 md:h-52 rounded-full",
+            "absolute inset-0 w-40 h-40 md:w-52 md:h-52 rounded-full m-auto",
             "bg-gradient-to-r from-red-500/0 via-red-600/20 to-red-700/0",
             "blur-xl transition-opacity duration-300",
             isActive ? "opacity-100" : "opacity-0"
@@ -137,37 +137,30 @@ export function DynamoPage() {
         />
       </div>
 
-      {/* Transcript en tiempo real */}
-      {(isListening || isProcessing) && transcript && (
-        <div className="max-w-md text-center px-4 py-2 rounded-lg bg-muted/50 border border-border">
-          <p className="text-sm text-foreground italic">"{transcript}"</p>
-        </div>
-      )}
-
-      {/* Última respuesta */}
-      {lastResponse && isIdle && !error && (
-        <div className="max-w-md text-center px-4 py-3 rounded-lg bg-red-500/5 border border-red-500/20">
-          <p className="text-sm text-muted-foreground">{lastResponse}</p>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="flex items-center gap-2 max-w-md text-center px-4 py-3 rounded-lg bg-destructive/10 border border-destructive/20">
-          <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
-          <p className="text-sm text-destructive">{error.message}</p>
-          {error.recoverable && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearError}
-              className="ml-2 text-destructive hover:text-destructive"
-            >
-              Cerrar
-            </Button>
-          )}
-        </div>
-      )}
+      {/* Contenedor de mensajes con altura fija para evitar que el botón se mueva */}
+      <div className="h-20 flex items-center justify-center w-full max-w-md px-4">
+        {/* Transcript en tiempo real */}
+        {(isListening || isProcessing) && transcript ? (
+          <div className="text-center px-4 py-2 rounded-lg bg-muted/50 border border-border w-full">
+            <p className="text-sm text-foreground italic line-clamp-2">"{transcript}"</p>
+          </div>
+        ) : /* Error */ error ? (
+          <div className="flex items-center gap-2 text-center px-4 py-3 rounded-lg bg-destructive/10 border border-destructive/20 w-full">
+            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+            <p className="text-sm text-destructive flex-1">{error.message}</p>
+            {error.recoverable && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearError}
+                className="text-destructive hover:text-destructive flex-shrink-0"
+              >
+                Cerrar
+              </Button>
+            )}
+          </div>
+        ) : null}
+      </div>
 
       {/* Botón de push-to-talk */}
       <button
@@ -232,18 +225,27 @@ export function DynamoPage() {
         <span className="max-w-xs truncate">{getStatusText()}</span>
       </div>
 
-      {/* Botón para resetear sesión */}
-      {(lastResponse || error) && isIdle && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={resetSession}
-          className="text-muted-foreground gap-2"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Nueva conversación
-        </Button>
-      )}
+      {/* Última respuesta - Ahora en la parte inferior con altura fija */}
+      <div className="w-full max-w-md min-h-[80px] flex flex-col items-center justify-start">
+        {lastResponse && isIdle && !error && (
+          <div className="text-center px-4 py-3 rounded-lg bg-red-500/5 border border-red-500/20 w-full">
+            <p className="text-sm text-muted-foreground line-clamp-3">{lastResponse}</p>
+          </div>
+        )}
+
+        {/* Botón para resetear sesión */}
+        {(lastResponse || error) && isIdle && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetSession}
+            className="text-muted-foreground gap-2 mt-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Nueva conversación
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
