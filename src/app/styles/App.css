@@ -12,12 +12,7 @@
   }
 
   /*
-    Crea el haz de luz usando un gradiente cónico.
-    - Comienza transparente.
-    - Pasa a un color (ej. azul) en un punto específico.
-    - Vuelve a transparente.
-    Puedes cambiar #3b82f6 (blue-500 de tailwind) por el color que prefieras.
-    Ajusta los porcentajes (ej. 10% a 30%) para hacer el haz de luz más ancho o más delgado.
+    Gradiente original simple
   */
   .moving-light-gradient {
     background: conic-gradient(
@@ -28,8 +23,33 @@
     );
   }
 
+  /*
+    Gradiente con estela tipo Firebase
+    - Estela larga que se desvanece gradualmente
+    - Punto de luz brillante al frente
+    - Degradado de rojo neón suave
+  */
+  .moving-light-gradient-trail {
+    background: conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0%,
+      rgba(255, 80, 80, 0.03) 5%,
+      rgba(255, 80, 80, 0.08) 10%,
+      rgba(255, 80, 80, 0.15) 15%,
+      rgba(255, 80, 80, 0.25) 20%,
+      rgba(255, 100, 100, 0.4) 25%,
+      rgba(255, 120, 100, 0.6) 28%,
+      #ff6b6b 30%,
+      #ff5252 32%,
+      rgba(255, 100, 100, 0.5) 35%,
+      rgba(255, 80, 80, 0.2) 40%,
+      rgba(255, 80, 80, 0.05) 50%,
+      transparent 60%
+    );
+  }
+
   /* Aplica la animación al elemento */
   .animate-border-spin {
-    animation: border-spin 8s linear infinite;
+    animation: border-spin 6s linear infinite;
   }
 }

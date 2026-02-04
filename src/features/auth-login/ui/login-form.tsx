@@ -39,35 +39,38 @@ export function LoginForm({
   };
 
   return (
-    // 1. Contenedor principal: relativo, con bordes redondeados y overflow hidden para contener la luz
     <div
       className={cn(
-        "relative flex flex-col gap-4 rounded-xl overflow-hidden p-[1px]", // p-[1px] define el grosor del borde brillante
+        "relative flex flex-col gap-4 rounded-2xl overflow-hidden p-[2px] w-full max-w-md",
         className
       )}
       {...props}
     >
-      {/* 2. Capa de la luz giratoria: Se posiciona absolutamente detrás del contenido */}
-      <div className="absolute inset-[-100%] animate-border-spin moving-light-gradient" />
+      {/* Capa de la luz giratoria con estela */}
+      <div className="absolute inset-[-100%] animate-border-spin moving-light-gradient-trail" />
 
-      {/* 3. Contenido principal: Debe tener un fondo sólido (bg-background) y estar encima (z-10/relative) */}
-      <div className="relative bg-card z-10 flex flex-col gap-6 bg-background p-6 rounded-xl">
-        <Card className="border-none shadow-none p-0"> {/* Removemos bordes y padding extra de la Card interna */}
-          <CardHeader className="text-center">
-            <img src="/minca_logo.svg" alt="Minca Logo" className="size-20 mx-auto mb-2" />
-            <CardTitle className="text-xl">Minca Inventory System</CardTitle>
-            <CardDescription>
+      {/* Contenido principal con fondo oscuro */}
+      <div className="relative z-10 flex flex-col gap-6 bg-gray-800/95 backdrop-blur-sm p-8 rounded-2xl">
+        <Card className="border-none shadow-none p-0 bg-transparent">
+          <CardHeader className="text-center pb-2">
+            <img src="/minca_logo.svg" alt="Minca Logo" className="size-16 mx-auto mb-4 rounded-xl" />
+            <CardTitle className="text-2xl font-bold tracking-wider text-white uppercase">
+              Minca Inventory
+            </CardTitle>
+            <CardDescription className="text-gray-400 mt-2">
               {isResettingPassword
                 ? "Ingresa tu correo para recuperar tu contraseña"
-                : "Logueate con tu correo y contraseña"}
+                : "Log in to manage your fleet"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {isResettingPassword ? (
               <form onSubmit={handleResetSubmit}>
                 <FieldGroup>
                   <Field>
-                    <FieldLabel htmlFor="reset-email">Email</FieldLabel>
+                    <FieldLabel htmlFor="reset-email" className="text-gray-300 text-sm">
+                      Email Address
+                    </FieldLabel>
                     <Input
                       id="reset-email"
                       type="email"
@@ -76,10 +79,15 @@ export function LoginForm({
                       autoComplete="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-red-500/20"
                     />
                   </Field>
                   <Field>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold py-3 rounded-lg shadow-lg shadow-red-500/25 transition-all duration-300"
+                      disabled={isLoading}
+                    >
                       {isLoading ? "Enviando..." : "Enviar enlace de recuperación"}
                     </Button>
                   </Field>
@@ -87,7 +95,7 @@ export function LoginForm({
                     <Button
                       type="button"
                       variant="ghost"
-                      className="w-full"
+                      className="w-full text-gray-400 hover:text-white hover:bg-gray-700/50"
                       onClick={() => setIsResettingPassword(false)}
                       disabled={isLoading}
                     >
@@ -100,7 +108,9 @@ export function LoginForm({
               <form onSubmit={handleSubmit}>
                 <FieldGroup>
                   <Field>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <FieldLabel htmlFor="email" className="text-gray-300 text-sm">
+                      Email Address
+                    </FieldLabel>
                     <Input
                       id="email"
                       type="email"
@@ -109,17 +119,20 @@ export function LoginForm({
                       autoComplete="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      className="bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-red-500/20"
                     />
                   </Field>
                   <Field>
                     <div className="flex items-center">
-                      <FieldLabel htmlFor="password">Password</FieldLabel>
+                      <FieldLabel htmlFor="password" className="text-gray-300 text-sm">
+                        Password
+                      </FieldLabel>
                       <button
                         type="button"
-                        className="ml-auto text-sm underline-offset-4 hover:underline"
+                        className="ml-auto text-sm text-red-400 hover:text-red-300 transition-colors"
                         onClick={() => setIsResettingPassword(true)}
                       >
-                        Forgot your password?
+                        Forgot password?
                       </button>
                     </div>
                     <div className="relative">
@@ -131,12 +144,12 @@ export function LoginForm({
                         autoComplete="current-password"
                         placeholder="********"
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pr-10"
+                        className="pr-10 bg-gray-700/50 border-gray-600 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-red-500/20"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 transition-colors"
                       >
                         {showPassword ? (
                           <EyeOff className="h-5 w-5" />
@@ -146,9 +159,13 @@ export function LoginForm({
                       </button>
                     </div>
                   </Field>
-                  <Field>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? "Iniciando sesión..." : "Login"}
+                  <Field className="pt-2">
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold py-3 rounded-lg shadow-lg shadow-red-500/25 transition-all duration-300 hover:shadow-red-500/40"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Iniciando sesión..." : "Login to Dashboard"}
                     </Button>
                   </Field>
                 </FieldGroup>
@@ -156,9 +173,15 @@ export function LoginForm({
             )}
           </CardContent>
         </Card>
-        <FieldDescription className="text-center">
-          By clicking continue, you agree to our <a href="#" className="underline underline-offset-2 hover:text-primary">Terms of Service</a>{" "}
-          and <a href="#" className="underline underline-offset-2 hover:text-primary">Privacy Policy</a>.
+        <FieldDescription className="text-center text-gray-500 text-xs">
+          By continuing, you agree to our{" "}
+          <a href="#" className="underline underline-offset-2 hover:text-red-400 transition-colors">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="#" className="underline underline-offset-2 hover:text-red-400 transition-colors">
+            Privacy Policy
+          </a>.
         </FieldDescription>
       </div>
     </div>
