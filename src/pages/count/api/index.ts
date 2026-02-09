@@ -30,7 +30,7 @@ export async function getCountDetails(idConteo: string): Promise<CountDetail | n
     console.log('Fetching count details for ID:', idConteo);
 
     const { data, error } = await supabase
-        .from('vista_detalle_conteos')
+        .from('vista_detalle_conteo_by_id')
         .select('*')
         .eq('id_conteo', idConteo)
         .single();
