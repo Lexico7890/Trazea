@@ -1,35 +1,80 @@
-/* globals.css */
-
 @layer utilities {
-  /* Define la animación de rotación */
-  @keyframes border-spin {
-    from {
-      transform: rotate(0deg);
+  /* Animación flotante amplia para la primera estela */
+  @keyframes float-1 {
+    0% {
+      transform: translate(0, -50%) scale(1);
+      opacity: 0.6;
     }
-    to {
-      transform: rotate(360deg);
+    20% {
+      transform: translate(-80px, calc(-50% + 120px)) scale(1.15);
+      opacity: 0.7;
+    }
+    40% {
+      transform: translate(60px, calc(-50% - 100px)) scale(0.9);
+      opacity: 0.5;
+    }
+    60% {
+      transform: translate(-100px, calc(-50% - 80px)) scale(1.1);
+      opacity: 0.65;
+    }
+    80% {
+      transform: translate(70px, calc(-50% + 90px)) scale(0.95);
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate(0, -50%) scale(1);
+      opacity: 0.6;
     }
   }
 
-  /*
-    Crea el haz de luz usando un gradiente cónico.
-    - Comienza transparente.
-    - Pasa a un color (ej. azul) en un punto específico.
-    - Vuelve a transparente.
-    Puedes cambiar #3b82f6 (blue-500 de tailwind) por el color que prefieras.
-    Ajusta los porcentajes (ej. 10% a 30%) para hacer el haz de luz más ancho o más delgado.
-  */
-  .moving-light-gradient {
-    background: conic-gradient(
-      from 0deg at 50% 50%,
-      transparent 0%,
-      #f63b3b 10%,
-      transparent 30%
-    );
+  /* Animación flotante amplia para la segunda estela */
+  @keyframes float-2 {
+    0% {
+      transform: translate(0, -50%) scale(1);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translate(90px, calc(-50% - 110px)) scale(1.12);
+      opacity: 0.55;
+    }
+    45% {
+      transform: translate(-70px, calc(-50% + 130px)) scale(0.88);
+      opacity: 0.7;
+    }
+    65% {
+      transform: translate(110px, calc(-50% + 70px)) scale(1.05);
+      opacity: 0.6;
+    }
+    85% {
+      transform: translate(-60px, calc(-50% - 90px)) scale(0.93);
+      opacity: 0.65;
+    }
+    100% {
+      transform: translate(0, -50%) scale(1);
+      opacity: 0.6;
+    }
   }
 
-  /* Aplica la animación al elemento */
-  .animate-border-spin {
-    animation: border-spin 8s linear infinite;
+  /* Animación de pulsación con blur variable */
+  @keyframes pulse-glow {
+    0%, 100% {
+      filter: blur(40px) brightness(1);
+    }
+    33% {
+      filter: blur(55px) brightness(1.3);
+    }
+    66% {
+      filter: blur(45px) brightness(0.9);
+    }
   }
+
+  .animate-float-1 {
+    animation: float-1 20s ease-in-out infinite, pulse-glow 12s ease-in-out infinite;
+  }
+
+  .animate-float-2 {
+    animation: float-2 25s ease-in-out infinite, pulse-glow 15s ease-in-out infinite;
+  }
+
+  
 }

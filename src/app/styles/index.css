@@ -138,8 +138,100 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Roboto', sans-serif;
+  }
+  
+  /* Orbitron only for the main title */
+  .orbitron-title {
     font-family: 'Orbitron', monospace;
   }
+}
+
+/* Custom styles for inputs with gray text when filled */
+input:not(:placeholder-shown) {
+  color: #6b7280 !important;
+}
+
+/* Enhanced focus states for inputs */
+input:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+  outline: none !important;
+}
+
+/* Red gradient button */
+.btn-red-gradient {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%) !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-red-gradient:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Secondary buttons for social login */
+.btn-secondary {
+  background: white !important;
+  border: 2px solid #e5e7eb !important;
+  color: #374151 !important;
+  transition: all 0.3s ease !important;
+  font-weight: 500 !important;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Visual separator */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.divider span {
+  background: white;
+  padding: 0 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark mode adjustments */
+.dark .btn-secondary {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+  color: white !important;
+}
+
+.dark .btn-secondary:hover {
+  background: #4b5563 !important;
+  border-color: #6b7280 !important;
+}
+
+.dark .divider::before {
+  background: #4b5563;
+}
+
+.dark .divider span {
+  background: #1f2937;
 }
 
 /* Animaciones para Dynamo */
