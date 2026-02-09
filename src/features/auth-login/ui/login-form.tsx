@@ -127,7 +127,7 @@ export function LoginForm({
                           className="text-sm text-red-600 hover:text-red-700 underline-offset-4 hover:underline transition-colors"
                           onClick={() => setIsResettingPassword(true)}
                         >
-                          Forgot your password?
+                          ¿Olvidaste tu contraseña?
                         </button>
                       </div>
                       <div className="relative">
