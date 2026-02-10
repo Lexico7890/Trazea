@@ -120,11 +120,9 @@ export const useUserStore = create<UserStore>()(
 
       setCurrentLocation: (location) => set({ currentLocation: location }),
 
-      clearUser: () => set({
-        sessionData: null,
-        currentLocation: null,
-        isAuthenticated: false
-      }),
+      clearUser: () => {
+        get().clearSessionData();
+      },
 
       hasPermission: () => {
         return true;

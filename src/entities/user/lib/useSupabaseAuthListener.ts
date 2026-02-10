@@ -1,19 +1,26 @@
 // src/shared/lib/hooks/useSupabaseAuthListener.ts
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useUserStore } from '../model/useUserStore';
 import { fetchUserSessionData, supabase } from '@/shared/api';
 
 export const useSupabaseAuthListener = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const setSessionData = useUserStore((state) => state.setSessionData);
   const clearSessionData = useUserStore((state) => state.clearSessionData);
 
   useEffect(() => {
-    // Verificar sesión inicial
-    const initSession = async () => {
+    // Verificar sesión inicial SOLO si no estamos en auth-callback
+    const initializeSession = async () => {
+      // NO cargar sesión si estamos en la página de callback
+      if (location.pathname === '/auth-callback') {
+        console.log('🔄 En auth-callback, saltando inicialización de sesión');
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session?.user) {
@@ -28,7 +35,7 @@ export const useSupabaseAuthListener = () => {
       }
     };
 
-    initSession();
+    initializeSession();
 
     // Escuchar eventos de autenticación
     const {
@@ -36,7 +43,14 @@ export const useSupabaseAuthListener = () => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔔 Auth event:', event, session?.user?.email);
 
-      // Manejar login con OAuth (Google)
+      // NO procesar eventos SIGNED_IN si estamos en auth-callback
+      // Dejar que AuthCallback maneje la redirección
+      if (event === 'SIGNED_IN' && location.pathname === '/auth-callback') {
+        console.log('🔄 SIGNED_IN durante auth-callback, dejando que AuthCallback maneje');
+        return;
+      }
+
+      // Manejar login (después de que AuthCallback termine)
       if (event === 'SIGNED_IN' && session?.user) {
         try {
           console.log('✅ Usuario autenticado, cargando datos...');
@@ -65,7 +79,12 @@ export const useSupabaseAuthListener = () => {
       if (event === 'SIGNED_OUT') {
         console.log('🚪 Usuario cerró sesión');
         clearSessionData();
-        navigate('/login', { replace: true });
+
+        // Solo redirigir si NO estamos ya en login o auth-callback
+        const currentPath = location.pathname;
+        if (currentPath !== '/login' && currentPath !== '/auth-callback') {
+          navigate('/login', { replace: true });
+        }
       }
 
       // Manejar actualización de usuario
@@ -80,14 +99,13 @@ export const useSupabaseAuthListener = () => {
       }
 
       // Manejar token refrescado
-      if (event === 'TOKEN_REFRESHED' && session?.user) {
+      if (event === 'TOKEN_REFRESHED') {
         console.log('🔄 Token refrescado');
-        // Opcional: recargar datos si es necesario
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [setSessionData, clearSessionData, navigate]);
+  }, [setSessionData, clearSessionData, navigate, location]);
 };

@@ -2,7 +2,6 @@ import { supabase } from "@/shared/api";
 
 export async function createGuarantee(warrantyData: Record<string, unknown>) {
     // Check if we have an ID to update an existing record
-    debugger
     const { error } = await supabase
         .from('garantias')
         .update({
