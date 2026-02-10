@@ -7,6 +7,7 @@ import { handleSupabaseError } from '@/shared/lib';
 
 export const useLogin = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
     const setSessionData = useUserStore((state) => state.setSessionData);
     const clearUser = useUserStore((state) => state.clearUser);
     const navigate = useNavigate();
@@ -77,6 +78,34 @@ export const useLogin = () => {
         }
     };
 
+    const loginWithGoogle = async () => {
+        setIsGoogleLoading(true);
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth-callback`,
+                    queryParams: {
+                        access_type: 'offline',
+                        prompt: 'consent',
+                    },
+                },
+            });
+
+            if (error) {
+                handleSupabaseError(error);
+                return;
+            }
+
+            // El redireccionamiento ocurrirá automáticamente
+            sonnerToast.success('Redirigiendo a Google...');
+        } catch (error) {
+            handleSupabaseError(error);
+        } finally {
+            setIsGoogleLoading(false);
+        }
+    };
+
     const updatePassword = async (password: string) => {
         setIsLoading(true);
         try {
@@ -101,6 +130,8 @@ export const useLogin = () => {
         logout,
         resetPassword,
         updatePassword,
+        loginWithGoogle,
         isLoading,
+        isGoogleLoading,
     };
 };

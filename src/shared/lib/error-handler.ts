@@ -27,6 +27,9 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   'email_exists': 'Este email ya está registrado.',
   'session_not_found': 'Sesión expirada. Por favor inicia sesión nuevamente.',
   'refresh_token_not_found': 'Sesión expirada. Por favor inicia sesión nuevamente.',
+  'oauth_provider_disabled': 'El proveedor de Google no está habilitado. Contacta al administrador.',
+  'oauth_not_allowed': 'El login con Google no está permitido.',
+  'request_timeout': 'La conexión con Google ha expirado. Intenta nuevamente.',
 };
 
 const DATABASE_ERROR_MESSAGES: Record<string, string> = {
