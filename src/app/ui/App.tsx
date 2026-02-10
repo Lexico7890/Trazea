@@ -47,6 +47,8 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Routes>
+        <Route path="/pending-approval" element={<PendingApproval />} />
+        <Route path="/auth-callback" element={<AuthCallback />} />
         <Route
           path="/login"
           element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />}
@@ -136,8 +138,6 @@ function App() {
                           <Route path="enviadas" element={<RequestsSentPage />} />
                         </Route>
                       </Route>
-                      <Route path="/pending-approval" element={<PendingApproval />} />
-                      <Route path="/auth-callback" element={<AuthCallback />} />
                       <Route path="/dynamo" element={<DynamoPage />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>

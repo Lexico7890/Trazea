@@ -21,7 +21,7 @@ export interface AppPermissions {
     registros: MenuPermissions;
     repuestos: MenuPermissions;
     solicitudes: MenuPermissions;
-    inventario: MenuPermissions; // Antes 'mi_inventario'
+    inventario: MenuPermissions;
     [key: string]: MenuPermissions;
   };
   dashboard?: {
@@ -56,8 +56,6 @@ export interface AppPermissions {
     view_audit_logs: boolean;
     assign_locations: boolean;
   };
-  // Permitimos propiedades adicionales ya que la estructura crecerá
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -71,6 +69,9 @@ interface Role {
 interface UserData {
   id: string;
   email: string;
+  nombre?: string;        // ← AGREGAR
+  activo: boolean;        // ← AGREGAR
+  aprobado: boolean;      // ← AGREGAR
   role: Role;
   locations?: UserLocation[];
 }
@@ -88,12 +89,13 @@ interface UserStore {
   setSessionData: (data: SessionData | null) => void;
   setCurrentLocation: (location: UserLocation | null) => void;
   clearUser: () => void;
-  // hasPermission genérico se mantiene por compatibilidad, pero lo ideal es usar checkMenuPermission
   hasPermission: (permission: string) => boolean;
   hasRole: (roleName: string) => boolean;
-  // Nuevo helper específico para rutas
   canViewRoute: (routeKey: string) => boolean;
   checkMenuPermission: (menu: string, permission: string) => boolean;
+  clearSessionData: () => void;
+  isUserApproved: () => boolean;      // ← AGREGAR helper
+  isUserActive: () => boolean;        // ← AGREGAR helper
 }
 
 export const useUserStore = create<UserStore>()(
@@ -110,6 +112,12 @@ export const useUserStore = create<UserStore>()(
         });
       },
 
+      clearSessionData: () =>
+        set({
+          sessionData: null,
+          isAuthenticated: false
+        }),
+
       setCurrentLocation: (location) => set({ currentLocation: location }),
 
       clearUser: () => set({
@@ -119,7 +127,6 @@ export const useUserStore = create<UserStore>()(
       }),
 
       hasPermission: () => {
-        // Implementación placeholder anterior, debe ser refinada si se usa
         return true;
       },
 
@@ -138,9 +145,6 @@ export const useUserStore = create<UserStore>()(
           return false;
         }
 
-        // We check if the property exists and is exactly true.
-        // Using explicit casting or checking truthiness depending on requirement.
-        // Based on "si esta llega como false no la quites", we assume boolean values in JSON.
         return !!menuPermissions[menu][permission];
       },
 
@@ -154,6 +158,17 @@ export const useUserStore = create<UserStore>()(
 
         const routePermission = menuPermissions[routeKey];
         return routePermission?.show_view === true;
+      },
+
+      // ← NUEVOS HELPERS
+      isUserApproved: () => {
+        const state = get();
+        return state.sessionData?.user.aprobado === true;
+      },
+
+      isUserActive: () => {
+        const state = get();
+        return state.sessionData?.user.activo === true;
       }
     }),
     {

@@ -1,7 +1,8 @@
+// src/pages/auth/ui/AuthCallback.tsx
 
-import { supabase } from '@/shared/api'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '@/shared/api/supabase'
 
 export function AuthCallback() {
     const navigate = useNavigate()
@@ -10,13 +11,22 @@ export function AuthCallback() {
     useEffect(() => {
         const handleCallback = async () => {
             try {
+                console.log('🔄 Iniciando proceso de callback...')
+
                 // Obtener el código de la URL
                 const params = new URLSearchParams(window.location.search)
                 const code = params.get('code')
+                const error_description = params.get('error_description')
+
+                if (error_description) {
+                    throw new Error(error_description)
+                }
 
                 if (!code) {
                     throw new Error('No se recibió código de autenticación')
                 }
+
+                console.log('✅ Código recibido, intercambiando por sesión...')
 
                 // Intercambiar el código por una sesión
                 const { data: { session }, error: sessionError } =
@@ -25,36 +35,72 @@ export function AuthCallback() {
                 if (sessionError) throw sessionError
                 if (!session) throw new Error('No se pudo crear la sesión')
 
+                console.log('✅ Sesión creada, verificando usuario...')
+
                 // Obtener datos del usuario de la tabla usuarios
                 const { data: usuario, error: userError } = await supabase
                     .from('usuarios')
-                    .select('aprobado, activo, nombre, email')
+                    .select('aprobado, activo, nombre, email, id_rol')
                     .eq('id_usuario', session.user.id)
                     .single()
 
+                console.log('👤 Usuario encontrado:', usuario)
+
                 if (userError) {
-                    console.error('Error al obtener usuario:', userError)
-                    throw new Error('Error al verificar el estado del usuario')
+                    console.error('❌ Error al obtener usuario:', userError)
+                    // Si el usuario no existe en la tabla, puede ser que el trigger no se ejecutó
+                    // Esperar 2 segundos y reintentar
+                    await new Promise(resolve => setTimeout(resolve, 2000))
+
+                    const { data: usuario2, error: userError2 } = await supabase
+                        .from('usuarios')
+                        .select('aprobado, activo, nombre, email, id_rol')
+                        .eq('id_usuario', session.user.id)
+                        .single()
+
+                    if (userError2) {
+                        throw new Error('Error al verificar el estado del usuario. Por favor contacta al administrador.')
+                    }
+
+                    // Usar el segundo intento
+                    if (!usuario2.aprobado) {
+                        console.log('⏳ Usuario no aprobado, redirigiendo a pending-approval')
+                        navigate('/pending-approval', { replace: true })
+                        return
+                    }
+
+                    if (!usuario2.activo) {
+                        await supabase.auth.signOut()
+                        setError('Tu cuenta ha sido desactivada. Contacta al administrador.')
+                        return
+                    }
+
+                    console.log('✅ Usuario aprobado, redirigiendo a dashboard')
+                    navigate('/', { replace: true })
+                    return
                 }
 
                 // Validar si está aprobado
                 if (!usuario.aprobado) {
+                    console.log('⏳ Usuario no aprobado, redirigiendo a pending-approval')
                     navigate('/pending-approval', { replace: true })
                     return
                 }
 
                 // Validar si está activo
                 if (!usuario.activo) {
+                    console.log('❌ Usuario inactivo')
                     await supabase.auth.signOut()
                     setError('Tu cuenta ha sido desactivada. Contacta al administrador.')
                     return
                 }
 
                 // Todo OK, redirigir al dashboard
-                navigate('/dashboard', { replace: true })
+                console.log('✅ Usuario aprobado y activo, redirigiendo a dashboard')
+                navigate('/', { replace: true })
 
             } catch (err: any) {
-                console.error('Error en callback:', err)
+                console.error('❌ Error en callback:', err)
                 setError(err.message || 'Error al procesar la autenticación')
 
                 // Esperar 3 segundos y redirigir al login
