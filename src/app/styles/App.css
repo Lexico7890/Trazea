@@ -76,5 +76,24 @@
     animation: float-2 25s ease-in-out infinite, pulse-glow 15s ease-in-out infinite;
   }
 
-  
+  /* Keyframes para la animación shimmer */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Clase de utilidad para la animación */
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* Font family Orbitron */
+  .font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+  }
+
 }

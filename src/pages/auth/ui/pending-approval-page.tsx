@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/shared/api/supabase'
 import { useUserStore } from '@/entities/user'
+import { PageLoader } from '@/shared/ui'
 
 export function PendingApproval() {
     const navigate = useNavigate()
@@ -51,7 +52,6 @@ export function PendingApproval() {
 
         try {
             const userId = sessionData?.user?.id
-
             if (!userId) {
                 console.error('❌ No hay userId')
                 navigate('/login', { replace: true })
@@ -105,12 +105,7 @@ export function PendingApproval() {
     // Mostrar loading mientras esperamos que se cargue sessionData
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600 dark:text-gray-300">Cargando...</p>
-                </div>
-            </div>
+            <PageLoader text="Procesando autenticación..." />
         )
     }
 
@@ -120,8 +115,8 @@ export function PendingApproval() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-            <div className="max-w-md w-full space-y-8 p-8 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background to-red-950">
+            <div className="max-w-md w-full space-y-8 p-8 bg-linear-to-br from-red-600/25 to-red-600/10 rounded-lg shadow border border-red-600/20">
                 <div className="text-center">
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 dark:bg-yellow-900">
                         <svg
@@ -158,8 +153,8 @@ export function PendingApproval() {
                         </p>
                     </div>
 
-                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <div className="mt-6 p-4 bg-blue-50 dark:bg-yellow-900/80 rounded-md">
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
                             💡 Este proceso generalmente toma menos de 24 horas hábiles.
                         </p>
                     </div>
@@ -168,7 +163,7 @@ export function PendingApproval() {
                         <button
                             onClick={checkApproval}
                             disabled={checking}
-                            className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {checking ? (
                                 <>
@@ -185,7 +180,7 @@ export function PendingApproval() {
 
                         <button
                             onClick={handleSignOut}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="w-full px-4 py-2 border bg-red-700 rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                         >
                             Cerrar Sesión
                         </button>

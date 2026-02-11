@@ -43,6 +43,9 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+    hmr: {
+      overlay: true,
+    },
     host: true,
     port: 5173,
   },

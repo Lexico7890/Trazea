@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/shared/api/supabase'
+import { PageLoader } from '@/shared/ui'
 
 export function AuthCallback() {
     const navigate = useNavigate()
@@ -190,8 +191,8 @@ export function AuthCallback() {
     // Pantalla de error
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                <div className="max-w-md w-full p-8 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-background to-red-950">
+                <div className="max-w-md w-full p-8 bg-red-600/20 rounded-lg shadow border border-red-600">
                     <div className="text-center">
                         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900">
                             <svg
@@ -219,7 +220,7 @@ export function AuthCallback() {
 
                         <button
                             onClick={handleBackToLogin}
-                            className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                            className="mt-6 w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
                         >
                             Volver al Login
                         </button>
@@ -231,40 +232,6 @@ export function AuthCallback() {
 
     // Pantalla de carga
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-background">
-            <div className="max-w-md w-full p-8 bg-white dark:bg-gray-500/10 dark:border dark:border-gray-800 rounded-lg shadow">
-                <div className="text-center">
-                    <div className="mx-auto h-12 w-12 text-blue-500">
-                        <svg
-                            className="h-12 w-12 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                            />
-                            <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            />
-                        </svg>
-                    </div>
-
-                    <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-white">
-                        Procesando autenticación...
-                    </h2>
-
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                        Por favor espera un momento
-                    </p>
-                </div>
-            </div>
-        </div>
+        <PageLoader text="Procesando autenticación..." />
     )
 }
