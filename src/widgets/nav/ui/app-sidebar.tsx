@@ -22,6 +22,7 @@ import {
 } from "@/shared/ui/sidebar"
 import { useUserStore } from "@/entities/user";
 import { NavMain, NavSecondary, NavUser } from "@/widgets/nav";
+import { version } from "../../../../package.json";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const sessionData = useUserStore((state) => state.sessionData);
@@ -126,8 +127,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <a href="#">
                 <img src="/minca_logo.svg" alt="Minca Logo" className="size-8" />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Minca Electric</span>
-                  <span className="truncate text-xs">Inventory System</span>
+                  <span className="truncate font-medium">Minca Inventory System</span>
+                  <span className="truncate text-xs">V-{version}</span>
                 </div>
               </a>
             </SidebarMenuButton>

@@ -1,8 +1,11 @@
 {
   "name": "minca-inventory-system",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0-beta",
   "type": "module",
+  "description": "Sistema de gestión de inventario y garantías",
+  "author": "Oscar Casas",
+  "license": "MIT",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "tsc -b && vite build",
