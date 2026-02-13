@@ -13,6 +13,11 @@ export interface OrderFollow {
     level: number;
     is_finish: boolean;
     updated_at: string | null;
+    status?: string;
+    phone?: string;
+    order_link?: string;
+    email?: string;
+    call_count?: number;
 }
 
 export interface ViewOrderFollow {
@@ -25,10 +30,27 @@ export interface ViewOrderFollow {
     is_finish: boolean;
     updated_at: string | null;
     id_scooter_type: string;
+    status?: string;
+    phone?: string;
+    order_link?: string;
+    email?: string;
+    call_count?: number;
 }
 
 export interface CreateOrderFollowPayload {
     number: number;
     id_scooter_type: string;
-    level: number;
+    status: string;
+    phone: string;
+    order_link: string;
+    email: string;
+}
+
+export interface CallHistory {
+    id: number;
+    order_id: number;
+    call_date: string;
+    answered: boolean;
+    comment?: string;
+    created_at: string;
 }

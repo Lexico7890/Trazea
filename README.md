@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Minca Logo](./public/minca_logo.svg)
+<img src="./public/minca_logo.svg" alt="Minca Logo" width="200">
 
 **Sistema de Gestión de Inventario y Garantías**
 
