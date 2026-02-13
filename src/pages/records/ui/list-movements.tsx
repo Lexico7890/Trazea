@@ -30,11 +30,12 @@ import {
 } from "@/shared/ui/select";
 import { Label } from "@/shared/ui/label";
 import { useUserStore } from "@/entities/user";
-import { MovementDetailsModal, useSearchMovements } from "@/entities/movimientos";
+import { MovementDetailsModal, useSearchMovements, type MovimientoTecnico } from "@/entities/movimientos";
 import { useRecordsStore } from "@/entities/records";
 import { useMarkMovementAsDownloaded } from "../lib/useMarkMovementAsDownloaded";
 import { cn } from "@/shared/lib";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
+
 
 export default function ListMovements() {
     const { sessionData, hasRole, checkMenuPermission } = useUserStore();
@@ -217,19 +218,19 @@ export default function ListMovements() {
                         </TableHeader>
                         <TableBody>
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                            {movements.map((movement: any) => (
+                            {movements.map((movement: MovimientoTecnico) => (
                                 <TableRow
-                                    key={movement.id_movimientos_tecnicos || movement.id}
+                                    key={movement.id_movimientos_tecnicos || movement.id_repuesto}
                                     className={cn(getRowClass(movement))}
                                 >
                                     <TableCell className="font-medium">
-                                        {typeof movement.id === 'string' && movement.id.startsWith('temp-')
+                                        {typeof movement.id_movimientos_tecnicos === 'string' && movement.id_movimientos_tecnicos.startsWith('temp-')
                                             ? <span className="text-muted-foreground italic">Guardando...</span>
-                                            : movement.repuesto_referencia
+                                            : movement.referencia
                                         }
                                     </TableCell>
                                     <TableCell>{movement.numero_orden || '-'}</TableCell>
-                                    <TableCell>{movement.tecnico_asignado || '-'}</TableCell>
+                                    <TableCell>{movement.nombre_tecnico || '-'}</TableCell>
                                     <TableCell>{movement.concepto || '-'}</TableCell>
                                     <TableCell className="text-right">{movement.cantidad || '-'}</TableCell>
                                     <TableCell>
@@ -242,13 +243,13 @@ export default function ListMovements() {
                                                     onClick: () => setMovementToEdit({
                                                         id_movimientos_tecnicos: movement.id_movimientos_tecnicos,
                                                         id_repuesto: movement.id_repuesto,
-                                                        repuesto_referencia: movement.repuesto_referencia,
-                                                        repuesto_nombre: movement.repuesto_nombre,
+                                                        repuesto_referencia: movement.referencia,
+                                                        repuesto_nombre: movement.nombre_repuesto,
                                                         id_tecnico_asignado: movement.id_tecnico_asignado,
                                                         tipo: movement.tipo,
                                                         concepto: movement.concepto,
                                                         cantidad: movement.cantidad,
-                                                        numero_orden: movement.numero_orden
+                                                        numero_orden: String(movement.numero_orden)
                                                     })
                                                 },
                                                 {

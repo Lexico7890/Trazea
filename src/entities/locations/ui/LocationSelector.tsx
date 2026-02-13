@@ -75,7 +75,6 @@ export function LocationSelector() {
     }, [isAuthenticated, currentLocation, sessionData?.user?.id, setCurrentLocation, savedLocationId]);
 
     const handleSelectLocation = (location: UserLocation) => {
-        debugger
         setSelectedLocation(location.id_localizacion.toString());
         setCurrentLocation(location);
         queryClient.invalidateQueries({ queryKey: ['inventory'] });

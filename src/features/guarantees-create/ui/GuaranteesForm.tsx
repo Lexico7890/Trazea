@@ -49,7 +49,6 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
     const data = prefillData || location.state?.warrantyData;
 
     console.log("GuaranteesForm effect. data:", data);
-    debugger
 
     if (data) {
       setCurrentWarrantyId(data.id_garantia || "");

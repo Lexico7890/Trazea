@@ -19,13 +19,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/shared/ui/select";
-import { cn } from "@/shared/lib/utils";
-import { Hash, Bike, Send } from "lucide-react";
+import { Hash, Bike, Send, Phone, Mail, Link } from "lucide-react";
 
 const formSchema = z.object({
     number: z.coerce.number().min(1, "El número es requerido"),
     id_scooter_type: z.string().uuid("Seleccione un tipo de scooter"),
-    level: z.number().min(1).max(3),
+    status: z.string().min(1, "El estado es requerido"),
+    phone: z.string().min(1, "El teléfono es requerido"),
+    order_link: z.string().min(1, "El link de orden es requerido"),
+    email: z.string().email("Ingrese un email válido").min(1, "El email es requerido"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -39,7 +41,10 @@ export function OrderFollowForm() {
         defaultValues: {
             number: 0,
             id_scooter_type: "",
-            level: 0,
+            status: "",
+            phone: "",
+            order_link: "",
+            email: "",
         },
     });
 
@@ -49,7 +54,10 @@ export function OrderFollowForm() {
                 form.reset({
                     number: 0,
                     id_scooter_type: "",
-                    level: 0
+                    status: "",
+                    phone: "",
+                    order_link: "",
+                    email: "",
                 });
             }
         });
@@ -63,8 +71,8 @@ export function OrderFollowForm() {
             </div>
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField
                             control={form.control as any}
                             name="number"
@@ -73,17 +81,17 @@ export function OrderFollowForm() {
                                     <FormLabel className="uppercase text-xs font-bold tracking-wider text-gray-500 mb-2 block">
                                         Número de Orden
                                     </FormLabel>
-                                    <FormControl>
-                                        <div className="relative group">
-                                            <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-white transition-colors" />
+                                    <div className="relative group">
+                                        <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-white transition-colors" />
+                                        <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="999999"
                                                 className="bg-[#1a1a1a] border-border/10 focus:border-white/20 h-14 pl-12 rounded-xl text-lg font-medium placeholder:text-gray-700 transition-all"
                                                 {...field}
                                             />
-                                        </div>
-                                    </FormControl>
+                                        </FormControl>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -128,82 +136,115 @@ export function OrderFollowForm() {
                                 </FormItem>
                             )}
                         />
+
+                        <FormField
+                            control={form.control as any}
+                            name="status"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase text-xs font-bold tracking-wider text-gray-500 mb-2 block">
+                                        Estado
+                                    </FormLabel>
+                                    <div className="relative group">
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            value={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger className="bg-[#1a1a1a] border-border/10 focus:border-white/20 h-14 rounded-xl text-lg font-medium text-gray-200 transition-all">
+                                                    <SelectValue placeholder="Seleccione un estado" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent className="bg-[#1a1a1a] border-white/10 text-gray-200">
+                                                <SelectItem value="P.Autorizar" className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                                                    P.Autorizar
+                                                </SelectItem>
+                                                <SelectItem value="Finalizada" className="focus:bg-white/10 focus:text-white cursor-pointer py-3">
+                                                    Finalizada
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
-                    <FormField
-                        control={form.control as any}
-                        name="level"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="uppercase text-xs font-bold tracking-wider text-gray-500 mb-4 block">
-                                    Nivel de Prioridad
-                                </FormLabel>
-                                <div className="grid grid-cols-3 gap-4 bg-[#111] p-2 rounded-2xl border border-white/5">
-                                    {[
-                                        {
-                                            value: 1,
-                                            label: "BAJA",
-                                            baseColor: "text-[#39ff14]",
-                                            glowColor: "shadow-[0_0_30px_-5px_#39ff1440]",
-                                            borderColor: "border-[#39ff14]/50",
-                                            bgActive: "bg-[#39ff14]/10"
-                                        },
-                                        {
-                                            value: 2,
-                                            label: "MEDIA",
-                                            baseColor: "text-[#ffff00]",
-                                            glowColor: "shadow-[0_0_30px_-5px_#ffff0040]",
-                                            borderColor: "border-[#ffff00]/50",
-                                            bgActive: "bg-[#ffff00]/10"
-                                        },
-                                        {
-                                            value: 3,
-                                            label: "ALTA",
-                                            baseColor: "text-[#ff073a]",
-                                            glowColor: "shadow-[0_0_30px_-5px_#ff073a40]",
-                                            borderColor: "border-[#ff073a]/50",
-                                            bgActive: "bg-[#ff073a]/10"
-                                        },
-                                    ].map((option) => {
-                                        const isSelected = field.value === option.value;
-                                        return (
-                                            <div
-                                                key={option.value}
-                                                className={cn(
-                                                    "cursor-pointer relative flex flex-col items-center justify-center py-6 rounded-xl transition-all duration-300 border border-transparent",
-                                                    isSelected ? cn("bg-white/5 border-white/10", option.glowColor) : "hover:bg-white/5 opacity-60 hover:opacity-100"
-                                                )}
-                                                onClick={() => field.onChange(option.value)}
-                                            >
-                                                {/* Background Glow for selected item - subtle */}
-                                                {isSelected && (
-                                                    <div className={cn("absolute inset-0 rounded-xl opacity-20 blur-xl", option.bgActive)} />
-                                                )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <FormField
+                            control={form.control as any}
+                            name="phone"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase text-xs font-bold tracking-wider text-gray-500 mb-2 block">
+                                        Teléfono
+                                    </FormLabel>
+                                    <div className="relative group">
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-white transition-colors" />
+                                        <FormControl>
+                                            <Input
+                                                type="tel"
+                                                placeholder="+1234567890"
+                                                className="bg-[#1a1a1a] border-border/10 focus:border-white/20 h-14 pl-12 rounded-xl text-lg font-medium placeholder:text-gray-700 transition-all"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                                                <div
-                                                    className={cn(
-                                                        "w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold border-2 transition-all duration-300 mb-3 z-10",
-                                                        isSelected
-                                                            ? cn(option.baseColor, option.borderColor, "bg-black/40 shadow-lg scale-110")
-                                                            : "text-gray-500 border-gray-700"
-                                                    )}
-                                                >
-                                                    {option.value}
-                                                </div>
-                                                <span className={cn(
-                                                    "text-[10px] uppercase font-bold tracking-widest z-10 transition-colors",
-                                                    isSelected ? option.baseColor : "text-gray-600"
-                                                )}>
-                                                    {option.label}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                        <FormField
+                            control={form.control as any}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase text-xs font-bold tracking-wider text-gray-500 mb-2 block">
+                                        Email
+                                    </FormLabel>
+                                    <div className="relative group">
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-white transition-colors" />
+                                        <FormControl>
+                                            <Input
+                                                type="email"
+                                                placeholder="email@ejemplo.com"
+                                                className="bg-[#1a1a1a] border-border/10 focus:border-white/20 h-14 pl-12 rounded-xl text-lg font-medium placeholder:text-gray-700 transition-all"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control as any}
+                            name="order_link"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase text-xs font-bold tracking-wider text-gray-500 mb-2 block">
+                                        Link de Orden
+                                    </FormLabel>
+                                    <div className="relative group">
+                                        <Link className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-white transition-colors" />
+                                        <FormControl>
+                                            <Input
+                                                type="url"
+                                                placeholder="https://ejemplo.com/orden"
+                                                className="bg-[#1a1a1a] border-border/10 focus:border-white/20 h-14 pl-12 rounded-xl text-lg font-medium placeholder:text-gray-700 transition-all"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     <div className="flex justify-end pt-2">
                         <Button

@@ -18,7 +18,7 @@ const DetailItem = ({ icon: Icon, label, value, className }: { icon: React.Compo
       <Icon className="h-3.5 w-3.5" />
       <span>{label}</span>
     </div>
-    <div className="text-sm font-medium pl-5 break-words">
+    <div className="text-sm font-medium pl-5 wrap-break-words">
       {value || "-"}
     </div>
   </div>
@@ -27,11 +27,11 @@ const DetailItem = ({ icon: Icon, label, value, className }: { icon: React.Compo
 export function MovementDetailsModal({ movement, open, onOpenChange }: MovementDetailsModalProps) {
   if (!movement) return null;
 
-  const hasImage = !!movement.repuesto_imagen;
+  const hasImage = !!movement.url_imagen;
 
   const handleOpenImage = () => {
-    if (movement.repuesto_imagen) {
-      window.open(movement.repuesto_imagen, "_blank");
+    if (movement.url_imagen) {
+      window.open(movement.url_imagen, "_blank");
     }
   };
 
@@ -80,7 +80,7 @@ export function MovementDetailsModal({ movement, open, onOpenChange }: MovementD
             <DetailItem
               icon={Package}
               label="Repuesto"
-              value={`${movement.repuesto_referencia || ''} - ${movement.repuesto_nombre || ''}`}
+              value={`${movement.referencia || ''} - ${movement.nombre_repuesto || ''}`}
               className="md:col-span-2"
             />
             <DetailItem
@@ -91,17 +91,17 @@ export function MovementDetailsModal({ movement, open, onOpenChange }: MovementD
             <DetailItem
               icon={MapPin}
               label="Ubicación"
-              value={movement.ubicacion_nombre}
+              value={movement.nombre_localizacion}
             />
             <DetailItem
               icon={UserCog}
               label="Técnico Asignado"
-              value={movement.tecnico_asignado}
+              value={movement.nombre_tecnico}
             />
             <DetailItem
               icon={User}
               label="Responsable"
-              value={movement.usuario_responsable}
+              value={movement.nombre_responsable}
             />
             <DetailItem
               icon={movement.descargada ? CheckCircle2 : XCircle}

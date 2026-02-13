@@ -17,7 +17,11 @@ import { Phone, Loader2, Search } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
-export function OrderFollowTable() {
+interface OrderFollowTableProps {
+    onCallClick?: (orderId: number, orderNumber: number) => void;
+}
+
+export function OrderFollowTable({ onCallClick }: OrderFollowTableProps = {}) {
     const { filters, setFilters } = useOrderFollowFilters();
     const { data, isLoading } = useOrderFollowList({ filters });
     const { data: scooterTypes } = useScooterTypes();
@@ -87,10 +91,12 @@ export function OrderFollowTable() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Tiempo</TableHead>
+                                <TableHead>Fecha Creación</TableHead>
                                 <TableHead>N° Orden</TableHead>
-                                <TableHead>Scooter</TableHead>
-                                <TableHead>Nivel</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead>Teléfono</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Llamadas</TableHead>
                                 <TableHead className="text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -105,23 +111,18 @@ export function OrderFollowTable() {
                                     </TableCell>
                                     <TableCell>{order.number}</TableCell>
                                     <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className="font-semibold">{order.nombre_scooter}</span>
-                                            <span className="text-xs text-muted-foreground">
-                                                {order.potencia}
-                                            </span>
-                                        </div>
+                                        <span className={cn(
+                                            "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
+                                            order.status === "P.Autorizar" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"
+                                        )}>
+                                            {order.status || "N/A"}
+                                        </span>
                                     </TableCell>
+                                    <TableCell>{order.phone || "N/A"}</TableCell>
+                                    <TableCell className="max-w-[200px] truncate">{order.email || "N/A"}</TableCell>
                                     <TableCell>
-                                        <span
-                                            className={cn(
-                                                "inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-sm",
-                                                order.level === 1 && "bg-green-500",
-                                                order.level === 2 && "bg-yellow-500",
-                                                order.level === 3 && "bg-red-500"
-                                            )}
-                                        >
-                                            {order.level}
+                                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
+                                            {order.call_count || 0}
                                         </span>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -130,7 +131,11 @@ export function OrderFollowTable() {
                                             size="icon"
                                             className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
                                             onClick={() => {
-                                                console.log("Navigate to phone view for order", order.id);
+                                                if (onCallClick) {
+                                                    onCallClick(order.id, order.number);
+                                                } else {
+                                                    console.log("Navigate to phone view for order", order.id);
+                                                }
                                             }}
                                         >
                                             <Phone className="h-4 w-4" />
