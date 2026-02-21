@@ -7,7 +7,7 @@
 
 <defs>
 <clipPath id="round">
-<rect width="1024" height="1024" rx="180" ry="180"/>
+<rect width="1024" height="1024" rx="600" ry="600"/>
 </clipPath>
 </defs>
 <g clip-path="url(#round)">

@@ -125,10 +125,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <img src="/trazea-icon.svg" alt="Workshop Logo" className="size-8" />
+                <img src="/trazea-icon.svg" alt="Workshop Logo" className="size-10" />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Trazea</span>
-                  <span className="truncate text-xs">V-{version}</span>
+                  <span className="text-lg truncate font-medium orbitron-title">Trazea</span>
+                  <span className="truncate text-xs orbitron-title">V-{version}</span>
                 </div>
               </a>
             </SidebarMenuButton>

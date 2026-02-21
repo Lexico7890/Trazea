@@ -115,7 +115,7 @@ export const PageLoader: React.FC<{ text?: string }> = ({ text = 'Cargando...' }
                 <Spinner size="w-16 h-16" />
             </div>
             <h2 className="text-2xl font-bold font-orbitron text-white mb-2 animate-pulse">
-                MINCA INVENTORY SYSTEM
+                TRAZEA MANAGEMENT SYSTEM
             </h2>
             <p className="text-gray-600 font-orbitron">
                 {text}
