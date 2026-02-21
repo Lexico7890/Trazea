@@ -63,7 +63,7 @@ export function LoginForm({
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-2">
                 <img src="/trazea-icon.svg" alt="Workshop Logo" className="size-8" />
-                <CardTitle className="text-lg orbitron-title">Trazea</CardTitle>
+                <CardTitle className="text-3xl orbitron-title">Trazea</CardTitle>
               </div>
               <p className="text-xs text-muted-foreground">Bienvenido de vuelta</p>
             </div>
