@@ -125,9 +125,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <img src="/minca_logo.svg" alt="Minca Logo" className="size-8" />
+                <img src="/trazea-icon.svg" alt="Workshop Logo" className="size-8" />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Minca Inventory System</span>
+                  <span className="truncate font-medium">Trazea</span>
                   <span className="truncate text-xs">V-{version}</span>
                 </div>
               </a>

@@ -11,20 +11,20 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['minca_logo.svg', 'favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['trazea-icon.svg', 'favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Minca Inventory System',
-        short_name: 'M.I.S.',
-        description: 'Sistema de inventario para Minca',
+        name: 'Trazea',
+        short_name: 'WMS',
+        description: 'Sistema de gestión de taller y inventario',
         theme_color: '#ffffff',
         icons: [
           {
-            src: 'minca_logo.svg',
+            src: 'trazea-icon.svg',
             sizes: '192x192',
             type: 'image/svg+xml'
           },
           {
-            src: 'minca_logo.svg',
+            src: 'trazea-icon.svg',
             sizes: '512x512',
             type: 'image/svg+xml'
           }
