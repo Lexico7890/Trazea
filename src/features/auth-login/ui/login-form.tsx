@@ -62,8 +62,8 @@ export function LoginForm({
           <CardHeader className="text-center space-y-2">
             <div className="space-y-1">
               <div className="flex items-center justify-center gap-2">
-                <img src="/minca_logo.svg" alt="Minca Logo" className="size-8" />
-                <CardTitle className="text-lg orbitron-title">Minca Inventory System</CardTitle>
+                <img src="/trazea-icon.svg" alt="Workshop Logo" className="size-8" />
+                <CardTitle className="text-lg orbitron-title">Trazea</CardTitle>
               </div>
               <p className="text-xs text-muted-foreground">Bienvenido de vuelta</p>
             </div>
@@ -177,8 +177,8 @@ export function LoginForm({
                 </div>
 
                 <div className="space-y-1">
-                  <Button 
-                    type="button" 
+                  <Button
+                    type="button"
                     className="w-full btn-secondary h-9 text-sm font-medium"
                     onClick={loginWithGoogle}
                     disabled={isGoogleLoading}
@@ -198,7 +198,7 @@ export function LoginForm({
                 </div>
 
                 <footer className="text-center pt-2">
-                  <p className="text-xs text-gray-500">© 2024 Minca Electric. All rights reserved.</p>
+                  <p className="text-xs text-gray-500">© 2024 Trazea. All rights reserved.</p>
                 </footer>
               </div>
             )}

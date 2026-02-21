@@ -31,7 +31,7 @@ export const sendWhatsAppNotification = (
     });
 
     message += `\n--------------------------------\n`;
-    message += `🔗 _Generado desde App Minca Inventory System_`;
+    message += `🔗 _Generado desde Trazea_`;
 
     // 3. Codificar para URL (importante para emojis y saltos de línea)
     const encodedMessage = encodeURIComponent(message);

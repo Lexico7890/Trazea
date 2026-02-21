@@ -36,7 +36,7 @@ export const LOADER_TEXTS = {
     downloading: 'Descargando...',
     searching: 'Buscando...',
 
-    // Específicos de Minca Electric
+    // Específicos de Workshop
     loadingInventory: 'Cargando inventario...',
     loadingWarranties: 'Cargando garantías...',
     loadingRequests: 'Cargando solicitudes...',

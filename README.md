@@ -1,10 +1,10 @@
-# Minca Inventory System
+# Trazea
 
 <div align="center">
 
-<img src="./public/minca_logo.svg" alt="Minca Logo" width="200">
+<img src="./public/trazea-icon.svg" alt="Trazea Logo" width="200">
 
-**Sistema de Gestión de Inventario y Garantías**
+**Sistema de Gestión de Taller e Inventario**
 
 Aplicación web moderna para la gestión integral de inventarios, repuestos, garantías y movimientos de stock.
 
@@ -40,7 +40,7 @@ Aplicación web moderna para la gestión integral de inventarios, repuestos, gar
 
 ## 📖 Descripción
 
-**Minca Inventory System (M.I.S.)** es una aplicación web profesional diseñada para la gestión completa de inventarios, repuestos y garantías. Desarrollada con las mejores prácticas de desarrollo moderno, esta plataforma permite a las organizaciones controlar sus activos, gestionar solicitudes de repuestos, realizar conteos de inventario y mantener un registro detallado de movimientos y garantías de productos.
+**Trazea (W.M.S.)** es una aplicación web profesional diseñada para la gestión completa de inventarios, repuestos y garantías. Desarrollada con las mejores prácticas de desarrollo moderno, esta plataforma permite a las organizaciones controlar sus activos, gestionar solicitudes de repuestos, realizar conteos de inventario y mantener un registro detallado de movimientos y garantías de productos.
 
 La aplicación implementa una arquitectura escalable basada en **Feature-Sliced Design (FSD)**, lo que garantiza un código mantenible, modular y fácil de extender.
 
@@ -168,7 +168,7 @@ src/
 ```
 minca-inventory-system/
 ├── 📁 public/                 # Assets estáticos
-│   ├── minca_logo.svg        # Logo principal
+│   ├── Trazea-icon.svg        # Logo principal
 │   └── logo_min.png          # Logo versión miniatura
 ├── 📁 src/                   # Código fuente
 │   ├── 📁 app/               # Configuración global
