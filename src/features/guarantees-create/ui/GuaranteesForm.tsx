@@ -20,7 +20,7 @@ import {
 import { Textarea } from "@/shared/ui/textarea";
 import { toast } from "sonner";
 import { useUserStore } from "@/entities/user";
-import { useCreateGuarantee } from "../lib/useCreateGuarantees";
+import { useUpdateGuarantee } from "../lib/useCreateGuarantees";
 import { useTechnicians } from "@/entities/technical";
 import { uploadWarrantyImage } from "../api";
 import { AutocompleteInputList } from "@/entities/inventario";
@@ -33,19 +33,14 @@ interface GuaranteesFormProps {
 }
 
 export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
-  const { currentLocation, sessionData } = useUserStore();
-  const createGuaranteeMutation = useCreateGuarantee();
+  const { currentLocation } = useUserStore();
+  const createGuaranteeMutation = useUpdateGuarantee();
   const location = useLocation();
 
   // State for form fields
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [mileage, setMileage] = useState<string>(""); // Text as requested
   const [customerNotes, setCustomerNotes] = useState<string>("");
-  const [selectedPart, setSelectedPart] = useState<{
-    id_repuesto: string;
-    referencia: string;
-    nombre: string;
-  } | null>(null);
   const [applicant, setApplicant] = useState<string>(""); // Owner name
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
   const [warrantyReason, setWarrantyReason] = useState<string>("");
@@ -106,7 +101,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
       return toast.info("No hay una ubicación seleccionada");
     if (!orderNumber) return toast.info("Ingrese el número de orden");
     if (!mileage) return toast.info("Ingrese el kilometraje");
-    if (!selectedPart) return toast.info("Seleccione un repuesto");
+    if (!selectedParts.length) return toast.info("Seleccione un repuesto");
     if (!applicant) return toast.info("Ingrese el solicitante");
     if (!selectedTechnicianId) return toast.info("Seleccione un técnico");
     if (!warrantyReason)
@@ -122,23 +117,20 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
         imageUrls.push(imageUrl);
         toast.success("Imagen subida correctamente", { id: "warranty-upload" });
       }
-
-      const guaranteeData = {
-        id_repuesto: selectedPart.id_repuesto,
-        referencia_repuesto: selectedPart.referencia,
-        nombre_repuesto: selectedPart.nombre,
-        id_localizacion: selectedLocationId,
-        id_usuario_reporta: sessionData?.user.id,
-        id_tecnico_asociado: selectedTechnicianId,
-        motivo_falla: warrantyReason,
-        url_evidencia_foto: imageUrls[0], // Keep first image for backward compatibility
-        imagenes_adicionales: imageUrls.slice(1), // Store additional images
-        kilometraje: mileage,
-        orden: orderNumber,
-        solicitante: applicant,
-        comentarios_resolucion: customerNotes,
-        estado: "Pendiente",
-      };
+      if (!prefillData){
+        return
+      }
+      const guaranteeData: Guarantee[] = prefillData.map((item: Guarantee, index: number) => {
+        return {
+          ...item,
+          estado: "Pendiente",
+          url_evidencia_foto: imageUrls[index] !== undefined ? imageUrls[index] : "", // Update with new image if provided
+          motivo_falla: warrantyReason,
+          comentarios_resolucion: customerNotes,
+          kilometraje: Number(mileage),
+          solicitante: applicant,
+        };
+      })
 
       await createGuaranteeMutation.mutateAsync(guaranteeData);
 
@@ -148,7 +140,6 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
       setOrderNumber("");
       setMileage("");
       setCustomerNotes("");
-      setSelectedPart(null);
       setApplicant("");
       setSelectedTechnicianId("");
       setWarrantyReason("");

@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createGuarantee } from "../api";
+import { updateGuarantees } from "../api";
+import type { Guarantee } from "@/entities/guarantees";
 
-export function useCreateGuarantee() {
+export function useUpdateGuarantee() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (guaranteeData: Record<string, unknown>) => createGuarantee(guaranteeData),
+        mutationFn: (guaranteeData: Guarantee[]) => updateGuarantees(guaranteeData),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["garantias-dashboard"] });
         },
