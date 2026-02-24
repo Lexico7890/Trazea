@@ -56,7 +56,7 @@ export interface AppPermissions {
     view_audit_logs: boolean;
     assign_locations: boolean;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Role {

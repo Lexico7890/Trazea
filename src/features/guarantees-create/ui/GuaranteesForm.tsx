@@ -24,9 +24,9 @@ import { useCreateGuarantee } from "../lib/useCreateGuarantees";
 import { useTechnicians } from "@/entities/technical";
 import { uploadWarrantyImage } from "../api";
 import { AutocompleteInputList } from "@/entities/inventario";
-import { X } from "lucide-react";
 import type { Guarantee } from "@/entities/guarantees";
 import type { SparePart } from "@/shared/model";
+import { ImageUploadMulti } from "@/features/inventario-crear-repuesto";
 
 interface GuaranteesFormProps {
   prefillData?: Guarantee[];
@@ -49,8 +49,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   const [applicant, setApplicant] = useState<string>(""); // Owner name
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
   const [warrantyReason, setWarrantyReason] = useState<string>("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedParts, setSelectedParts] = useState<SparePart[]>([]);
 
   // State to track if we are in "send mode" (pre-filled from existing warranty)
@@ -95,32 +94,9 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
     setIsReadOnlyMode(true);
   }, [prefillData, location.state]);
 
-  // Handle file change with preview
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-
-      // Revoke previous preview URL to avoid memory leaks
-      if (imagePreview) {
-        URL.revokeObjectURL(imagePreview);
-      }
-
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
-    }
-  };
-
-  // Clear image preview
-  const clearImagePreview = () => {
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-      setImagePreview(null);
-    }
-    setSelectedFile(null);
-    const fileInput = document.getElementById("image") as HTMLInputElement;
-    if (fileInput) fileInput.value = "";
+  // Handle images change from ImageUploadMulti
+  const handleImagesChange = (files: File[]) => {
+    setSelectedFiles(files);
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -135,19 +111,19 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
     if (!selectedTechnicianId) return toast.info("Seleccione un técnico");
     if (!warrantyReason)
       return toast.info("Ingrese la observación de garantía");
-    if (!selectedFile)
-      return toast.info("Debe adjuntar una imagen como evidencia");
+    if (selectedFiles.length === 0)
+      return toast.info("Debe adjuntar al menos una imagen como evidencia");
 
     try {
-      let imageUrl = null;
-      if (selectedFile) {
+      const imageUrls: string[] = [];
+      for (const file of selectedFiles) {
         toast.loading("Subiendo imagen...", { id: "warranty-upload" });
-        imageUrl = await uploadWarrantyImage(selectedFile);
+        const imageUrl = await uploadWarrantyImage(file);
+        imageUrls.push(imageUrl);
         toast.success("Imagen subida correctamente", { id: "warranty-upload" });
       }
 
       const guaranteeData = {
-        id_garantia: currentWarrantyId,
         id_repuesto: selectedPart.id_repuesto,
         referencia_repuesto: selectedPart.referencia,
         nombre_repuesto: selectedPart.nombre,
@@ -155,12 +131,13 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
         id_usuario_reporta: sessionData?.user.id,
         id_tecnico_asociado: selectedTechnicianId,
         motivo_falla: warrantyReason,
-        url_evidencia_foto: imageUrl,
+        url_evidencia_foto: imageUrls[0], // Keep first image for backward compatibility
+        imagenes_adicionales: imageUrls.slice(1), // Store additional images
         kilometraje: mileage,
         orden: orderNumber,
         solicitante: applicant,
         comentarios_resolucion: customerNotes,
-        estado: "Pendiente", // Or whatever status it should transition to
+        estado: "Pendiente",
       };
 
       await createGuaranteeMutation.mutateAsync(guaranteeData);
@@ -176,7 +153,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
       setSelectedTechnicianId("");
       setWarrantyReason("");
       setIsReadOnlyMode(false);
-      clearImagePreview();
+      setSelectedFiles([]);
     } catch (error) {
       toast.error("Error al registrar la garantía");
       console.error(error);
@@ -332,31 +309,11 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
 
           {/* Imagen */}
           <div className="grid gap-2">
-            <Label htmlFor="image">Imagen</Label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
+            <Label>Evidencia fotográfica</Label>
+            <ImageUploadMulti
+              onImagesChange={handleImagesChange}
+              maxImages={10}
             />
-            {/* Image Preview */}
-            {imagePreview && (
-              <div className="relative mt-2 rounded-lg overflow-hidden border border-border">
-                <img
-                  src={imagePreview}
-                  alt="Vista previa"
-                  className="w-full max-h-64 object-contain bg-muted"
-                />
-                <button
-                  type="button"
-                  onClick={clearImagePreview}
-                  className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
-                  title="Eliminar imagen"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
           </div>
 
           <Button type="submit" className="w-full mt-4">
