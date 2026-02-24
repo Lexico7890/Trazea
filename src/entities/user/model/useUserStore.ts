@@ -56,7 +56,7 @@ export interface AppPermissions {
     view_audit_logs: boolean;
     assign_locations: boolean;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Role {
@@ -191,6 +191,7 @@ export const useUserStore = create<UserStore>()(
         sessionData: state.sessionData,
         isAuthenticated: state.isAuthenticated,
         selectedLocationId: state.selectedLocationId,
+        currentLocation: state.currentLocation,
       }),
       storage: createJSONStorage(() => localStorage),
     }

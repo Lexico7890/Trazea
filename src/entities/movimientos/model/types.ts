@@ -1,3 +1,5 @@
+import type { SparePart } from "@/shared/model";
+
 /**
  * Tipos de movimientos técnicos disponibles
  */
@@ -96,13 +98,12 @@ export interface MovimientoEdicion {
 
 
 export interface TechnicalMovement {
+  repuestos: SparePart[];
   id_localizacion?: string;
-  id_repuesto?: string;
   id_usuario_responsable?: string;
   id_tecnico_asignado?: string | null;
   concepto?: string;
   tipo?: string;
-  cantidad?: number;
   numero_orden?: string | null;
   descargada?: boolean;
   [key: string]: unknown;

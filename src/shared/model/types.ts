@@ -14,6 +14,13 @@ export interface Destination {
     telefono: string;
 }
 
+export interface SparePart {
+    id_repuesto: string;
+    referencia: string;
+    nombre: string;
+    cantidad?: number;
+}
+
 export type LoaderSize = 'sm' | 'md' | 'lg' | 'xl';
 export type LoaderVariant = 'spinner' | 'dots' | 'pulse' | 'bars';
 export type SkeletonVariant = 'text' | 'circular' | 'rectangular';

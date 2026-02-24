@@ -12,29 +12,34 @@ import {
 import { BrushCleaning } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { Slider } from "@/shared/ui/slider";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { ActionButtonGroup, TIPY_CONCEPT } from "../constants";
 import { useUserStore } from "@/entities/user";
 import { useTechnicians } from "@/entities/technical";
 import { useRecordsStore } from "@/entities/records";
 import { useTechnicalMovements } from "../lib/useTechnicalMovement";
-import { AutocompleteInput } from "@/entities/inventario";
+import { AutocompleteInputList } from "@/entities/inventario";
+import type { SparePart } from "@/shared/model";
 
 export function MovementsWorkshopForm() {
   const [orderNumber, setOrderNumber] = useState<string>("");
-  const [countItems, setCountItems] = useState<number>(1);
   const [actionButtonGroup, setActionButtonGroup] = useState<ActionButtonGroup>(
-    ActionButtonGroup.SALIDA
+    ActionButtonGroup.SALIDA,
   );
   const [movementConcept, setMovementConcept] = useState<TIPY_CONCEPT | null>(
-    null
+    null,
   );
-  const [selected, setSelected] = useState<{ id_repuesto: string, referencia: string, nombre: string } | null>(null);
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
+  const [selectedParts, setSelectedParts] = useState<SparePart[]>([]);
 
   const { sessionData } = useUserStore();
   const locationId = sessionData?.locations?.[0]?.id_localizacion;
@@ -42,58 +47,22 @@ export function MovementsWorkshopForm() {
   const { data: technicians } = useTechnicians(locationId);
   const { movementToEdit, setMovementToEdit } = useRecordsStore();
 
-  const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } = useTechnicalMovements();
-
-  useEffect(() => {
-    if (!movementToEdit) return;
-
-    // Intentionally syncing form state with external edit data
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrderNumber(movementToEdit.numero_orden || "");
-
-    setCountItems(movementToEdit.cantidad || 1);
-
-    // Map 'tipo' string to ActionButtonGroup enum if possible
-    // Assuming movementToEdit.tipo matches the enum values
-    if (Object.values(ActionButtonGroup).includes(movementToEdit.tipo as ActionButtonGroup)) {
-
-      setActionButtonGroup(movementToEdit.tipo as ActionButtonGroup);
-    }
-
-    // Map 'concepto'
-    // Assuming movementToEdit.concepto matches TIPY_CONCEPT
-    if (Object.values(TIPY_CONCEPT).includes(movementToEdit.concepto as TIPY_CONCEPT)) {
-
-      setMovementConcept(movementToEdit.concepto as TIPY_CONCEPT);
-    }
-    if (movementToEdit.id_repuesto && movementToEdit.repuesto_nombre) {
-
-      setSelected({
-        id_repuesto: movementToEdit.id_repuesto,
-        referencia: movementToEdit.repuesto_referencia || "",
-        nombre: movementToEdit.repuesto_nombre
-      });
-    }
-
-    if (movementToEdit.id_tecnico_asignado) {
-
-      setSelectedTechnicianId(movementToEdit.id_tecnico_asignado);
-    }
-  }, [movementToEdit]);
+  const { handleCreateTechnicalMovement, isProcessing: isTechnicalProcessing } =
+    useTechnicalMovements();
 
   const handleClear = () => {
-    setSelected(null);
     setActionButtonGroup(ActionButtonGroup.SALIDA);
     setMovementConcept(null);
     setOrderNumber("");
-    setCountItems(1);
     setSelectedTechnicianId("");
+    setSelectedParts([]);
     setMovementToEdit(null);
   };
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const validatedOrderNumber = typeof orderNumber !== 'string' ? String(orderNumber) : orderNumber;
+    const validatedOrderNumber =
+      typeof orderNumber !== "string" ? String(orderNumber) : orderNumber;
 
     if (!selectedTechnicianId) {
       toast.info("Debe seleccionar un técnico");
@@ -105,7 +74,9 @@ export function MovementsWorkshopForm() {
       actionButtonGroup === ActionButtonGroup.INGRESO
     ) {
       if (!movementConcept) {
-        toast.info("Debe seleccionar un concepto de movimiento para salida o ingreso");
+        toast.info(
+          "Debe seleccionar un concepto de movimiento para salida o ingreso",
+        );
         return;
       }
     }
@@ -116,23 +87,21 @@ export function MovementsWorkshopForm() {
       }
     }
 
-    if (!selected) {
+    if (selectedParts.length === 0) {
       toast.info("Debe seleccionar un repuesto");
-      return;
-    }
-    if (countItems <= 0) {
-      toast.info("La cantidad debe ser mayor a 0");
       return;
     }
 
     const movementData = {
+      repuestos: selectedParts,
       id_localizacion: locationId,
       id_usuario_responsable: sessionData?.user?.id,
       id_tecnico_asignado: selectedTechnicianId,
-      id_repuesto: selected?.id_repuesto,
-      concepto: (actionButtonGroup === ActionButtonGroup.VENTA ? TIPY_CONCEPT.VENTA : movementConcept) || undefined,
+      concepto:
+        (actionButtonGroup === ActionButtonGroup.VENTA
+          ? TIPY_CONCEPT.VENTA
+          : movementConcept) || undefined,
       tipo: actionButtonGroup,
-      cantidad: countItems,
       numero_orden: validatedOrderNumber || "",
     };
 
@@ -140,18 +109,14 @@ export function MovementsWorkshopForm() {
     await handleCreateTechnicalMovement(movementData as any);
 
     // Clear form and edit state
-    setSelected(null);
-    setActionButtonGroup(ActionButtonGroup.SALIDA);
-    setMovementConcept(null);
-    setOrderNumber("");
-    setCountItems(1);
-    setSelectedTechnicianId("");
-    setMovementToEdit(null);
+    handleClear();
   };
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>{movementToEdit ? "Editar movimiento" : "Movimiento taller"}</CardTitle>
+        <CardTitle>
+          {movementToEdit ? "Editar movimiento" : "Movimiento taller"}
+        </CardTitle>
         <CardDescription>
           {movementToEdit
             ? "Edita los detalles del movimiento (se creará un nuevo registro)"
@@ -175,21 +140,46 @@ export function MovementsWorkshopForm() {
           <div className="md:grid md:grid-cols-5 md:gap-4 flex flex-col gap-2 sm:gap-4">
             <div className="grid gap-2 col-span-5">
               <Label htmlFor="technician">Técnico</Label>
-              <Select value={selectedTechnicianId} onValueChange={setSelectedTechnicianId}>
+              <Select
+                value={selectedTechnicianId}
+                onValueChange={setSelectedTechnicianId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar técnico" />
                 </SelectTrigger>
                 <SelectContent>
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {technicians?.map((tech: any) => (
-                    <SelectItem key={tech.id_usuario} value={tech.id_usuario}>
-                      {tech.nombre_usuario}
-                    </SelectItem>
-                  ))}
+                  {technicians?.length === 0 ? (
+                    <div className="p-2 text-sm text-gray-500">
+                      No hay técnicos disponibles para esta ubicación
+                    </div>
+                  ) : (
+                    technicians?.map(
+                      (tech: {
+                        id_usuario: string;
+                        nombre_usuario: string;
+                      }) => (
+                        <SelectItem
+                          key={tech.id_usuario}
+                          value={tech.id_usuario}
+                        >
+                          {tech.nombre_usuario}
+                        </SelectItem>
+                      ),
+                    )
+                  )}
+                  <div className="p-2 text-sm text-gray-500"></div>
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2 col-span-2">
+            <div className="col-span-5">
+              <AutocompleteInputList
+                selectedParts={selectedParts}
+                setSelectedParts={setSelectedParts}
+                locationId={locationId}
+              />
+            </div>
+            <div className="grid gap-2 col-span-5">
               <Label htmlFor="order">Orden</Label>
               <Input
                 id="order"
@@ -197,34 +187,6 @@ export function MovementsWorkshopForm() {
                 placeholder="999999"
                 value={orderNumber}
                 onChange={(e) => setOrderNumber(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2 col-span-3">
-              <div className="flex items-center">
-                <Label htmlFor="password">Repuesto</Label>
-              </div>
-              <AutocompleteInput
-                setSelected={setSelected}
-                selected={selected}
-                id_localizacion={locationId}
-              />
-            </div>
-            <div className="grid gap-4 col-span-5">
-              <div className="flex items-center">
-                <Label htmlFor="quantity">
-                  Cantidad:{" "}
-                  <span className="text-green-400 font-bold">
-                    {countItems}
-                  </span>
-                </Label>
-              </div>
-              <Slider
-                value={[countItems]}
-                onValueChange={(value) => setCountItems(value[0])}
-                max={50}
-                step={1}
-                min={1}
-                id="quantity"
               />
             </div>
             <div className="grid gap-2 col-span-5">
@@ -334,7 +296,11 @@ export function MovementsWorkshopForm() {
             </div>
           </div>
           <div className="mt-4">
-            <Button type="submit" className="w-full" disabled={isTechnicalProcessing}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isTechnicalProcessing}
+            >
               {isTechnicalProcessing ? "Procesando..." : "Guardar"}
             </Button>
           </div>

@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getGarantiasDashboard, updateGuaranteeStatus } from "../api";
+import { getGarantiasDashboard, updateGuaranteeStatus } from "@/entities/guarantees/api";
 
 export function useGarantiasDashboard() {
     return useQuery({
         queryKey: ["garantias-dashboard"],
         queryFn: () => getGarantiasDashboard(),
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 5,
     });
 }
 
