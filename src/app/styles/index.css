@@ -154,7 +154,7 @@ input:not(:placeholder-shown) {
 
 /* Enhanced focus states for inputs */
 input:focus {
-  border-color: #ef4444 !important;
+  border-color: #f8d7d2 !important;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
   outline: none !important;
 }

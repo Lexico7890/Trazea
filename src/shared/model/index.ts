@@ -1,1 +1,1 @@
-export { type Destination } from "./types";
+export { type Destination, type SparePart } from "./types";

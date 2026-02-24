@@ -7,7 +7,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/shared/ui/table"
-import { Loader2, Edit, Eye, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Eye, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import {
     AlertDialog,
@@ -31,14 +31,13 @@ import {
 import { Label } from "@/shared/ui/label";
 import { useUserStore } from "@/entities/user";
 import { MovementDetailsModal, useSearchMovements, type MovimientoTecnico } from "@/entities/movimientos";
-import { useRecordsStore } from "@/entities/records";
 import { useMarkMovementAsDownloaded } from "../lib/useMarkMovementAsDownloaded";
 import { cn } from "@/shared/lib";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
 
 
 export default function ListMovements() {
-    const { sessionData, hasRole, checkMenuPermission } = useUserStore();
+    const { sessionData, hasRole } = useUserStore();
 
     // Determine if we need to filter by technician
     const isTechnician = hasRole('tecnico');
@@ -69,7 +68,6 @@ export default function ListMovements() {
     const totalCount = queryData?.count || 0;
     const totalPages = Math.ceil(totalCount / pageSize);
 
-    const { setMovementToEdit } = useRecordsStore();
     const markAsDownloaded = useMarkMovementAsDownloaded();
     const [downloadConfirmId, setDownloadConfirmId] = useState<string | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,8 +111,6 @@ export default function ListMovements() {
         { value: "cotizacion", label: "Cotizacion" },
         { value: "devolucion", label: "Devolucion" },
     ];
-
-    const canEdit = checkMenuPermission("registros", "edit_register");
 
     if (isLoading) {
         return (
@@ -236,22 +232,6 @@ export default function ListMovements() {
                                     <TableCell>
                                         <ActionMenu
                                             actions={[
-                                                {
-                                                    label: "Editar",
-                                                    icon: <Edit className="h-4 w-4" />,
-                                                    disabled: !canEdit,
-                                                    onClick: () => setMovementToEdit({
-                                                        id_movimientos_tecnicos: movement.id_movimientos_tecnicos,
-                                                        id_repuesto: movement.id_repuesto,
-                                                        repuesto_referencia: movement.referencia,
-                                                        repuesto_nombre: movement.nombre_repuesto,
-                                                        id_tecnico_asignado: movement.id_tecnico_asignado,
-                                                        tipo: movement.tipo,
-                                                        concepto: movement.concepto,
-                                                        cantidad: movement.cantidad,
-                                                        numero_orden: String(movement.numero_orden)
-                                                    })
-                                                },
                                                 {
                                                     label: "Descargar",
                                                     icon: <Download className="h-4 w-4" />,

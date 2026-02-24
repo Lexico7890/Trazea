@@ -1,3 +1,5 @@
+import type { SparePart } from "@/shared/model";
+
 // Types for inventory feature
 export interface InventoryItem {
     // Inventory specific fields
@@ -40,11 +42,13 @@ export interface PaginatedInventoryResponse {
 }
 
 export interface AutocompleteInputProps {
-    selected?: { id_repuesto: string, referencia: string, nombre: string } | null;
-    setSelected: (selection: { id_repuesto: string, referencia: string, nombre: string } | null) => void;
+    selected?: SparePart | null;
+    setSelected: (selection: SparePart | null) => void;
     id_localizacion?: string;
     placeholder?: string;
     searchSource?: 'inventory' | 'spares';
+    showBadge?: boolean;
+    clearInput?: boolean;
 }
 
 // Exporta este tipo para que los componentes padres lo usen

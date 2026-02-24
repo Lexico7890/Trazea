@@ -1,10 +1,22 @@
 import { useState, type FormEvent, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 import { toast } from "sonner";
 import { useUserStore } from "@/entities/user";
@@ -15,7 +27,7 @@ import { AutocompleteInput } from "@/entities/inventario";
 import { X } from "lucide-react";
 
 interface GuaranteesFormProps {
-  prefillData?: any;
+  prefillData?: unknown;
 }
 
 export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
@@ -28,7 +40,11 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   const [orderNumber, setOrderNumber] = useState<string>("");
   const [mileage, setMileage] = useState<string>(""); // Text as requested
   const [customerNotes, setCustomerNotes] = useState<string>("");
-  const [selectedPart, setSelectedPart] = useState<{ id_repuesto: string, referencia: string, nombre: string } | null>(null);
+  const [selectedPart, setSelectedPart] = useState<{
+    id_repuesto: string;
+    referencia: string;
+    nombre: string;
+  } | null>(null);
   const [applicant, setApplicant] = useState<string>(""); // Owner name
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
   const [warrantyReason, setWarrantyReason] = useState<string>("");
@@ -48,36 +64,36 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
     // Prefer passed prop data, fallback to location state if any (legacy or external link support)
     const data = prefillData || location.state?.warrantyData;
 
-    console.log("GuaranteesForm effect. data:", data);
+    if (!data) return;
 
-    if (data) {
-      setCurrentWarrantyId(data.id_garantia || "");
-      setOrderNumber(data.orden || "");
-      // Assuming 'kilometraje' comes from the list item
-      setMileage(data.kilometraje ? String(data.kilometraje) : "");
+    
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentWarrantyId(data.id_garantia || "");
+    setOrderNumber(data.orden || "");
+    // Assuming 'kilometraje' comes from the list item
+    setMileage(data.kilometraje ? String(data.kilometraje) : "");
 
-      // Pre-fill part if available
-      if (data.id_repuesto && data.referencia_repuesto) {
-        setSelectedPart({
-          id_repuesto: data.id_repuesto,
-          referencia: data.referencia_repuesto,
-          nombre: data.nombre_repuesto || ""
-        });
-      }
-
-      // Pre-fill technician (check if we have the ID, otherwise might need to match by name or it might be missing in LIST view)
-      // The list view has 'tecnico_responsable' (name) or 'id_tecnico_asociado' (if available). 
-      // Assuming 'id_tecnico_asociado' is available in the object from the list query.
-      if (data.id_tecnico_asociado) {
-        setSelectedTechnicianId(data.id_tecnico_asociado);
-      }
-
-      setApplicant(data.solicitante || "");
-      // setCustomerNotes(data.comentarios_resolucion || ""); // Maybe? User said "los demas campos si pueden ser manipulados"
-      // setWarrantyReason(data.motivo_falla || "");
-
-      setIsReadOnlyMode(true);
+    // Pre-fill part if available
+    if (data.id_repuesto && data.referencia_repuesto) {
+      setSelectedPart({
+        id_repuesto: data.id_repuesto,
+        referencia: data.referencia_repuesto,
+        nombre: data.nombre_repuesto || "",
+      });
     }
+
+    // Pre-fill technician (check if we have the ID, otherwise might need to match by name or it might be missing in LIST view)
+    // The list view has 'tecnico_responsable' (name) or 'id_tecnico_asociado' (if available).
+    // Assuming 'id_tecnico_asociado' is available in the object from the list query.
+    if (data.id_tecnico_asociado) {
+      setSelectedTechnicianId(data.id_tecnico_asociado);
+    }
+
+    setApplicant(data.solicitante || "");
+    // setCustomerNotes(data.comentarios_resolucion || ""); // Maybe? User said "los demas campos si pueden ser manipulados"
+    // setWarrantyReason(data.motivo_falla || "");
+
+    setIsReadOnlyMode(true);
   }, [prefillData, location.state]);
 
   // Handle file change with preview
@@ -111,14 +127,17 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     // Basic validation
-    if (!selectedLocationId) return toast.info("No hay una ubicación seleccionada");
+    if (!selectedLocationId)
+      return toast.info("No hay una ubicación seleccionada");
     if (!orderNumber) return toast.info("Ingrese el número de orden");
     if (!mileage) return toast.info("Ingrese el kilometraje");
     if (!selectedPart) return toast.info("Seleccione un repuesto");
     if (!applicant) return toast.info("Ingrese el solicitante");
     if (!selectedTechnicianId) return toast.info("Seleccione un técnico");
-    if (!warrantyReason) return toast.info("Ingrese la observación de garantía");
-    if (!selectedFile) return toast.info("Debe adjuntar una imagen como evidencia");
+    if (!warrantyReason)
+      return toast.info("Ingrese la observación de garantía");
+    if (!selectedFile)
+      return toast.info("Debe adjuntar una imagen como evidencia");
 
     try {
       let imageUrl = null;
@@ -159,7 +178,6 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
       setWarrantyReason("");
       setIsReadOnlyMode(false);
       clearImagePreview();
-
     } catch (error) {
       toast.error("Error al registrar la garantía");
       console.error(error);
@@ -170,11 +188,12 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Registro de Garantía</CardTitle>
-        <CardDescription>Complete los datos para registrar una nueva garantía.</CardDescription>
+        <CardDescription>
+          Complete los datos para registrar una nueva garantía.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
           {/* Taller - Hidden as it is taken from current location */}
           <div className="grid gap-2">
             <Label htmlFor="location">Taller</Label>
@@ -208,11 +227,11 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
                 value={mileage}
                 onChange={(e) => setMileage(e.target.value)}
                 placeholder="Ej: 50000 o 'Apagada'"
-              // User didn't request this to be locked, but "taller orden, repuesto, tecnico" were mentioned as locked.
-              // Assuming Kilometaje is editable unless implied otherwise. 
-              // "taller orden, repuesto, tecnico, estos campos no pueden ser editados" -> does not include Kilometraje explicitly?
-              // Actually, "deben estar siempre bloqueados, los demas campos si pueden ser manipulados". 
-              // So Kilometraje is one of "los demas".
+                // User didn't request this to be locked, but "taller orden, repuesto, tecnico" were mentioned as locked.
+                // Assuming Kilometaje is editable unless implied otherwise.
+                // "taller orden, repuesto, tecnico, estos campos no pueden ser editados" -> does not include Kilometraje explicitly?
+                // Actually, "deben estar siempre bloqueados, los demas campos si pueden ser manipulados".
+                // So Kilometraje is one of "los demas".
               />
             </div>
           </div>
@@ -231,7 +250,9 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
           {/* Repuesto */}
           <div className="grid gap-2">
             <Label>Repuesto</Label>
-            <div className={isReadOnlyMode ? "pointer-events-none opacity-80" : ""}>
+            <div
+              className={isReadOnlyMode ? "pointer-events-none opacity-80" : ""}
+            >
               <AutocompleteInput
                 selected={selectedPart}
                 setSelected={setSelectedPart}
@@ -260,16 +281,39 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
                 onValueChange={setSelectedTechnicianId}
                 disabled={!selectedLocationId || isReadOnlyMode}
               >
-                <SelectTrigger id="technician" className={isReadOnlyMode ? "bg-muted" : ""}>
-                  <SelectValue placeholder={selectedLocationId ? "Seleccionar técnico" : "Seleccione un taller primero"} />
+                <SelectTrigger
+                  id="technician"
+                  className={isReadOnlyMode ? "bg-muted" : ""}
+                >
+                  <SelectValue
+                    placeholder={
+                      selectedLocationId
+                        ? "Seleccionar técnico"
+                        : "Seleccione un taller primero"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {technicians?.map((tech: any) => (
-                    <SelectItem key={tech.id_usuario} value={tech.id_usuario}>
-                      {tech.nombre_usuario}
-                    </SelectItem>
-                  ))}
+                  {technicians?.length === 0 ? (
+                    <div className="p-2 text-sm text-gray-500">
+                      No hay técnicos disponibles para esta ubicación
+                    </div>
+                  ) : (
+                    technicians?.map(
+                      (tech: {
+                        id_usuario: string;
+                        nombre_usuario: string;
+                      }) => (
+                        <SelectItem
+                          key={tech.id_usuario}
+                          value={tech.id_usuario}
+                        >
+                          {tech.nombre_usuario}
+                        </SelectItem>
+                      ),
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -315,7 +359,9 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
             )}
           </div>
 
-          <Button type="submit" className="w-full mt-4">Gestionar Garantía</Button>
+          <Button type="submit" className="w-full mt-4">
+            Gestionar Garantía
+          </Button>
         </form>
       </CardContent>
     </Card>

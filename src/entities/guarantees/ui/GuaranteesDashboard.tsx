@@ -19,6 +19,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/shared/ui/hover-card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/ui/popover";
 import { Badge } from "@/shared/ui/badge";
 import { toast } from "sonner";
 import {
@@ -30,8 +35,24 @@ import {
 } from "@/shared/ui/select";
 
 interface GuaranteesDashboardProps {
-  onSendWarranty?: (warranty: any) => void;
+  onSendWarranty?: (warranty: unknown) => void;
 }
+
+interface WarrantyGroup {
+  orden: string;
+  items: unknown[];
+  fecha_reporte?: string;
+  tecnico_responsable?: string;
+  reportado_por?: string;
+  solicitante?: string;
+  estado?: string;
+  taller_origen?: string;
+  motivo_falla?: string;
+  kilometraje?: number;
+  url_evidencia_foto?: string;
+  repuestosCount: number;
+}
+
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
 const STATUS_OPTIONS = [
@@ -56,37 +77,66 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
   const { data: warranties = [], isLoading, isError, error } = useGarantiasDashboard();
   const updateStatusMutation = useUpdateGuaranteeStatus();
 
-  // Combined filtering logic
-  const filteredWarranties = useMemo(() => {
+  // Group warranties by orden
+  const groupedWarranties = useMemo(() => {
     if (!Array.isArray(warranties)) return [];
+    
+    const groups: Record<string, WarrantyGroup[]> = {};
+    
+    warranties.forEach((w: WarrantyGroup) => {
+      const ordenKey = w.orden || 'sin-orden';
+      if (!groups[ordenKey]) {
+        groups[ordenKey] = [];
+      }
+      groups[ordenKey].push(w);
+    });
+    
+    return Object.entries(groups).map(([orden, items]) => ({
+      orden,
+      items,
+      fecha_reporte: items[0]?.fecha_reporte,
+      tecnico_responsable: items[0]?.tecnico_responsable,
+      reportado_por: items[0]?.reportado_por,
+      solicitante: items[0]?.solicitante,
+      estado: items[0]?.estado,
+      taller_origen: items[0]?.taller_origen,
+      motivo_falla: items[0]?.motivo_falla,
+      kilometraje: items[0]?.kilometraje,
+      url_evidencia_foto: items[0]?.url_evidencia_foto,
+      repuestosCount: items.length,
+    }));
+  }, [warranties]);
 
-    return warranties.filter((w: any) => {
-      // Search filter
+  // Filter grouped warranties
+  const filteredGroups = useMemo(() => {
+    return groupedWarranties.filter((group: WarrantyGroup) => {
+      // Search filter - search in any item of the group
       const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = !searchTerm || (
-        w.orden?.toLowerCase().includes(searchLower) ||
-        w.referencia_repuesto?.toLowerCase().includes(searchLower) ||
-        w.nombre_repuesto?.toLowerCase().includes(searchLower) ||
-        w.tecnico_responsable?.toLowerCase().includes(searchLower) ||
-        w.solicitante?.toLowerCase().includes(searchLower)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const matchesSearch = !searchTerm || group.items.some((item: any) =>
+        item.orden?.toLowerCase().includes(searchLower) ||
+        item.referencia_repuesto?.toLowerCase().includes(searchLower) ||
+        item.nombre_repuesto?.toLowerCase().includes(searchLower) ||
+        item.tecnico_responsable?.toLowerCase().includes(searchLower) ||
+        item.solicitante?.toLowerCase().includes(searchLower)
       );
 
       // Status filter
       const matchesStatus = statusFilter === "all" ||
-        w.estado?.toLowerCase() === statusFilter.toLowerCase();
+        group.estado?.toLowerCase() === statusFilter.toLowerCase();
 
       // Date filters
       let matchesDateFrom = true;
       let matchesDateTo = true;
 
-      if (dateFrom && w.fecha_reporte) {
-        const itemDate = new Date(w.fecha_reporte);
+      if (dateFrom && group.fecha_reporte) {
+        const itemDate = new Date(group.fecha_reporte);
         const fromDate = new Date(dateFrom);
         matchesDateFrom = itemDate >= fromDate;
       }
 
-      if (dateTo && w.fecha_reporte) {
-        const itemDate = new Date(w.fecha_reporte);
+      if (dateTo && group.fecha_reporte) {
+        const itemDate = new Date(group.fecha_reporte);
         const toDate = new Date(dateTo);
         toDate.setHours(23, 59, 59, 999);
         matchesDateTo = itemDate <= toDate;
@@ -94,14 +144,7 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
 
       return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo;
     });
-  }, [warranties, searchTerm, statusFilter, dateFrom, dateTo]);
-
-  // Pagination logic
-  const totalItems = filteredWarranties.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedWarranties = filteredWarranties.slice(startIndex, endIndex);
+  }, [groupedWarranties, searchTerm, statusFilter, dateFrom, dateTo]);
 
   // Reset to first page when filters change
   const handleFilterChange = () => {
@@ -143,7 +186,14 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
 
   const hasActiveFilters = searchTerm || statusFilter !== "all" || dateFrom || dateTo;
 
-  const getStatusColor = (status: string) => {
+  // Pagination logic
+  const totalItems = filteredGroups.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedGroups = filteredGroups.slice(startIndex, endIndex);
+
+  const getStatusColor = (status: string | undefined) => {
     const lowerStatus = status?.toLowerCase() || '';
     if (lowerStatus === 'sin enviar') return 'bg-orange-500 text-white border-transparent shadow-[0_0_12px_-3px_rgba(249,115,22,0.8)] hover:bg-orange-600 hover:shadow-[0_0_15px_-3px_rgba(249,115,22,1)] transition-all';
     if (lowerStatus === 'pendiente') return 'bg-blue-500 text-white border-transparent shadow-[0_0_12px_-3px_rgba(59,130,246,0.8)] hover:bg-blue-600 hover:shadow-[0_0_15px_-3px_rgba(59,130,246,1)] transition-all';
@@ -151,7 +201,8 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
     return 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  const handleUpdateStatus = async (id: string, newStatus: string) => {
+  const handleUpdateStatus = async (id: string | undefined, newStatus: string) => {
+    if (!id) return;
     try {
       await updateStatusMutation.mutateAsync({ id, status: newStatus });
       toast.success(`Estado actualizado a ${newStatus}`);
@@ -188,7 +239,7 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
         <div className="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10">
           <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
           <span className="text-xs font-medium text-primary uppercase tracking-wider">
-            {filteredWarranties.length} Registros
+            {filteredGroups.length} Órdenes
           </span>
         </div>
       </div>
@@ -289,39 +340,90 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedWarranties.map((item: any) => (
+              {paginatedGroups.map((group: {
+                orden?: string;
+                fecha_reporte?: string;
+                items: {
+                  referencia_repuesto?: string;
+                  nombre_repuesto?: string;
+                  motivo_falla?: string;
+                  id_garantia?: string;
+                }[];
+                repuestosCount: number;
+                tecnico_responsable?: string;
+                reportado_por?: string;
+                estado?: string;
+                taller_origen?: string;
+                motivo_falla?: string;
+                kilometraje?: number;
+                url_evidencia_foto?: string;
+                solicitante?: string;
+              }) => (
                 <TableRow
-                  key={item.id_garantia}
+                  key={group.orden}
                   className="group hover:bg-muted/30 transition-colors"
                 >
                   <TableCell className="font-medium text-muted-foreground text-sm">
-                    {item.fecha_reporte ? format(new Date(item.fecha_reporte), 'dd/MM/yyyy') : '-'}
+                    {group.fecha_reporte ? format(new Date(group.fecha_reporte), 'dd/MM/yyyy') : '-'}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{item.referencia_repuesto}</span>
-                      <span className="text-xs text-muted-foreground">{item.nombre_repuesto}</span>
-                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" className="h-auto p-0 hover:bg-transparent hover:text-primary flex flex-col items-start">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{group.items[0]?.referencia_repuesto}</span>
+                            {group.repuestosCount > 1 && (
+                              <Badge variant="secondary" className="text-[10px]">
+                                +{group.repuestosCount - 1}
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">{group.items[0]?.nombre_repuesto}</span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0" align="start">
+                        <div className="bg-muted/50 p-3 border-b">
+                          <h4 className="font-semibold text-sm">Repuestos ({group.repuestosCount})</h4>
+                        </div>
+                        <div className="max-h-60 overflow-y-auto p-2">
+                          {group.items.map((item: {
+                            referencia_repuesto?: string;
+                            nombre_repuesto?: string;
+                            motivo_falla?: string;
+                          }, idx: number) => (
+                            <div key={idx} className="p-2 hover:bg-muted/30 rounded-md text-sm">
+                              <div className="font-medium">{item.referencia_repuesto}</div>
+                              <div className="text-xs text-muted-foreground">{item.nombre_repuesto}</div>
+                              {item.motivo_falla && (
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  <span className="font-semibold">Falla:</span> {item.motivo_falla}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="font-mono bg-background">
-                      {item.orden || 'S/N'}
+                      {group.orden || 'S/N'}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                        {(item.tecnico_responsable || item.reportado_por || 'U').charAt(0).toUpperCase()}
+                        {(group.tecnico_responsable || group.reportado_por || 'U').charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-sm">{item.tecnico_responsable || item.reportado_por || '-'}</span>
+                      <span className="text-sm">{group.tecnico_responsable || group.reportado_por || '-'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={`uppercase text-[10px] ${getStatusColor(item.estado)}`}
+                      className={`uppercase text-[10px] ${getStatusColor(group.estado)}`}
                     >
-                      {item.estado}
+                      {group.estado}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
@@ -337,36 +439,36 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
                           <h4 className="font-semibold text-sm">Detalle de Garantía</h4>
                           <Badge
                             variant="outline"
-                            className={`text-[10px] ${getStatusColor(item.estado)}`}
+                            className={`text-[10px] ${getStatusColor(group.estado)}`}
                           >
-                            {item.estado}
+                            {group.estado}
                           </Badge>
                         </div>
                         <div className="p-4 space-y-4">
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground flex items-center gap-1"><Activity className="h-3 w-3" /> Motivo Falla</p>
-                              <p className="font-medium line-clamp-2" title={item.motivo_falla}>{item.motivo_falla || 'No especificado'}</p>
+                              <p className="font-medium line-clamp-2" title={group.motivo_falla}>{group.motivo_falla || 'No especificado'}</p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" /> Kilometraje</p>
-                              <p className="font-medium">{item.kilometraje || 0} km</p>
+                              <p className="font-medium">{group.kilometraje || 0} km</p>
                             </div>
 
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground flex items-center gap-1"><User className="h-3 w-3" /> Solicitante</p>
-                              <p className="font-medium truncate">{item.solicitante || '-'}</p>
+                              <p className="font-medium truncate">{group.solicitante || '-'}</p>
                             </div>
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground flex items-center gap-1"><Wrench className="h-3 w-3" /> Taller Origen</p>
-                              <p className="font-medium truncate">{item.taller_origen || '-'}</p>
+                              <p className="font-medium truncate">{group.taller_origen || '-'}</p>
                             </div>
                           </div>
 
-                          {item.url_evidencia_foto && (
+                          {group.url_evidencia_foto && (
                             <div className="pt-2 border-t">
                               <a
-                                href={item.url_evidencia_foto}
+                                href={group.url_evidencia_foto}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-xs text-primary hover:underline flex items-center gap-1"
@@ -377,14 +479,14 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
                           )}
 
                           {/* Botón Enviar para garantías sin enviar */}
-                          {(item.estado === 'Sin enviar' || item.estado === 'sin enviar') && (
+                          {(group.estado === 'Sin enviar' || group.estado === 'sin enviar') && (
                             <div className="pt-2 border-t">
                               <Button
                                 size="sm"
                                 className="w-full text-xs h-8 bg-orange-600 hover:bg-orange-700 text-white"
                                 onClick={() => {
                                   if (onSendWarranty) {
-                                    onSendWarranty(item);
+                                    onSendWarranty(group.items[0]);
                                   }
                                 }}
                               >
@@ -394,12 +496,12 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
                           )}
 
                           {/* Botón Gestionado para garantías pendientes */}
-                          {(item.estado === 'Pendiente' || item.estado === 'pendiente') && (
+                          {(group.estado === 'Pendiente' || group.estado === 'pendiente') && (
                             <div className="pt-2 border-t">
                               <Button
                                 size="sm"
                                 className="w-full text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white"
-                                onClick={() => handleUpdateStatus(item.id_garantia, 'Aprobada')}
+                                onClick={() => handleUpdateStatus(group.items[0].id_garantia, 'Aprobada')}
                                 disabled={updateStatusMutation.isPending}
                               >
                                 {updateStatusMutation.isPending ? 'Actualizando...' : 'Gestionado'}
@@ -413,7 +515,7 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
                   </TableCell>
                 </TableRow>
               ))}
-              {paginatedWarranties.length === 0 && (
+              {paginatedGroups.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-12">
                     <p className="text-muted-foreground">
