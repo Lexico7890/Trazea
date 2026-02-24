@@ -191,6 +191,7 @@ export const useUserStore = create<UserStore>()(
         sessionData: state.sessionData,
         isAuthenticated: state.isAuthenticated,
         selectedLocationId: state.selectedLocationId,
+        currentLocation: state.currentLocation,
       }),
       storage: createJSONStorage(() => localStorage),
     }

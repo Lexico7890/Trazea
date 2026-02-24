@@ -23,18 +23,19 @@ import { useUserStore } from "@/entities/user";
 import { useCreateGuarantee } from "../lib/useCreateGuarantees";
 import { useTechnicians } from "@/entities/technical";
 import { uploadWarrantyImage } from "../api";
-import { AutocompleteInput } from "@/entities/inventario";
+import { AutocompleteInputList } from "@/entities/inventario";
 import { X } from "lucide-react";
+import type { Guarantee } from "@/entities/guarantees";
+import type { SparePart } from "@/shared/model";
 
 interface GuaranteesFormProps {
-  prefillData?: unknown;
+  prefillData?: Guarantee[];
 }
 
 export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   const { currentLocation, sessionData } = useUserStore();
   const createGuaranteeMutation = useCreateGuarantee();
   const location = useLocation();
-  console.log("sessionData", sessionData);
 
   // State for form fields
   const [orderNumber, setOrderNumber] = useState<string>("");
@@ -50,7 +51,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   const [warrantyReason, setWarrantyReason] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [currentWarrantyId, setCurrentWarrantyId] = useState<string>("");
+  const [selectedParts, setSelectedParts] = useState<SparePart[]>([]);
 
   // State to track if we are in "send mode" (pre-filled from existing warranty)
   const [isReadOnlyMode, setIsReadOnlyMode] = useState(false);
@@ -62,36 +63,34 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
 
   useEffect(() => {
     // Prefer passed prop data, fallback to location state if any (legacy or external link support)
-    const data = prefillData || location.state?.warrantyData;
+    const data = prefillData;
 
     if (!data) return;
 
-    
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCurrentWarrantyId(data.id_garantia || "");
-    setOrderNumber(data.orden || "");
+    setOrderNumber(data[0].orden || "");
     // Assuming 'kilometraje' comes from the list item
-    setMileage(data.kilometraje ? String(data.kilometraje) : "");
-
-    // Pre-fill part if available
-    if (data.id_repuesto && data.referencia_repuesto) {
-      setSelectedPart({
-        id_repuesto: data.id_repuesto,
-        referencia: data.referencia_repuesto,
-        nombre: data.nombre_repuesto || "",
-      });
-    }
+    setMileage(data[0].kilometraje ? String(data[0].kilometraje) : "");
+    setSelectedParts((prev) => [
+      ...prev,
+      ...data.map((item: Guarantee) => ({
+        id_repuesto: item.id_repuesto,
+        referencia: item.referencia_repuesto,
+        nombre: item.nombre_repuesto || "",
+        cantidad: item.cantidad || 1,
+      })),
+    ]);
 
     // Pre-fill technician (check if we have the ID, otherwise might need to match by name or it might be missing in LIST view)
     // The list view has 'tecnico_responsable' (name) or 'id_tecnico_asociado' (if available).
     // Assuming 'id_tecnico_asociado' is available in the object from the list query.
-    if (data.id_tecnico_asociado) {
-      setSelectedTechnicianId(data.id_tecnico_asociado);
+    if (data[0].id_tecnico_asociado) {
+      setSelectedTechnicianId(data[0].id_tecnico_asociado);
     }
 
-    setApplicant(data.solicitante || "");
-    // setCustomerNotes(data.comentarios_resolucion || ""); // Maybe? User said "los demas campos si pueden ser manipulados"
-    // setWarrantyReason(data.motivo_falla || "");
+    setApplicant(data[0].solicitante || "");
+    // setCustomerNotes(data[0].comentarios_resolucion || ""); // Maybe? User said "los demas campos si pueden ser manipulados"
+    // setWarrantyReason(data[0].motivo_falla || "");
 
     setIsReadOnlyMode(true);
   }, [prefillData, location.state]);
@@ -183,6 +182,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
       console.error(error);
     }
   };
+  console.log("currentLocation", currentLocation);
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -253,10 +253,10 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
             <div
               className={isReadOnlyMode ? "pointer-events-none opacity-80" : ""}
             >
-              <AutocompleteInput
-                selected={selectedPart}
-                setSelected={setSelectedPart}
-                id_localizacion={selectedLocationId}
+              <AutocompleteInputList
+                selectedParts={selectedParts}
+                setSelectedParts={setSelectedParts}
+                locationId={selectedLocationId}
               />
             </div>
           </div>

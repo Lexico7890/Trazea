@@ -5,7 +5,7 @@ import { MovementsWorkshopForm } from "@/features/record-save-movement";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import ListMovements from "./list-movements";
 import { GuaranteesForm } from "@/features/guarantees-create";
-import { GuaranteesDashboard } from "@/entities/guarantees";
+import { GuaranteesDashboard } from "@/features/guarantees-dashboard";
 
 interface LocationState {
   defaultTab?: string;

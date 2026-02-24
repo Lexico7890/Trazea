@@ -1,1 +1,2 @@
-export { GuaranteesDashboard } from "./ui/GuaranteesDashboard";
+export * from "./api";
+export * from "./model/types";

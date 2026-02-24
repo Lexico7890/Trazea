@@ -12,4 +12,8 @@ export interface Guarantee {
     motivo_falla: string;
     url_evidencia_foto: string | null;
     comentarios_resolucion: string | null;
+    kilometraje?: number;
+    cantidad: number;
+    id_repuesto: string;
+    id_tecnico_asociado: string;
 }
