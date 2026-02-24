@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: ['trazea-icon.svg', 'favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
         name: 'Trazea',
-        short_name: 'WMS',
+        short_name: 'Trazea',
         description: 'Sistema de gestión de taller y inventario',
         theme_color: '#ffffff',
         icons: [

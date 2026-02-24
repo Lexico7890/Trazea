@@ -4,378 +4,352 @@
 
 <img src="./public/trazea-icon.svg" alt="Trazea Logo" width="200">
 
-**Sistema de Gestión de Taller e Inventario**
+**Sistema Integral de Gestión de Inventario, Taller y Garantías**
 
-Aplicación web moderna para la gestión integral de inventarios, repuestos, garantías y movimientos de stock.
+Plataforma web diseñada para Minca Electric que centraliza el control de inventarios multi-sede, solicitudes entre ubicaciones, movimientos de técnicos, garantías de repuestos y seguimiento de órdenes de scooters eléctricos — con trazabilidad completa en cada operación.
 
 [![React](https://img.shields.io/badge/React-19.2.0-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.2.2-646CFF.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.1.17-06B6D4.svg)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-3FCF8E.svg)](https://supabase.com/)
 [![FSD](https://img.shields.io/badge/Architecture-Feature--Sliced%20Design-7B3FF2)](https://feature-sliced.design/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
 
 ---
 
-## 📋 Tabla de Contenidos
+## ¿Qué es Trazea?
 
-- [📖 Descripción](#-descripción)
-- [🏗️ Arquitectura](#️-arquitectura)
-- [✨ Características](#-características)
-- [🚀 Tecnologías](#-tecnologías)
-- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
-- [⚙️ Configuración](#️-configuración)
-- [🔧 Instalación y Ejecución](#-instalación-y-ejecución)
-- [🐳 Docker](#-docker)
-- [📚 Desarrollo](#-desarrollo)
-- [🧪 Testing](#-testing)
-- [🚀 Despliegue](#-despliegue)
-- [🤝 Contribución](#-contribución)
-- [📄 Licencia](#-licencia)
+Trazea nace de la necesidad real de Minca Electric de controlar el flujo de repuestos y partes eléctricas entre múltiples sedes de taller. Antes de Trazea, el seguimiento de qué repuesto estaba en qué sede, quién lo solicitó, quién lo despachó y si llegó completo se hacía de forma manual o dispersa en hojas de cálculo.
+
+La plataforma resuelve esto con un sistema donde cada movimiento de inventario queda registrado, cada solicitud pasa por un workflow con trazabilidad completa, y cada garantía se gestiona con evidencia fotográfica y estados claros. Todo accesible desde cualquier dispositivo gracias a su diseño PWA.
 
 ---
 
-## 📖 Descripción
+## Funcionalidades Principales
 
-**Trazea (W.M.S.)** es una aplicación web profesional diseñada para la gestión completa de inventarios, repuestos y garantías. Desarrollada con las mejores prácticas de desarrollo moderno, esta plataforma permite a las organizaciones controlar sus activos, gestionar solicitudes de repuestos, realizar conteos de inventario y mantener un registro detallado de movimientos y garantías de productos.
+### 📦 Inventario Multi-Sede
 
-La aplicación implementa una arquitectura escalable basada en **Feature-Sliced Design (FSD)**, lo que garantiza un código mantenible, modular y fácil de extender.
+El corazón de la aplicación. Cada sede (localizacion) mantiene su propio inventario con cantidades independientes por repuesto.
 
-### Propósito Principal
+- **Stock por ubicación**: cada repuesto tiene su cantidad, posición física en bodega y stock mínimo configurable.
+- **Alertas de stock bajo**: cuando un repuesto cae por debajo de su `cantidad_minima`, el sistema genera notificaciones automáticas.
+- **Indicador de novedades**: los repuestos recién ingresados se marcan como "nuevos" durante un periodo configurable (`nuevo_hasta`), facilitando la identificación visual de ingresos recientes.
+- **Logs de auditoría**: cada cambio de cantidad queda registrado en `logs_inventario` con el usuario responsable, cantidad anterior, cantidad nueva, tipo de operación y detalles. Nada se pierde.
+- **Conteo de verificación**: el campo `veces_contado` permite rastrear cuántas veces un ítem ha sido auditado físicamente.
 
-- Gestión centralizada de inventarios multi-ubicación
-- Control de repuestos y solicitudes de taller
-- Administración de garantías y movimientos de stock
-- Sistema de conteo físico con generación de reportes
-- Gestión de usuarios con roles y permisos diferenciados
+### 🔄 Solicitudes entre Sedes (Workflow Completo)
+
+El flujo de solicitudes es uno de los procesos más robustos del sistema. Una solicitud pasa por múltiples etapas, cada una con un responsable diferente:
+
+1. **Creación**: un usuario en la sede destino crea la solicitud seleccionando repuestos desde un carrito (`carrito_solicitudes`).
+2. **Alistamiento**: el almacenista de la sede origen prepara los ítems, registrando la `cantidad_despachada` por cada repuesto (puede diferir de la solicitada).
+3. **Despacho**: se registra la guía de transporte y la fecha de envío.
+4. **Recepción**: el receptor en destino confirma la `cantidad_recibida` por ítem y puede agregar observaciones individuales.
+
+Cada transición de estado queda registrada en `trazabilidad_solicitudes` con el estado anterior, el nuevo, quién hizo el cambio, la fecha y un comentario opcional. Esto permite reconstruir el historial completo de cualquier solicitud.
+
+El sistema de carrito permite a los usuarios agregar múltiples repuestos con cantidades específicas antes de generar la solicitud formal, haciendo el proceso más ágil que crear solicitudes ítem por ítem.
+
+### 🔧 Movimientos de Técnicos
+
+Los técnicos de taller generan movimientos de repuestos diariamente (carga y descarga de partes para reparaciones). El sistema registra:
+
+- **Concepto y tipo** del movimiento (carga/descarga).
+- **Número de orden** de trabajo asociada.
+- **Técnico asignado** y usuario responsable (pueden ser diferentes — un supervisor puede registrar el movimiento de un técnico).
+- **Estado de descarga**: el flag `descargada` permite rastrear si un movimiento de carga ya fue descontado del inventario.
+
+Esto permite saber exactamente qué repuestos tiene asignados cada técnico y cruzar esa información con el inventario físico.
+
+### 🛡️ Gestión de Garantías
+
+Cuando un repuesto falla, el sistema permite registrar la garantía con toda la información necesaria para el reclamo:
+
+- **Datos del repuesto**: referencia, nombre, cantidad afectada.
+- **Contexto de la falla**: motivo de falla en texto libre, kilometraje del scooter, número de orden de trabajo y solicitante.
+- **Evidencia**: URL de foto como respaldo visual del defecto.
+- **Flujo de estados**: `Sin enviar` → `Pendiente` → `Aprobada` / `Rechazada`, con comentarios de resolución.
+- **Asociación a técnico**: se registra tanto quién reporta la garantía como el técnico asociado al caso.
+
+### 📊 Conteo Físico (Auditoría de Inventario)
+
+El módulo de conteo permite realizar auditorías de inventario comparando el stock del sistema con el conteo físico real:
+
+- **Conteo total o parcial**: se puede auditar toda la bodega o solo un subconjunto de repuestos.
+- **Tres cantidades por ítem**: cantidad del sistema, cantidad contada en sede (CSA) y cantidad en "pequeños quedan" (PQ) — esas piezas sueltas o en proceso que suelen generar discrepancias.
+- **Diferencia automática**: calculada como `(cantidad_sistema + cantidad_pq) - cantidad_csa`.
+- **Resumen del conteo**: total de ítems auditados, total de diferencias encontradas e ítems con PQ.
+- **Exportación a Excel**: generación de reportes con las discrepancias para acción correctiva.
+
+### 🛵 Seguimiento de Órdenes de Scooters
+
+Un módulo específico para el negocio de scooters eléctricos de Minca Electric:
+
+- **Seguimiento por niveles** (1 a 3): progreso del pedido desde la orden hasta la entrega.
+- **Tipo de scooter**: asociado a un catálogo de tipos con especificaciones de potencia.
+- **Datos de contacto**: teléfono y email del cliente para comunicación directa.
+- **Link de orden y estado**: permite al equipo consultar el estado actualizado de cada pedido.
+
+### 🔔 Sistema de Notificaciones
+
+- **Notificaciones in-app**: con título, mensaje, tipo, prioridad (alta/media/baja) y estado de lectura.
+- **Segmentación**: por usuario específico o por ubicación (todos los usuarios de una sede).
+- **Datos adicionales**: campo JSON flexible para adjuntar metadata contextual.
+- **Notificaciones admin**: los administradores pueden suscribirse para recibir alertas de nuevos registros de usuarios.
+
+### 👥 Gestión de Usuarios y Acceso
+
+El sistema implementa un flujo de registro con aprobación:
+
+- **Registro con aprobación**: los nuevos usuarios quedan en estado `aprobado = false` hasta que un administrador los aprueba. Se registra quién aprobó, cuándo y, en caso de rechazo, el motivo.
+- **Roles con permisos granulares**: cada rol tiene un objeto JSON de permisos que define exactamente qué puede hacer cada perfil en el sistema.
+- **Asignación multi-sede**: un usuario puede estar asignado a una o más ubicaciones mediante `usuarios_localizacion`, controlando a qué inventarios tiene acceso.
+- **Autenticación**: integración con Supabase Auth (email/password y Google OAuth).
+
+### 📋 Catálogo de Repuestos
+
+Base de datos centralizada de todos los repuestos del negocio:
+
+- **Referencia única**: código identificador que se usa en todo el sistema.
+- **Clasificación**: tipo, marca y descripción detallada.
+- **Estado**: flag de descontinuado para repuestos que ya no se manejan.
+- **Fecha estimada**: para repuestos en espera de reposición.
+- **Imágenes**: URL de imagen del repuesto para identificación visual.
+- **Carga masiva**: importación desde archivos Excel para actualizaciones grandes del catálogo.
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ### Feature-Sliced Design (FSD)
 
-Este proyecto implementa la metodología **Feature-Sliced Design**, una arquitectura que organiza el código en capas lógicas y reutilizables:
+El proyecto implementa FSD como metodología arquitectónica, organizando el código en capas con responsabilidades claras y dependencias unidireccionales:
 
 ```
 src/
-├── app/          # Configuración global y providers
-├── entities/     # Lógica de negocio del dominio
-├── features/     # Funcionalidades específicas del usuario
-├── pages/        # Composición de features en pantallas
-├── widgets/      # Componentes UI reutilizables
-├── shared/       # Código compartido entre capas
-└── processes/    # Flujo de datos entre features
+├── app/          → Configuración global, routing, providers, Sentry
+├── pages/        → Composición de features en vistas completas
+├── widgets/      → Componentes compuestos reutilizables (nav, notifications, pagination)
+├── features/     → Casos de uso del usuario (crear repuesto, solicitar, contar)
+├── entities/     → Entidades de dominio (user, inventory, locations)
+├── shared/       → UI base, utilidades, tipos, helpers
+└── processes/    → Flujos de datos entre features
 ```
 
-#### Capas de la Arquitectura
-
-1. **app/** - Configuración global, routing, providers
-2. **entities/** - Entidades de negocio (User, Inventory, Locations)
-3. **features/** - Casos de uso específicos (CreateSpare, RequestSpares)
-4. **pages/** - Composición de features en vistas completas
-5. **widgets/** - Componentes UI reutilizables (Pagination, Notifications)
-6. **shared/** - Utilidades, UI components, tipos comunes
-
-#### Principios Clave
-
-- **Separación de responsabilidades**: Cada capa tiene un propósito definido
-- **Reutilización**: Los widgets y entities pueden ser usados en múltiples features
-- **Mantenibilidad**: La arquitectura facilita la localización y modificación de código
-- **Escalabilidad**: Nueva funcionalidad puede agregarse sin afectar el código existente
-
----
-
-## ✨ Características
-
-### 🏪 Gestión de Inventario
-- **Control Multi-ubicación**: Gestiona inventarios en diferentes sedes
-- **Movimientos de Stock**: Registro detallado de entradas y salidas
-- **Historial Completo**: Trazabilidad de cada movimiento con referencia
-- **Imágenes de Productos**: Soporte para carga y visualización de imágenes
-
-### 🔩 Gestión de Repuestos
-- **Catálogo Centralizado**: Base de datos completa de repuestos
-- **Solicitudes de Taller**: Workflow de aprobación para solicitudes
-- **Filtros Avanzados**: Búsqueda por código, descripción, categoría
-- **Carga Masiva**: Importación de repuestos desde archivos Excel
-
-### 🛡️ Sistema de Garantías
-- **Creación de Garantías**: Registro de productos con garantía
-- **Seguimiento**: Estado actual de cada garantía
-- **Integración con Inventario**: Vinculación automática con productos
-
-### 📊 Conteo Físico
-- **Conteo por Categorías**: Proceso organizado por grupos de productos
-- **Validación en Tiempo Real**: Comparación con stock actual
-- **Reporte de Diferencias**: Identificación automática de discrepancias
-- **Exportación de Resultados**: Generación de reportes en Excel
-
-### 👥 Gestión de Usuarios
-- **Autenticación Segura**: Integración con Supabase Auth
-- **Roles y Permisos**: Admin, Técnico, Supervisor
-- **Selección de Ubicación**: Restricción por sede asignada
-
-### 🔔 Notificaciones
-- **Sistema de Alertas**: Notificaciones en tiempo real
-- **Notificaciones WhatsApp**: Integración para solicitudes críticas
-- **Menú Centralizado**: Gestión unificada de todas las notificaciones
-
----
-
-## 🚀 Tecnologías
-
-### Frontend Core
-- **React 19.2.0** - Biblioteca principal de UI
-- **TypeScript 5.9.3** - Tipado estático y mejor desarrollo
-- **Vite 7.2.2** - Build tool ultrarrápido con HMR
-- **React Router DOM 7.9.6** - Gestión de rutas
-
-### UI Framework & Styling
-- **Tailwind CSS 4.1.17** - Framework de CSS utility-first
-- **Radix UI** - Componentes accesibles y desacoplados
-- **Lucide React** - Biblioteca de iconos modernos
-- **Sonner** - Sistema de toast notifications
-
-### State Management & Data Fetching
-- **Zustand 5.0.8** - Gestión de estado ligera
-- **TanStack Query 5.90.10** - Server state management y cache
-- **React Hook Form 7.66.1** - Forms con validación
-- **Zod 4.1.13** - Validación de esquemas
-
-### Backend & Database
-- **Supabase** - Backend-as-a-Service (Authentication, Database, Storage)
-- **PostgreSQL** - Base de datos principal (manejada por Supabase)
-
-### Development & Testing
-- **ESLint** - Linting y calidad de código
-- **Vitest** - Testing framework integrado
-- **Testing Library** - Testing de componentes React
-- **TypeScript ESLint** - Reglas específicas para TypeScript
-
-### Production & Monitoring
-- **Sentry 10.26.0** - Error tracking y monitoring
-- **PWA** - Progressive Web App capabilities
-- **Docker** - Contenerización para producción
-
----
-
-## 📁 Estructura del Proyecto
+Cada feature sigue una estructura interna consistente:
 
 ```
-minca-inventory-system/
-├── 📁 public/                 # Assets estáticos
-│   ├── Trazea-icon.svg        # Logo principal
-│   └── logo_min.png          # Logo versión miniatura
-├── 📁 src/                   # Código fuente
-│   ├── 📁 app/               # Configuración global
-│   │   ├── ui/              # App principal y routing
-│   │   ├── providers/       # React providers
-│   │   ├── styles/          # Estilos globales
-│   │   └── lib/             # Utilidades de la app
-│   ├── 📁 entities/         # Entidades de negocio
-│   │   ├── user/            # Lógica de usuarios
-│   │   ├── locations/       # Gestión de ubicaciones
-│   │   └── inventory/       # Entidades de inventario
-│   ├── 📁 features/         # Funcionalidades específicas
-│   │   ├── auth-login/      # Login de usuarios
-│   │   ├── spares-create/   # Creación de repuestos
-│   │   ├── spares-upload/   # Carga masiva
-│   │   ├── spares-request-workshop/ # Solicitudes taller
-│   │   ├── guarantees-create/ # Gestión garantías
-│   │   └── count-spares/    # Conteo físico
-│   ├── 📁 pages/            # Vistas completas
-│   │   ├── auth/           # Páginas de autenticación
-│   │   ├── inventario/     # Gestión de inventario
-│   │   ├── spares/         # Gestión de repuestos
-│   │   ├── orders/         # Órdenes de trabajo
-│   │   ├── records/        # Registros y garantías
-│   │   ├── count/          # Conteo físico
-│   │   └── dynamo/         # Página especial Dynamo
-│   ├── 📁 widgets/          # Componentes reutilizables
-│   │   ├── nav/            # Navegación principal
-│   │   ├── notifications/  # Sistema de notificaciones
-│   │   └── pagination/     # Paginación genérica
-│   ├── 📁 shared/           # Código compartido
-│   │   ├── ui/             # Componentes UI base
-│   │   ├── lib/            # Utilidades y helpers
-│   │   └── components/     # Componentes comunes
-│   ├── 📁 assets/           # Imágenes y recursos
-│   └── 📄 main.tsx         # Punto de entrada
-├── 📁 dist/                 # Build de producción
-├── 📄 package.json          # Dependencias y scripts
-├── 📄 vite.config.ts        # Configuración de Vite
-├── 📄 tsconfig.json         # Configuración TypeScript
-├── 📄 docker-compose.yml    # Configuración Docker
-├── 📄 Dockerfile            # Imagen Docker
-├── 📄 .env.example          # Variables de entorno ejemplo
-└── 📄 README.md             # Documentación
+features/nombre-feature/
+├── ui/           → Componentes de presentación
+├── model/        → Tipos, validaciones (Zod), estado (Zustand)
+├── lib/          → Lógica de negocio
+├── api/          → Llamadas a Supabase
+└── index.ts      → API pública del feature
+```
+
+### Stack Técnico
+
+| Capa | Tecnología | Propósito |
+|------|-----------|-----------|
+| **UI** | React 19 + TypeScript | Componentes tipados con hooks |
+| **Estilos** | Tailwind CSS 4 + Radix UI | Utility-first + componentes accesibles |
+| **Estado cliente** | Zustand 5 | Estado global ligero y reactivo |
+| **Estado servidor** | TanStack Query 5 | Cache, sincronización y refetch automático |
+| **Formularios** | React Hook Form + Zod | Validación declarativa con inferencia de tipos |
+| **Backend** | Supabase | Auth, PostgreSQL, Storage, Row Level Security |
+| **Build** | Vite 7 | HMR instantáneo y builds optimizados |
+| **Monitoreo** | Sentry 10 | Error tracking en producción |
+| **Notificaciones** | Sonner | Toast notifications no intrusivas |
+| **Iconos** | Lucide React | Iconografía consistente y ligera |
+
+---
+
+## Estructura del Proyecto
+
+```
+trazea/
+├── public/                    → Assets estáticos (logos, favicon)
+├── src/
+│   ├── app/
+│   │   ├── ui/               → App root y routing principal
+│   │   ├── providers/        → Auth, Query, Theme providers
+│   │   ├── styles/           → CSS global y configuración Tailwind
+│   │   └── lib/              → Cliente Supabase, configuración Sentry
+│   ├── entities/
+│   │   ├── user/             → Autenticación, roles, perfil
+│   │   ├── locations/        → Sedes y asignaciones
+│   │   └── inventory/        → Tipos de inventario y repuestos
+│   ├── features/
+│   │   ├── auth-login/       → Login (email + Google OAuth)
+│   │   ├── spares-create/    → CRUD de repuestos
+│   │   ├── spares-upload/    → Carga masiva desde Excel
+│   │   ├── spares-request-workshop/ → Solicitudes con carrito
+│   │   ├── guarantees-create/ → Registro de garantías
+│   │   └── count-spares/     → Conteo físico de inventario
+│   ├── pages/
+│   │   ├── auth/             → Login, registro, aprobación pendiente
+│   │   ├── inventario/       → Vista y gestión de stock por sede
+│   │   ├── spares/           → Catálogo de repuestos
+│   │   ├── orders/           → Seguimiento de órdenes de scooters
+│   │   ├── records/          → Movimientos, garantías, historial
+│   │   ├── count/            → Módulo de conteo físico
+│   │   └── dynamo/           → Página Dynamo (scooters)
+│   ├── widgets/
+│   │   ├── nav/              → Sidebar y navegación principal
+│   │   ├── notifications/    → Centro de notificaciones
+│   │   └── pagination/       → Paginación genérica
+│   ├── shared/
+│   │   ├── ui/               → Botones, inputs, modales, badges
+│   │   ├── lib/              → Utilidades, formateo, constantes
+│   │   └── components/       → Componentes compartidos
+│   └── assets/               → Imágenes y recursos internos
+├── docker-compose.yml
+├── Dockerfile
+├── vite.config.ts
+└── tsconfig.json
 ```
 
 ---
 
-## ⚙️ Configuración
+## Configuración e Instalación
+
+### Requisitos
+
+- Node.js 22+
+- pnpm (recomendado)
 
 ### Variables de Entorno
 
-Crea un archivo `.env` basado en `.env.example`:
-
 ```env
-# Sentry Configuration
-VITE_SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
-
-# Supabase Configuration
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key
+VITE_SENTRY_DSN=https://tu-dsn@sentry.io/project-id
 ```
 
-### Supabase Setup
-
-1. **Crea un proyecto en Supabase**
-2. **Configura Authentication**: Habilita email/password auth
-3. **Crea las tablas necesarias**:
-   - `users` (usuarios y roles)
-   - `locations` (sedes/ubicaciones)
-   - `inventory` (productos y stock)
-   - `spares` (repuestos)
-   - `guarantees` (garantías)
-   - `movements` (movimientos de stock)
-   - `requests` (solicitudes)
-
-4. **Configura Row Level Security (RLS)** para cada tabla
-5. **Agrega storage buckets** para imágenes de productos
-
----
-
-## 🔧 Instalación y Ejecución
-
-### Requisitos Previos
-
-- **Node.js** 22 o superior
-- **pnpm** (recomendado) o npm
-- **Git**
-
-### Instalación
+### Ejecución Local
 
 ```bash
-# Clona el repositorio
+# Clonar e instalar
 git clone <repository-url>
-cd minca-inventory-system
-
-# Instala dependencias
+cd trazea
 pnpm install
 
-# Configura variables de entorno
+# Configurar entorno
 cp .env.example .env
-# Edit .env con tus credenciales
+# Editar .env con tus credenciales
+
+# Iniciar en desarrollo (http://localhost:5173)
+pnpm dev
 ```
 
 ### Scripts Disponibles
 
 ```bash
-# Desarrollo con HMR
-pnpm dev
-
-# Build para producción
-pnpm build
-
-# Preview del build
-pnpm preview
-
-# Linting del código
-pnpm lint
-
-# Type checking
-pnpm tsc --noEmit
+pnpm dev          # Desarrollo con HMR
+pnpm build        # Build de producción
+pnpm preview      # Preview del build
+pnpm lint         # Linting
+pnpm test         # Tests con Vitest
+pnpm test:watch   # Tests en modo watch
+pnpm test:coverage # Cobertura de código
 ```
 
-### Ejecución
+### Docker
 
 ```bash
-# Modo desarrollo (http://localhost:5173)
-pnpm dev
-
-# Modo producción
-pnpm build && pnpm preview
-```
-
----
-
-## 🐳 Docker
-
-### Desarrollo con Docker
-
-```bash
-# Construye y ejecuta el contenedor
+# Desarrollo
 docker-compose up --build
 
-# Ejecución en segundo plano
-docker-compose up -d --build
-
-# Detener contenedores
-docker-compose down
-```
-
-### Producción con Docker
-
-```bash
-# Construye imagen de producción
-docker build -t minca-inventory:latest .
-
-# Ejecuta contenedor de producción
-docker run -p 80:80 minca-inventory:latest
+# Producción
+docker build -t trazea:latest .
+docker run -p 80:80 trazea:latest
 ```
 
 ---
 
-## 📚 Desarrollo
+## Modelo de Datos
 
-### Convenciones de Código
+El sistema se compone de 17 tablas principales organizadas en estos dominios:
 
-- **TypeScript estricto**: Todo el código debe estar tipado
-- **ESLint**: Configuración para mantener calidad de código
-- **Componentes funcionales**: Usar hooks y functional components
-- **Tailwind CSS**: Prefiere utility classes sobre CSS custom
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     USUARIOS Y ACCESO                       │
+│  usuarios ←→ roles         (permisos JSON por rol)          │
+│  usuarios ←→ localizacion  (asignación multi-sede)          │
+│  admin_notifications       (suscripción a alertas)          │
+└─────────────────────────────────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌───────────────┐  ┌────────────────┐  ┌────────────────────┐
+│  INVENTARIO   │  │  SOLICITUDES   │  │    GARANTÍAS       │
+│               │  │                │  │                    │
+│ inventario    │  │ carrito        │  │ garantias          │
+│ repuestos     │  │ solicitudes    │  │ (estados, fotos,   │
+│ logs          │  │ detalles       │  │  km, técnico)      │
+│ movimientos   │  │ trazabilidad   │  └────────────────────┘
+│  técnicos     │  └────────────────┘
+└───────────────┘          │
+                    ┌──────────────────────────┐
+                    │  CONTEO / AUDITORÍA       │
+                    │  registro_conteo          │
+                    │  detalles_conteo          │
+                    │  (sistema vs físico vs PQ)│
+                    └──────────────────────────┘
 
-### Flujo de Trabajo FSD
+┌─────────────────────────────────────────────────────────────┐
+│                   SCOOTERS Y ÓRDENES                        │
+│  scooter_types → order_follow  (seguimiento por niveles)    │
+└─────────────────────────────────────────────────────────────┘
+```
 
-Al agregar nueva funcionalidad:
+---
 
-1. **Identifica la capa correcta**:
-   - ¿Es una entidad del dominio? → `entities/`
-   - ¿Es un caso de uso completo? → `features/`
-   - ¿Es un componente reutilizable? → `widgets/`
-   - ¿Es una vista completa? → `pages/`
+## Despliegue
 
-2. **Estructura de un feature**:
-   ```
-   features/nombre-feature/
-   ├── ui/           # Componentes de UI
-   ├── model/        # Tipos y validaciones
-   ├── lib/          # Lógica de negocio
-   ├── api/          # Llamadas a API
-   └── index.ts      # Exportaciones públicas
-   ```
+### Vercel (Recomendado)
 
-3. **Exports públicos**: Cada segmento debe tener un `index.ts`
+1. Conectar el repositorio a Vercel.
+2. Configurar las variables de entorno en el dashboard.
+3. Deploy automático en cada push a `main`.
 
-### Branching Strategy
+### Configuración de Producción
 
-- `main`: Rama de producción
-- `develop`: Rama de desarrollo
-- `feature/nombre`: Features específicos
-- `hotfix/nombre**: Correcciones urgentes
+- Habilitar HTTPS/SSL.
+- Configurar CORS en Supabase con los orígenes permitidos.
+- Verificar que Row Level Security esté activo en todas las tablas.
+- Sentry configurado para error tracking automático.
 
-### Commit Convention
+---
 
-```bash
+## Desarrollo
+
+### Convenciones
+
+- TypeScript estricto en todo el código.
+- Componentes funcionales con hooks.
+- Tailwind CSS como sistema de estilos principal.
+- Validación de formularios con Zod.
+- Manejo de estado servidor con TanStack Query.
+
+### Branching
+
+```
+main       → producción
+develop    → desarrollo
+feature/*  → nuevas funcionalidades
+hotfix/*   → correcciones urgentes
+```
+
+### Commits
+
+```
 feat: nueva funcionalidad
 fix: corrección de bug
 docs: documentación
-style: formato/código
 refactor: refactorización
 test: pruebas
 chore: dependencias/configuración
@@ -383,122 +357,9 @@ chore: dependencias/configuración
 
 ---
 
-## 🧪 Testing
+## Licencia
 
-### Testing Setup
-
-El proyecto utiliza **Vitest** y **Testing Library**:
-
-```bash
-# Ejecutar todos los tests
-pnpm test
-
-# Ejecutar en modo watch
-pnpm test:watch
-
-# Cobertura de código
-pnpm test:coverage
-```
-
-### Estructura de Tests
-
-- **Unit Tests**: Lógica de negocio, hooks, utilities
-- **Component Tests**: Componentes React aislados
-- **Integration Tests**: Flujo completo de features
-
----
-
-## 🚀 Despliegue
-
-### Vercel (Recomendado)
-
-1. **Conecta tu repo a Vercel**
-2. **Configura variables de entorno** en Vercel
-3. **Deploy automático** en cada push a `main`
-
-### Despliegue Manual
-
-```bash
-# Build de producción
-pnpm build
-
-# Deploy a servidor
-scp -r dist/* user@server:/path/to/app/
-```
-
-### Configuración de Producción
-
-- **Environment Variables**: Todas las variables deben estar configuradas
-- **HTTPS**: Habilitar SSL en producción
-- **CORS**: Configurar orígenes permitidos en Supabase
-- **Monitoring**: Sentry ya está configurado para error tracking
-
----
-
-## 🤝 Contribución
-
-### Cómo Contribuir
-
-1. **Fork el proyecto**
-2. **Crea una rama**: `git checkout -b feature/tu-feature`
-3. **Commits descriptivos**: `git commit -m 'feat: agregar nueva funcionalidad'`
-4. **Push a tu fork**: `git push origin feature/tu-feature`
-5. **Pull Request**: Detalla los cambios realizados
-
-### Guía de Pull Requests
-
-- **Título descriptivo**: Resumen del cambio
-- **Descripción detallada**: Contexto y motivación
-- **Screenshots**: Si aplica, muestra before/after
-- **Tests**: Incluye tests para nueva funcionalidad
-- **Documentación**: Actualiza README si es necesario
-
-### Código de Conducta
-
-- **Respeto**: Trata a todos con respeto
-- **Constructivo**: Feedback constructivo y positivo
-- **Inclusivo**: Fomenta un ambiente inclusivo
-- **Profesional**: Mantén comunicación profesional
-
----
-
-## 📄 Licencia
-
-Este proyecto está licenciado bajo la **MIT License**.
-
-```
-MIT License
-
-Copyright (c) 2024 Oscar Casas
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
----
-
-## 📞 Soporte
-
-Para soporte técnico o preguntas:
-
-- **Email**: oscar.casas@example.com
-- **Issues**: [GitHub Issues](https://github.com/tu-usuario/minca-inventory-system/issues)
-- **Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/minca-inventory-system/discussions)
+MIT License — Copyright (c) 2024 Oscar Casas
 
 ---
 
@@ -508,5 +369,6 @@ Para soporte técnico o preguntas:
 
 [![Made with React](https://img.shields.io/badge/Made%20with-React-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Feature-Sliced Design](https://img.shields.io/badge/Architecture-FSD-purple?style=for-the-badge)](https://feature-sliced.design/)
+[![Powered by Supabase](https://img.shields.io/badge/Powered%20by-Supabase-3FCF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
 
 </div>
