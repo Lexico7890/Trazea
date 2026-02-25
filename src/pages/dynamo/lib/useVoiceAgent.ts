@@ -70,8 +70,6 @@ const EDGE_FUNCTION_URL =
 const ELEVENLABS_API_KEY = import.meta.env?.VITE_PUBLIC_ELEVENLABS_API_KEY ?? "";
 const ELEVENLABS_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Voz femenina española - "Bella"
 
-console.log("[VoiceAgent] ElevenLabs API Key configured:", ELEVENLABS_API_KEY ? "YES (length: " + ELEVENLABS_API_KEY.length + ")" : "NO");
-
 // Debug logging
 const DEBUG = true;
 const log = (...args: unknown[]) => {
@@ -141,6 +139,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   // Verificar soporte al montar
   useEffect(() => {
     log("Component mounted, checking browser support...");
+    isUnmountedRef.current = false;
     const supported = checkBrowserSupport();
     setIsSupported(supported);
 

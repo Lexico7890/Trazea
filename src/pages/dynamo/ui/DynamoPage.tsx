@@ -1,13 +1,10 @@
-import { Mic, MicOff, Volume2, Loader2, AlertCircle, RotateCcw, Send } from "lucide-react";
+import { Mic, MicOff, Volume2, Loader2, AlertCircle, RotateCcw } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
-import { useState } from "react";
 import { useVoiceAgent } from "../lib/useVoiceAgent";
 
 export function DynamoPage() {
-  const [testInput, setTestInput] = useState("");
   const {
     isListening,
     isProcessing,
@@ -22,7 +19,6 @@ export function DynamoPage() {
     cancelSpeaking,
     clearError,
     resetSession,
-    processText,
   } = useVoiceAgent();
 
   const isDisabled = isProcessing || isSpeaking || !isSupported;
@@ -63,7 +59,7 @@ export function DynamoPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-6 p-4">
+    <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
       {/* Título */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-3">
@@ -166,33 +162,6 @@ export function DynamoPage() {
         ) : null}
       </div>
 
-      {/* Input de texto alternativo */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (testInput.trim() && isIdle) {
-            processText(testInput.trim());
-            setTestInput("");
-          }
-        }}
-        className="flex gap-2 w-full max-w-md px-4"
-      >
-        <Input
-          value={testInput}
-          onChange={(e) => setTestInput(e.target.value)}
-          placeholder="O escribe tu consulta aquí..."
-          disabled={!isIdle}
-        />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={!testInput.trim() || !isIdle}
-          className="shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </Button>
-      </form>
-
       {/* Botón de push-to-talk */}
       <button
         onClick={() => {
@@ -259,7 +228,7 @@ export function DynamoPage() {
       </div>
 
       {/* Última respuesta - Ahora en la parte inferior con altura fija */}
-      <div className="w-full max-w-md min-h-[80px] flex flex-col items-center justify-start">
+      <div className="w-full max-w-md flex flex-col items-center justify-start">
         {lastResponse && isIdle && !error && (
           <div className="text-center px-4 py-3 rounded-lg bg-red-500/5 border border-red-500/20 w-full">
             <p className="text-sm text-muted-foreground line-clamp-3">{lastResponse}</p>
