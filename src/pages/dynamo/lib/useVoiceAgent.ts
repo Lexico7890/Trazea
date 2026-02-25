@@ -66,6 +66,10 @@ declare global {
 const EDGE_FUNCTION_URL =
   "https://xeypfdmbpkzkkfmthqwb.supabase.co/functions/v1/agent-voice";
 
+// Configuración de ElevenLabs (Vite usa import.meta.env)
+const ELEVENLABS_API_KEY = import.meta.env?.VITE_PUBLIC_ELEVENLABS_API_KEY ?? "";
+const ELEVENLABS_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Voz femenina española - "Bella"
+
 // Debug logging
 const DEBUG = true;
 const log = (...args: unknown[]) => {
@@ -119,10 +123,12 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   const sessionIdRef = useRef<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const isUnmountedRef = useRef(false);
   const isListeningRef = useRef(false);
   const hasReceivedResultRef = useRef(false);
   const currentTranscriptRef = useRef<string>(""); // Guardar transcript actual para usar en stop
+  const hasProcessedTranscriptRef = useRef(false); // Evitar doble procesamiento entre onend y safety timeout
 
   // Estados derivados
   const isListening = status === "listening";
@@ -133,6 +139,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   // Verificar soporte al montar
   useEffect(() => {
     log("Component mounted, checking browser support...");
+    isUnmountedRef.current = false;
     const supported = checkBrowserSupport();
     setIsSupported(supported);
 
@@ -152,6 +159,10 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
       isUnmountedRef.current = true;
       if (recognitionRef.current) {
         recognitionRef.current.abort();
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
       }
       if (window.speechSynthesis) {
         window.speechSynthesis.cancel();
@@ -210,29 +221,17 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     []
   );
 
-  // Text-to-Speech
-  const speakResponse = useCallback((text: string): Promise<void> => {
+  // Función auxiliar para Web Speech API (fallback)
+  const speakWithWebSpeech = useCallback((text: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      log("Speaking response:", text.substring(0, 50) + "...");
-
-      if (isUnmountedRef.current) {
-        log("Component unmounted, skipping speech");
-        resolve();
-        return;
-      }
-
-      // Cancelar cualquier síntesis anterior
-      window.speechSynthesis.cancel();
+      log("Using Web Speech API as fallback");
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "es-ES";
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
 
-      // Intentar usar una voz en español
       const voices = window.speechSynthesis.getVoices();
-      log("Available voices:", voices.length);
-
       const spanishVoice = voices.find(
         (voice) =>
           voice.lang.startsWith("es") &&
@@ -240,27 +239,17 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
       );
 
       if (spanishVoice) {
-        log("Using Spanish voice:", spanishVoice.name);
         utterance.voice = spanishVoice;
-      } else {
-        // Fallback: buscar cualquier voz en español
-        const anySpanishVoice = voices.find((voice) => voice.lang.startsWith("es"));
-        if (anySpanishVoice) {
-          log("Using fallback Spanish voice:", anySpanishVoice.name);
-          utterance.voice = anySpanishVoice;
-        } else {
-          log("No Spanish voice found, using default");
-        }
       }
 
       synthUtteranceRef.current = utterance;
 
       utterance.onstart = () => {
-        log("Speech started");
+        log("Web Speech API: Speech started");
       };
 
       utterance.onend = () => {
-        log("Speech ended");
+        log("Web Speech API: Speech ended");
         if (!isUnmountedRef.current) {
           setStatus("idle");
         }
@@ -268,13 +257,103 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
       };
 
       utterance.onerror = (event) => {
-        log("Speech error:", event);
+        log("Web Speech API: Speech error", event);
         reject(new Error("Error al reproducir la respuesta"));
       };
 
       window.speechSynthesis.speak(utterance);
     });
   }, []);
+
+  // Text-to-Speech con ElevenLabs
+  const speakResponse = useCallback(async (text: string): Promise<void> => {
+    log("Speaking response:", text.substring(0, 50) + "...");
+
+    if (isUnmountedRef.current) {
+      log("Component unmounted, skipping speech");
+      return;
+    }
+
+    // Cancelar cualquier síntesis anterior
+    window.speechSynthesis.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    // Intentar usar ElevenLabs si hay API key
+    if (ELEVENLABS_API_KEY) {
+      try {
+        log("Using ElevenLabs TTS");
+        
+        const response = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+          {
+            method: "POST",
+            headers: {
+              Accept: "audio/mpeg",
+              "Content-Type": "application/json",
+              "xi-api-key": ELEVENLABS_API_KEY,
+            },
+            body: JSON.stringify({
+              text: text,
+              model_id: "eleven_multilingual_v2",
+              voice_settings: {
+                stability: 0.5,
+                similarity_boost: 0.75,
+                style: 0.0,
+                use_speaker_boost: true,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al generar audio de ElevenLabs");
+        }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+
+        return new Promise((resolve, reject) => {
+          audio.onended = () => {
+            log("ElevenLabs speech ended");
+            if (!isUnmountedRef.current) {
+              setStatus("idle");
+            }
+            URL.revokeObjectURL(audioUrl);
+            resolve();
+          };
+
+          audio.onerror = () => {
+            log("ElevenLabs audio error, falling back to Web Speech API");
+            URL.revokeObjectURL(audioUrl);
+            audioRef.current = null;
+            // Fallback a Web Speech API
+            speakWithWebSpeech(text).then(resolve).catch(reject);
+          };
+
+          audio.onplay = () => {
+            log("ElevenLabs audio started playing");
+          };
+
+          audio.play().catch((err) => {
+            log("ElevenLabs play error:", err);
+            reject(err);
+          });
+        });
+      } catch (err) {
+        log("ElevenLabs error:", err);
+        log("Falling back to Web Speech API");
+      }
+    }
+
+    // Fallback a Web Speech API
+    return speakWithWebSpeech(text);
+  }, [speakWithWebSpeech]);
 
   // Procesar el transcript
   const processTranscript = useCallback(
@@ -366,6 +445,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     setError(null);
     setTranscript(null);
     hasReceivedResultRef.current = false;
+    hasProcessedTranscriptRef.current = false;
     currentTranscriptRef.current = ""; // Reset transcript ref
 
     const SpeechRecognitionClass = getSpeechRecognition();
@@ -497,7 +577,8 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
           wasListening: isListeningRef.current,
           finalTranscript,
           currentTranscript: currentTranscriptRef.current,
-          hasReceivedResult: hasReceivedResultRef.current
+          hasReceivedResult: hasReceivedResultRef.current,
+          hasProcessedTranscript: hasProcessedTranscriptRef.current
         });
 
         const wasListening = isListeningRef.current;
@@ -508,11 +589,19 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
           return;
         }
 
+        // Evitar doble procesamiento (si el safety timeout ya proceso)
+        if (hasProcessedTranscriptRef.current) {
+          log("Transcript already processed, skipping onend processing");
+          recognitionRef.current = null;
+          return;
+        }
+
         // Usar finalTranscript si existe, o el transcript actual del ref
         const transcriptToProcess = finalTranscript.trim() || currentTranscriptRef.current.trim();
 
         if (transcriptToProcess) {
-          log("Processing transcript:", transcriptToProcess);
+          log("Processing transcript from onend:", transcriptToProcess);
+          hasProcessedTranscriptRef.current = true;
           processTranscript(transcriptToProcess);
         } else if (wasListening && !hasReceivedResultRef.current) {
           // Solo mostrar error si estábamos escuchando y no recibimos ningún resultado
@@ -559,16 +648,35 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     if (recognitionRef.current && isListeningRef.current) {
       log("Stopping recognition...");
       recognitionRef.current.stop();
+
+      // Safety timeout - solo si onend nunca se dispara (2s es suficiente)
+      setTimeout(() => {
+        if (isListeningRef.current && !isUnmountedRef.current && !hasProcessedTranscriptRef.current) {
+          log("Safety timeout triggered - onend never fired, forcing processing");
+          isListeningRef.current = false;
+          hasProcessedTranscriptRef.current = true;
+          const pendingTranscript = currentTranscriptRef.current.trim();
+          if (pendingTranscript) {
+            processTranscript(pendingTranscript);
+          } else {
+            setStatus("idle");
+          }
+        }
+      }, 2000);
     }
-  }, []);
+  }, [processTranscript]);
 
   // Cancelar síntesis de voz
   const cancelSpeaking = useCallback(() => {
     log("cancelSpeaking called");
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
-      setStatus("idle");
     }
+    setStatus("idle");
   }, []);
 
   // Limpiar error
@@ -583,6 +691,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     sessionIdRef.current = null;
     currentTranscriptRef.current = "";
     hasReceivedResultRef.current = false;
+    hasProcessedTranscriptRef.current = false;
     isListeningRef.current = false;
     if (recognitionRef.current) {
       recognitionRef.current.abort();
@@ -611,6 +720,16 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     }
   }, []);
 
+  // Procesar texto directamente (para testing)
+  const processText = useCallback(async (text: string) => {
+    log("processText called with:", text, "status:", status);
+    if (!text.trim() || status !== "idle") {
+      log("processText skipped - empty text or not idle");
+      return;
+    }
+    await processTranscript(text.trim());
+  }, [processTranscript, status]);
+
   return {
     // Estados
     status,
@@ -633,5 +752,6 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     cancelSpeaking,
     clearError,
     resetSession,
+    processText,
   };
 }

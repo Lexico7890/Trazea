@@ -30,7 +30,7 @@ export function DynamoPage() {
     if (isListening) return "Escuchando...";
     if (isProcessing) return "Procesando...";
     if (isSpeaking) return "Reproduciendo...";
-    return "Mantén presionado para hablar";
+    return "Presiona para hablar";
   };
 
   // Texto del indicador de estado
@@ -59,7 +59,7 @@ export function DynamoPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)] gap-6 p-4">
+    <div className="flex flex-col items-center justify-center h-full gap-4 p-4">
       {/* Título */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-3">
@@ -72,7 +72,7 @@ export function DynamoPage() {
         </div>
         <p className="text-muted-foreground text-sm md:text-base">
           {isSupported
-            ? "Mantén presionado el botón para hablar"
+            ? "Presiona el botón para hablar o escribe tu consulta"
             : "Usa Chrome, Edge o Safari para usar esta función"}
         </p>
       </div>
@@ -164,12 +164,14 @@ export function DynamoPage() {
 
       {/* Botón de push-to-talk */}
       <button
-        onMouseDown={isSupported && isIdle ? startListening : undefined}
-        onMouseUp={isListening ? stopListening : undefined}
-        onMouseLeave={isListening ? stopListening : undefined}
-        onTouchStart={isSupported && isIdle ? startListening : undefined}
-        onTouchEnd={isListening ? stopListening : undefined}
-        disabled={isDisabled}
+        onClick={() => {
+          if (isListening) {
+            stopListening();
+          } else if (!isProcessing && !isSpeaking) {
+            startListening();
+          }
+        }}
+        disabled={isProcessing || isSpeaking || !isSupported}
         className={cn(
           "relative px-8 py-4 rounded-full font-semibold text-white",
           "bg-linear-to-r from-red-500 via-red-600 to-red-700",
@@ -178,7 +180,7 @@ export function DynamoPage() {
           "select-none touch-none",
           "hover:shadow-xl hover:shadow-red-500/30",
           "active:scale-95",
-          isListening && "scale-95 shadow-inner",
+          isListening && "scale-95 shadow-inner bg-red-800",
           isDisabled && "opacity-50 cursor-not-allowed"
         )}
       >
@@ -226,7 +228,7 @@ export function DynamoPage() {
       </div>
 
       {/* Última respuesta - Ahora en la parte inferior con altura fija */}
-      <div className="w-full max-w-md min-h-[80px] flex flex-col items-center justify-start">
+      <div className="w-full max-w-md flex flex-col items-center justify-start">
         {lastResponse && isIdle && !error && (
           <div className="text-center px-4 py-3 rounded-lg bg-red-500/5 border border-red-500/20 w-full">
             <p className="text-sm text-muted-foreground line-clamp-3">{lastResponse}</p>
