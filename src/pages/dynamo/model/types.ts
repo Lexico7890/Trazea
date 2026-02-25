@@ -70,6 +70,7 @@ export interface UseVoiceAgentReturn {
   cancelSpeaking: () => void;
   clearError: () => void;
   resetSession: () => void;
+  processText: (text: string) => Promise<void>;
 }
 
 // Tipos para Web Speech API (extender window)

@@ -1,10 +1,13 @@
-import { Mic, MicOff, Volume2, Loader2, AlertCircle, RotateCcw } from "lucide-react";
+import { Mic, MicOff, Volume2, Loader2, AlertCircle, RotateCcw, Send } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { useState } from "react";
 import { useVoiceAgent } from "../lib/useVoiceAgent";
 
 export function DynamoPage() {
+  const [testInput, setTestInput] = useState("");
   const {
     isListening,
     isProcessing,
@@ -19,6 +22,7 @@ export function DynamoPage() {
     cancelSpeaking,
     clearError,
     resetSession,
+    processText,
   } = useVoiceAgent();
 
   const isDisabled = isProcessing || isSpeaking || !isSupported;
@@ -30,7 +34,7 @@ export function DynamoPage() {
     if (isListening) return "Escuchando...";
     if (isProcessing) return "Procesando...";
     if (isSpeaking) return "Reproduciendo...";
-    return "Mantén presionado para hablar";
+    return "Presiona para hablar";
   };
 
   // Texto del indicador de estado
@@ -72,7 +76,7 @@ export function DynamoPage() {
         </div>
         <p className="text-muted-foreground text-sm md:text-base">
           {isSupported
-            ? "Mantén presionado el botón para hablar"
+            ? "Presiona el botón para hablar o escribe tu consulta"
             : "Usa Chrome, Edge o Safari para usar esta función"}
         </p>
       </div>
@@ -162,14 +166,43 @@ export function DynamoPage() {
         ) : null}
       </div>
 
+      {/* Input de texto alternativo */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (testInput.trim() && isIdle) {
+            processText(testInput.trim());
+            setTestInput("");
+          }
+        }}
+        className="flex gap-2 w-full max-w-md px-4"
+      >
+        <Input
+          value={testInput}
+          onChange={(e) => setTestInput(e.target.value)}
+          placeholder="O escribe tu consulta aquí..."
+          disabled={!isIdle}
+        />
+        <Button
+          type="submit"
+          size="icon"
+          disabled={!testInput.trim() || !isIdle}
+          className="shrink-0"
+        >
+          <Send className="w-4 h-4" />
+        </Button>
+      </form>
+
       {/* Botón de push-to-talk */}
       <button
-        onMouseDown={isSupported && isIdle ? startListening : undefined}
-        onMouseUp={isListening ? stopListening : undefined}
-        onMouseLeave={isListening ? stopListening : undefined}
-        onTouchStart={isSupported && isIdle ? startListening : undefined}
-        onTouchEnd={isListening ? stopListening : undefined}
-        disabled={isDisabled}
+        onClick={() => {
+          if (isListening) {
+            stopListening();
+          } else if (!isProcessing && !isSpeaking) {
+            startListening();
+          }
+        }}
+        disabled={isProcessing || isSpeaking || !isSupported}
         className={cn(
           "relative px-8 py-4 rounded-full font-semibold text-white",
           "bg-linear-to-r from-red-500 via-red-600 to-red-700",
@@ -178,7 +211,7 @@ export function DynamoPage() {
           "select-none touch-none",
           "hover:shadow-xl hover:shadow-red-500/30",
           "active:scale-95",
-          isListening && "scale-95 shadow-inner",
+          isListening && "scale-95 shadow-inner bg-red-800",
           isDisabled && "opacity-50 cursor-not-allowed"
         )}
       >
