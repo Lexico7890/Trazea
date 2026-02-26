@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/shared/api/supabase";
+import { useDynamoStore } from "../model/useDynamoStore";
 import type {
   VoiceAgentStatus,
   VoiceAgentResponse,
@@ -136,12 +137,19 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   const isSpeaking = status === "speaking";
   const isIdle = status === "idle";
 
-  // Verificar soporte al montar
+  // Verificar soporte al montar y restaurar sesión
   useEffect(() => {
     log("Component mounted, checking browser support...");
     isUnmountedRef.current = false;
     const supported = checkBrowserSupport();
     setIsSupported(supported);
+
+    // Restaurar sessionId desde el store persistido
+    const storedSessionId = useDynamoStore.getState().sessionId;
+    if (storedSessionId) {
+      sessionIdRef.current = storedSessionId;
+      log("Restored sessionId from store:", storedSessionId);
+    }
 
     if (!supported) {
       log("Browser not supported!");
@@ -214,6 +222,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
       // Guardar session_id para la siguiente petición
       if (data.session_id) {
         sessionIdRef.current = data.session_id;
+        useDynamoStore.getState().setSessionId(data.session_id);
       }
 
       return data;
@@ -380,6 +389,9 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
         setTranscript(text);
         setError(null);
 
+        // Agregar mensaje del usuario al store
+        useDynamoStore.getState().addMessage({ role: "user", content: text });
+
         // Llamar a la Edge Function
         const response = await callEdgeFunction(text);
 
@@ -390,6 +402,13 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
 
         // Guardar la respuesta
         setLastResponse(response.respuesta);
+
+        // Agregar respuesta del asistente al store
+        useDynamoStore.getState().addMessage({
+          role: "assistant",
+          content: response.respuesta,
+          options: response.opciones ?? undefined,
+        });
 
         // Mostrar errores del backend si los hay (pero continuar)
         if (response.errores && response.errores.length > 0) {
@@ -701,6 +720,8 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
     setLastResponse(null);
     setError(null);
     setStatus("idle");
+    // Limpiar el store de chat
+    useDynamoStore.getState().clearChat();
   }, []);
 
   // Cargar voces cuando estén disponibles
