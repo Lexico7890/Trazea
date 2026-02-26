@@ -8,9 +8,9 @@ import { useUserStore } from "@/entities/user";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function sendCountData(processedData: any) {
-    const selectedLocationId = useUserStore.getState().selectedLocationId;
+    const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion?.toString();
     const { data, error } = await supabase.rpc('procesar_comparacion_excel', {
-        p_id_localizacion: selectedLocationId,
+        p_id_localizacion: id_localizacion,
         p_datos_excel: processedData,
     });
 

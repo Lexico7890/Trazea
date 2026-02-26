@@ -47,7 +47,7 @@ export function ResultadosConteoPage() {
   const handleSendData = async () => {
     setIsSubmitting(true);
     try {
-      const id_localizacion = useUserStore.getState().selectedLocationId;
+      const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion;
       const id_usuario = sessionData?.user?.id;
 
       if (!id_localizacion || !id_usuario) {

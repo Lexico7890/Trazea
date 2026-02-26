@@ -20,9 +20,9 @@ export async function getInventory(
     } = params;
 
     // Get location dynamically and validate
-    const selectedLocationId = useUserStore.getState().selectedLocationId;
+    const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion?.toString();
 
-    if (!selectedLocationId || selectedLocationId === 'null') {
+    if (!id_localizacion || id_localizacion === 'null') {
         return {
             items: [],
             total_count: 0,
@@ -39,7 +39,7 @@ export async function getInventory(
     let query = supabase
         .from('v_inventario_completo')
         .select('*', { count: 'exact' })
-        .eq('id_localizacion', selectedLocationId);
+        .eq('id_localizacion', id_localizacion);
 
     // Apply search filter (search in nombre or referencia)
     if (search && search.trim()) {
@@ -93,16 +93,16 @@ export async function getInventory(
  * Get all inventory items (for autocomplete or dropdowns)
  */
 export async function getAllInventoryItems(): Promise<InventoryItem[]> {
-    const selectedLocationId = useUserStore.getState().selectedLocationId;
+    const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion?.toString();
 
-    if (!selectedLocationId || selectedLocationId === 'null') {
+    if (!id_localizacion || id_localizacion === 'null') {
         return [];
     }
 
     const { data, error } = await supabase
         .from('v_inventario_completo')
         .select('*')
-        .eq('id_localizacion', selectedLocationId)
+        .eq('id_localizacion', id_localizacion)
         .order('nombre', { ascending: true })
         .limit(1000);
 
@@ -154,16 +154,16 @@ export async function searchInventoryItems(query: string): Promise<InventoryItem
         return [];
     }
 
-    const selectedLocationId = useUserStore.getState().selectedLocationId;
+    const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion?.toString();
 
-    if (!selectedLocationId || selectedLocationId === 'null') {
+    if (!id_localizacion || id_localizacion === 'null') {
         return [];
     }
 
     const { data, error } = await supabase
         .from('v_inventario_completo')
         .select('*')
-        .eq('id_localizacion', selectedLocationId)
+        .eq('id_localizacion', id_localizacion)
         .or(`nombre.ilike.%${query}%,referencia.ilike.%${query}%`)
         .limit(50);
 

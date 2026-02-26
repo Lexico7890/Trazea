@@ -13,12 +13,12 @@ export async function getListMovements(filters: MovementFilters) {
         concept,
         downloaded
     } = filters;
-    const selectedLocationId = useUserStore.getState().selectedLocationId;
+    const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion?.toString();
 
     let query = supabase
         .from('v_movimientos_detallados')
         .select('*', { count: 'exact' })
-        .eq('id_localizacion', selectedLocationId)
+        .eq('id_localizacion', id_localizacion)
         .order('fecha', { ascending: false }) // Como segundo criterio
         .range(0, 9);
 
