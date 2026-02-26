@@ -274,11 +274,28 @@ export function DynamoPage() {
 
         {/* Botón de push-to-talk */}
         <button
+          // Desktop: click para toggle
           onClick={() => {
+            if (isMobile) return; // En móvil se maneja con touch
             if (isListening) {
               stopListening();
             } else if (!isProcessing && !isSpeaking) {
               startListening();
+            }
+          }}
+          // Móvil: mantener presionado para grabar, soltar para enviar
+          onTouchStart={(e) => {
+            if (!isMobile || isDisabled) return;
+            e.preventDefault();
+            if (!isListening && !isProcessing && !isSpeaking) {
+              startListening();
+            }
+          }}
+          onTouchEnd={(e) => {
+            if (!isMobile) return;
+            e.preventDefault();
+            if (isListening) {
+              stopListening();
             }
           }}
           disabled={isProcessing || isSpeaking || !isSupported}
@@ -304,7 +321,9 @@ export function DynamoPage() {
                 className={cn("w-5 h-5", isListening && "animate-pulse")}
               />
             )}
-            {getButtonText()}
+            {isMobile && !isDisabled && isIdle
+              ? "Mantén para hablar"
+              : getButtonText()}
           </span>
         </button>
 
@@ -455,7 +474,7 @@ export function DynamoPage() {
               </div>
             </div>
           </DrawerHeader>
-          <div className="flex-1 overflow-hidden min-h-0">{chatContent}</div>
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">{chatContent}</div>
         </DrawerContent>
       </Drawer>
     </div>
