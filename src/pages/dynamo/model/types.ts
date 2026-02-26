@@ -15,12 +15,30 @@ export interface VoiceAgentError {
   recuperable: boolean;
 }
 
+// Opción que el agente presenta para selección del usuario
+export interface AgentOption {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
+
 // Respuesta de la Edge Function
 export interface VoiceAgentResponse {
   respuesta: string;
   session_id: string;
   intenciones_detectadas: string[];
   errores: VoiceAgentError[] | null;
+  opciones?: AgentOption[] | null;
+}
+
+// Mensaje de chat en la conversación
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: number;
+  options?: AgentOption[];
+  selectedOption?: string;
 }
 
 // Estados del agente de voz
