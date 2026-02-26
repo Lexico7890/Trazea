@@ -50,10 +50,10 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   // State to track if we are in "send mode" (pre-filled from existing warranty)
   const [isReadOnlyMode, setIsReadOnlyMode] = useState(false);
 
-  const selectedLocationId = currentLocation?.id_localizacion || "";
+  const id_localizacion = currentLocation?.id_localizacion || "";
 
   // Fetch technicians based on selected location
-  const { data: technicians } = useTechnicians(selectedLocationId);
+  const { data: technicians } = useTechnicians(id_localizacion);
 
   useEffect(() => {
     // Prefer passed prop data, fallback to location state if any (legacy or external link support)
@@ -97,7 +97,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     // Basic validation
-    if (!selectedLocationId)
+    if (!id_localizacion)
       return toast.info("No hay una ubicación seleccionada");
     if (!orderNumber) return toast.info("Ingrese el número de orden");
     if (!mileage) return toast.info("Ingrese el kilometraje");
@@ -224,7 +224,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
               <AutocompleteInputList
                 selectedParts={selectedParts}
                 setSelectedParts={setSelectedParts}
-                locationId={selectedLocationId}
+                locationId={id_localizacion}
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
               <Select
                 value={selectedTechnicianId}
                 onValueChange={setSelectedTechnicianId}
-                disabled={!selectedLocationId || isReadOnlyMode}
+                disabled={!id_localizacion || isReadOnlyMode}
               >
                 <SelectTrigger
                   id="technician"
@@ -255,7 +255,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
                 >
                   <SelectValue
                     placeholder={
-                      selectedLocationId
+                      id_localizacion
                         ? "Seleccionar técnico"
                         : "Seleccione un taller primero"
                     }

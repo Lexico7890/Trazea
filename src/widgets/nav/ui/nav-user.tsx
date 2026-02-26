@@ -98,7 +98,6 @@ export function NavUser({
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  localStorage.removeItem("minca_location_id")
                   setCurrentLocation(null)
                   navigate("/repuestos")
                 }}

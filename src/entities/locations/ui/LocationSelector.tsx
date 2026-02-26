@@ -18,7 +18,6 @@ export function LocationSelector() {
     setCurrentLocation,
     isAuthenticated,
     sessionData,
-    setSelectedLocation,
   } = useUserStore();
   const [locations, setLocations] = useState<UserLocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,9 +64,9 @@ export function LocationSelector() {
     sessionData?.user?.id,
     setCurrentLocation
   ]);
+  console.log("Current Location:", currentLocation);
 
   const handleSelectLocation = (location: UserLocation) => {
-    setSelectedLocation(location.id_localizacion.toString());
     setCurrentLocation(location);
     queryClient.invalidateQueries({ queryKey: ["inventory"] });
   };

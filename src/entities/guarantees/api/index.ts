@@ -3,11 +3,11 @@ import { supabase } from "@/shared/api";
 
 
 export async function getGarantiasDashboard() {
-    const selectedLocationId = useUserStore.getState().selectedLocationId;
+    const id_localizacion = useUserStore.getState().currentLocation?.id_localizacion;
     const { data, error } = await supabase
         .from('v_garantias_dashboard')
         .select('*')
-        .eq('id_localizacion', selectedLocationId)
+        .eq('id_localizacion', id_localizacion)
         .order('fecha_reporte', { ascending: false });
 
     if (error) {

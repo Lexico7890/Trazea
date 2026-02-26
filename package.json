@@ -1,7 +1,7 @@
 {
   "name": "workshop-management-system",
   "private": true,
-  "version": "1.1.0-beta",
+  "version": "1.1.1-beta",
   "type": "module",
   "description": "Sistema de gestión de inventario y garantías",
   "author": "Oscar Casas",
