@@ -180,7 +180,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
 
   // Llamar a la Edge Function
   const callEdgeFunction = useCallback(
-    async (pregunta: string): Promise<VoiceAgentResponse> => {
+    async (pregunta: string, queryMode: string): Promise<VoiceAgentResponse> => {
       log("Calling Edge Function with:", { pregunta, sessionId: sessionIdRef.current });
 
       // Obtener el token del usuario
@@ -205,6 +205,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
         body: JSON.stringify({
           pregunta,
           session_id: sessionIdRef.current,
+          mode: queryMode
         }),
       });
 
@@ -366,7 +367,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
 
   // Procesar el transcript
   const processTranscript = useCallback(
-    async (text: string) => {
+    async (text: string, queryMode: string) => {
       log("Processing transcript:", text);
 
       if (isUnmountedRef.current || !text.trim()) {
@@ -393,7 +394,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
         useDynamoStore.getState().addMessage({ role: "user", content: text });
 
         // Llamar a la Edge Function
-        const response = await callEdgeFunction(text);
+        const response = await callEdgeFunction(text, queryMode);
 
         if (isUnmountedRef.current) {
           log("Component unmounted during processing");
@@ -621,7 +622,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
         if (transcriptToProcess) {
           log("Processing transcript from onend:", transcriptToProcess);
           hasProcessedTranscriptRef.current = true;
-          processTranscript(transcriptToProcess);
+          processTranscript(transcriptToProcess, "rag");
         } else if (wasListening && !hasReceivedResultRef.current) {
           // Solo mostrar error si estábamos escuchando y no recibimos ningún resultado
           log("No transcript received, showing error");
@@ -676,7 +677,7 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
           hasProcessedTranscriptRef.current = true;
           const pendingTranscript = currentTranscriptRef.current.trim();
           if (pendingTranscript) {
-            processTranscript(pendingTranscript);
+            processTranscript(pendingTranscript, "rag");
           } else {
             setStatus("idle");
           }
@@ -742,13 +743,13 @@ export function useVoiceAgent(): UseVoiceAgentReturn {
   }, []);
 
   // Procesar texto directamente (para testing)
-  const processText = useCallback(async (text: string) => {
+  const processText = useCallback(async (text: string, queryMode: string) => {
     log("processText called with:", text, "status:", status);
     if (!text.trim() || status !== "idle") {
       log("processText skipped - empty text or not idle");
       return;
     }
-    await processTranscript(text.trim());
+    await processTranscript(text.trim(), queryMode);
   }, [processTranscript, status]);
 
   return {

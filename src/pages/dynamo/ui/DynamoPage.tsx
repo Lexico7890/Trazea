@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Mic,
   MicOff,
@@ -9,10 +9,14 @@ import {
   MessageSquare,
   X,
   PanelRightClose,
+  Send,
+  Sparkles,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
+import { Textarea } from "@/shared/ui/textarea";
 import {
   Drawer,
   DrawerContent,
@@ -23,6 +27,10 @@ import { useIsMobile } from "@/shared/lib/use-mobile";
 import { useVoiceAgent } from "../lib/useVoiceAgent";
 import { useDynamoStore } from "../model/useDynamoStore";
 import { ChatMessages } from "./ChatMessages";
+import { toast } from "sonner";
+import { supabase } from "@/shared/api";
+
+type Mode = "audio" | "text";
 
 export function DynamoPage() {
   const {
@@ -53,9 +61,45 @@ export function DynamoPage() {
 
   const isMobile = useIsMobile();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [mode, setMode] = useState<Mode>("audio");
+  const [textInput, setTextInput] = useState("");
+  const [isMicHovered, setIsMicHovered] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [queryMode, setQueryMode] = useState<"sql" | "rag">("sql");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isDisabled = isProcessing || isSpeaking || !isSupported;
   const isActive = isListening || isProcessing || isSpeaking;
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const fileExt = file.name.split(".").pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `dynamo-documents/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("imagenes-repuestos-garantias")
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw new Error(uploadError.message);
+        }
+      }
+      toast.success(`${files.length} documento(s) subido(s) correctamente`);
+    } catch (err) {
+      toast.error(`Error al subir documento: ${err instanceof Error ? err.message : "Error desconocido"}`);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   useEffect(() => {
     if (!isMobile && messages.length > 0 && !isPanelOpen) {
@@ -107,7 +151,7 @@ export function DynamoPage() {
     optionLabel: string
   ) => {
     updateMessageSelection(messageId, optionId);
-    await processText(optionLabel);
+    await processText(optionLabel, queryMode);
   };
 
   const handleChatToggle = () => {
@@ -115,6 +159,20 @@ export function DynamoPage() {
       setIsDrawerOpen(true);
     } else {
       togglePanel();
+    }
+  };
+
+  const handleTextSubmit = async () => {
+    if (!textInput.trim() || isProcessing) return;
+    const input = textInput.trim();
+    setTextInput("");
+    await processText(input, queryMode);
+  };
+
+  const handleTextKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleTextSubmit();
     }
   };
 
@@ -129,31 +187,54 @@ export function DynamoPage() {
   return (
     <div className="flex h-[calc(100dvh-6rem)] overflow-hidden">
       <div className="flex-1 flex flex-col items-center justify-center gap-4 p-4 relative min-w-0">
-        {messages.length > 0 && (
-          <button
-            onClick={handleChatToggle}
-            className={cn(
-              "absolute top-4 right-4 z-10",
-              "flex items-center gap-2 px-3 py-2 rounded-full",
-              "bg-muted/80 backdrop-blur-sm border border-border",
-              "text-sm text-muted-foreground",
-              "hover:bg-muted hover:text-foreground",
-              "transition-all duration-200",
-              !isMobile && isPanelOpen && "lg:hidden"
-            )}
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span className="hidden sm:inline">Chat</span>
-            {hasUnread && (
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            )}
-          </button>
-        )}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-3 lg:left-auto lg:right-4 lg:translate-x-0">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/80 backdrop-blur-sm border border-border">
+            <Mic className={cn("w-3.5 h-3.5", mode === "audio" ? "text-red-500" : "text-muted-foreground")} />
+            <button
+              onClick={() => setMode("audio")}
+              className={cn(
+                "text-xs font-medium px-2 py-1 rounded-full transition-all",
+                mode === "audio" ? "bg-red-500 text-white" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Audio
+            </button>
+            <button
+              onClick={() => setMode("text")}
+              className={cn(
+                "text-xs font-medium px-2 py-1 rounded-full transition-all",
+                mode === "text" ? "bg-red-500 text-white" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Texto
+            </button>
+            <Sparkles className={cn("w-3.5 h-3.5", mode === "text" ? "text-red-500" : "text-muted-foreground")} />
+          </div>
+          {messages.length > 0 && (
+            <button
+              onClick={handleChatToggle}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-full",
+                "bg-muted/80 backdrop-blur-sm border border-border",
+                "text-sm text-muted-foreground",
+                "hover:bg-muted hover:text-foreground",
+                "transition-all duration-200",
+                !isMobile && isPanelOpen && "lg:hidden"
+              )}
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Chat</span>
+              {hasUnread && (
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              )}
+            </button>
+          )}
+        </div>
 
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-3">
             <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-red-500 via-red-600 to-red-700 bg-clip-text text-transparent">
-              Dynamo
+              {mode === "audio" ? "Dynamo" : "Dynamo-text"}
             </h1>
             <Badge
               variant="outline"
@@ -164,12 +245,70 @@ export function DynamoPage() {
           </div>
           <p className="text-muted-foreground text-sm md:text-base">
             {isSupported
-              ? "Presiona el botón para hablar o escribe tu consulta"
+              ? mode === "audio"
+                ? "Solo puedes realizar consultas sobre los documentos cargados"
+                : "Puedes consultar la base de datos y los documentos cargados"
               : "Usa Chrome, Edge o Safari para usar esta función"}
           </p>
         </div>
 
-        <div className="relative flex items-center justify-center h-56 md:h-64">
+        {mode === "text" ? (
+          <div className="w-full max-w-2xl px-4 flex flex-col gap-4">
+            <div className="bg-muted/30 rounded-3xl border border-border p-2 md:p-3 space-y-3">
+              <Textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                onKeyDown={handleTextKeyDown}
+                placeholder="¿Qué deseas consultar?"
+                className="min-h-[120px] md:min-h-[140px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base md:text-lg p-2"
+                disabled={isProcessing}
+              />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-muted/50 border border-border">
+                  <button
+                    onClick={() => setQueryMode("sql")}
+                    className={cn(
+                      "text-xs font-medium px-3 py-1 rounded-full transition-all",
+                      queryMode === "sql" ? "bg-red-500 text-white" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    REG
+                  </button>
+                  <button
+                    onClick={() => setQueryMode("rag")}
+                    className={cn(
+                      "text-xs font-medium px-3 py-1 rounded-full transition-all",
+                      queryMode === "rag" ? "bg-red-500 text-white" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    DOC
+                  </button>
+                </div>
+                <Button
+                  onClick={handleTextSubmit}
+                  disabled={!textInput.trim() || isProcessing}
+                  size="sm"
+                  className="rounded-full px-4 bg-red-500 hover:bg-red-600"
+                >
+                  {isProcessing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                  Enviar
+                </Button>
+              </div>
+            </div>
+            {isProcessing && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Procesando tu consulta...</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="relative flex items-center justify-center h-56 md:h-64">
           {isActive && (
             <>
               <div className="absolute w-48 h-48 md:w-64 md:h-64 rounded-full bg-linear-to-r from-red-500/20 via-red-600/20 to-red-700/20 animate-ping" />
@@ -206,9 +345,31 @@ export function DynamoPage() {
                     "transition-transform duration-200",
                     isListening && "scale-90"
                   )}
+                  onMouseEnter={() => mode === "audio" && setIsMicHovered(true)}
+                  onMouseLeave={() => setIsMicHovered(false)}
                 >
-                  <StatusIcon />
+                  {mode === "audio" && isMicHovered ? (
+                    <label htmlFor="document-upload" className="cursor-pointer">
+                      {isUploading ? (
+                        <Loader2 className="w-8 h-8 md:w-10 md:h-10 text-white animate-spin" />
+                      ) : (
+                        <Upload className="w-8 h-8 md:w-10 md:h-10 text-white hover:text-red-200" />
+                      )}
+                    </label>
+                  ) : (
+                    <StatusIcon />
+                  )}
                 </div>
+                <input
+                  ref={fileInputRef}
+                  id="document-upload"
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={isUploading || mode !== "audio"}
+                />
               </div>
             </div>
           </div>
@@ -341,6 +502,8 @@ export function DynamoPage() {
             <RotateCcw className="w-4 h-4" />
             Nueva conversación
           </Button>
+        )}
+        </>
         )}
       </div>
 
