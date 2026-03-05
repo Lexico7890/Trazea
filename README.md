@@ -128,6 +128,9 @@ Base de datos centralizada de todos los repuestos del negocio:
 
 El proyecto implementa FSD como metodología arquitectónica, organizando el código en capas con responsabilidades claras y dependencias unidireccionales:
 
+![alt text](image.png)
+[View on Eraser![](https://app.eraser.io/workspace/2ZDcv2JJh3kFqiyUbmXW/preview?diagram=MiwqNinJuT_PnLntEwHew&type=embed)](https://app.eraser.io/workspace/2ZDcv2JJh3kFqiyUbmXW?diagram=MiwqNinJuT_PnLntEwHew)
+
 ```
 src/
 ├── app/          → Configuración global, routing, providers, Sentry
