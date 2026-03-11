@@ -107,6 +107,25 @@ export function AuthCallback() {
                 console.log('⏳ Esperando creación del usuario en la base de datos...')
                 await new Promise(resolve => setTimeout(resolve, 2000))
 
+                // 1. RECOGEMOS EL TOKEN QUE ATRAPÓ EL INTERCEPTOR
+                const googleRefreshToken = localStorage.getItem('temp_google_refresh_token');
+                debugger
+
+                if (googleRefreshToken) {
+                    console.log('🔑 Guardando Token de Google en la base de datos...');
+                    const { error: updateError } = await supabase
+                        .from('usuarios')
+                        .update({ google_refresh_token: googleRefreshToken }) // Guardamos en BD
+                        .eq('id_usuario', userId);
+
+                    if (!updateError) {
+                        console.log('✅ Token guardado. Borrando evidencia...');
+                        localStorage.removeItem('temp_google_refresh_token'); // Limpiamos
+                    } else {
+                        console.error('❌ Error al actualizar BD:', updateError);
+                    }
+                }
+
                 // Verificar estado del usuario
                 const { data: usuario, error: userError } = await supabase
                     .from('usuarios')
