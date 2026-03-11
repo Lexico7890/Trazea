@@ -99,6 +99,7 @@ export const useLogin = () => {
                 provider: 'google',
                 options: {
                     redirectTo: `${window.location.origin}/auth-callback`,
+                    scopes: 'https://www.googleapis.com/auth/gmail.send', // Algunos wrappers de Supabase lo prefieren aquí
                     queryParams: {
                         access_type: 'offline',
                         prompt: 'consent',
