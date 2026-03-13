@@ -40,22 +40,16 @@ export const useLogin = () => {
 
     const logout = async () => {
         setIsLoading(true);
-        console.log('🚪 Iniciando logout...');
 
         try {
             // Primero limpiar el estado local
             localStorage.removeItem('minca_location_id');
             clearUser(); // o clearSessionData() según tu store
 
-            console.log('🧹 Estado local limpiado');
-
             // Luego cerrar sesión en Supabase
             const { error } = await supabase.auth.signOut();
 
-            console.log('✅ Sesión cerrada en Supabase');
-
             if (error) {
-                console.error('❌ Error al cerrar sesión:', error);
                 handleSupabaseError(error);
                 return;
             }
@@ -64,11 +58,9 @@ export const useLogin = () => {
             navigate('/login', { replace: true });
 
         } catch (error) {
-            console.error('❌ Error inesperado en logout:', error);
             handleSupabaseError(error);
         } finally {
             setIsLoading(false);
-            console.log('🏁 Logout completado');
         }
     };
 

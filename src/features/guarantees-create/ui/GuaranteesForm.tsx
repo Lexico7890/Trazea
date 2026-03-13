@@ -117,7 +117,7 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
         imageUrls.push(imageUrl);
         toast.success("Imagen subida correctamente", { id: "warranty-upload" });
       }
-      if (!prefillData){
+      if (!prefillData) {
         return
       }
       const guaranteeData: Guarantee[] = prefillData.map((item: Guarantee, index: number) => {
@@ -150,7 +150,6 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
       console.error(error);
     }
   };
-  console.log("currentLocation", currentLocation);
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -195,11 +194,11 @@ export function GuaranteesForm({ prefillData }: GuaranteesFormProps) {
                 value={mileage}
                 onChange={(e) => setMileage(e.target.value)}
                 placeholder="Ej: 50000 o 'Apagada'"
-                // User didn't request this to be locked, but "taller orden, repuesto, tecnico" were mentioned as locked.
-                // Assuming Kilometaje is editable unless implied otherwise.
-                // "taller orden, repuesto, tecnico, estos campos no pueden ser editados" -> does not include Kilometraje explicitly?
-                // Actually, "deben estar siempre bloqueados, los demas campos si pueden ser manipulados".
-                // So Kilometraje is one of "los demas".
+              // User didn't request this to be locked, but "taller orden, repuesto, tecnico" were mentioned as locked.
+              // Assuming Kilometaje is editable unless implied otherwise.
+              // "taller orden, repuesto, tecnico, estos campos no pueden ser editados" -> does not include Kilometraje explicitly?
+              // Actually, "deben estar siempre bloqueados, los demas campos si pueden ser manipulados".
+              // So Kilometraje is one of "los demas".
               />
             </div>
           </div>

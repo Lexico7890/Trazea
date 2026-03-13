@@ -64,7 +64,6 @@ export function LocationSelector() {
     sessionData?.user?.id,
     setCurrentLocation
   ]);
-  console.log("Current Location:", currentLocation);
 
   const handleSelectLocation = (location: UserLocation) => {
     setCurrentLocation(location);

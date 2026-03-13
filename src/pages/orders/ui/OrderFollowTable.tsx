@@ -133,8 +133,6 @@ export function OrderFollowTable({ onCallClick }: OrderFollowTableProps = {}) {
                                             onClick={() => {
                                                 if (onCallClick) {
                                                     onCallClick(order.id, order.number);
-                                                } else {
-                                                    console.log("Navigate to phone view for order", order.id);
                                                 }
                                             }}
                                         >

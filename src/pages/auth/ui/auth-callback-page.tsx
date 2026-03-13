@@ -12,11 +12,6 @@ export function AuthCallback() {
     useEffect(() => {
         const handleCallback = async () => {
             try {
-                console.log('🔄 Iniciando proceso de callback...')
-                console.log('📍 URL completa:', window.location.href)
-                console.log('📍 Search:', window.location.search)
-                console.log('📍 Hash:', window.location.hash)
-
                 // 1. Intentar obtener parámetros del query string
                 let params = new URLSearchParams(window.location.search)
                 let code = params.get('code')
@@ -25,7 +20,6 @@ export function AuthCallback() {
 
                 // 2. Si no hay en query string, intentar en el hash
                 if (!code && window.location.hash) {
-                    console.log('🔍 No hay code en query, buscando en hash...')
                     // Remover el # inicial
                     const hashParams = new URLSearchParams(window.location.hash.substring(1))
                     code = hashParams.get('code')
@@ -37,8 +31,6 @@ export function AuthCallback() {
                     const refresh_token = hashParams.get('refresh_token')
 
                     if (access_token) {
-                        console.log('✅ Encontrado access_token en hash (flow implícito)')
-
                         // Establecer la sesión directamente con los tokens
                         const { data, error: sessionError } = await supabase.auth.setSession({
                             access_token,
@@ -53,35 +45,26 @@ export function AuthCallback() {
                             throw new Error('No se pudo crear la sesión')
                         }
 
-                        console.log('✅ Sesión establecida exitosamente')
-
                         // Continuar con la verificación del usuario
                         await verifyAndRedirect(data.session.user.id)
                         return
                     }
                 }
 
-                console.log('📊 Parámetros encontrados:', { code, error_code, error_description })
-
                 // 3. Verificar errores de OAuth
                 if (error_code || error_description) {
-                    console.error('❌ Error de OAuth:', { error_code, error_description })
                     throw new Error(error_description || 'Error en la autenticación con Google')
                 }
 
                 // 4. Verificar que llegó el código
                 if (!code) {
-                    console.error('❌ No se encontró código ni access_token')
                     throw new Error('No se recibió el código de autenticación. Por favor intenta nuevamente.')
                 }
-
-                console.log('✅ Código recibido:', code.substring(0, 10) + '...')
 
                 // 5. Intercambiar código por sesión
                 const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
                 if (sessionError) {
-                    console.error('❌ Error al intercambiar código:', sessionError)
                     throw new Error(`Error al crear la sesión: ${sessionError.message}`)
                 }
 
@@ -89,13 +72,10 @@ export function AuthCallback() {
                     throw new Error('No se pudo crear la sesión')
                 }
 
-                console.log('✅ Sesión creada exitosamente para:', sessionData.session.user.email)
-
                 // Continuar con la verificación del usuario
                 await verifyAndRedirect(sessionData.session.user.id)
 
             } catch (err: any) {
-                console.error('❌ Error en callback:', err)
                 setError(err.message || 'Error desconocido al procesar la autenticación')
             }
         }
@@ -104,7 +84,6 @@ export function AuthCallback() {
         const verifyAndRedirect = async (userId: string) => {
             try {
                 // Esperar a que el trigger cree el usuario
-                console.log('⏳ Esperando creación del usuario en la base de datos...')
                 await new Promise(resolve => setTimeout(resolve, 2000))
 
                 // 1. RECOGEMOS EL TOKEN QUE ATRAPÓ EL INTERCEPTOR
@@ -112,14 +91,12 @@ export function AuthCallback() {
                 debugger
 
                 if (googleRefreshToken) {
-                    console.log('🔑 Guardando Token de Google en la base de datos...');
                     const { error: updateError } = await supabase
                         .from('usuarios')
                         .update({ google_refresh_token: googleRefreshToken }) // Guardamos en BD
                         .eq('id_usuario', userId);
 
                     if (!updateError) {
-                        console.log('✅ Token guardado. Borrando evidencia...');
                         localStorage.removeItem('temp_google_refresh_token'); // Limpiamos
                     } else {
                         console.error('❌ Error al actualizar BD:', updateError);
@@ -133,11 +110,8 @@ export function AuthCallback() {
                     .eq('id_usuario', userId)
                     .maybeSingle()
 
-                console.log('📊 Usuario en BD:', usuario)
-
                 // Si no existe, reintentar
                 if (userError || !usuario) {
-                    console.log('⏳ Usuario no encontrado, reintentando...')
                     await new Promise(resolve => setTimeout(resolve, 2000))
 
                     const { data: usuario2, error: userError2 } = await supabase
@@ -147,14 +121,12 @@ export function AuthCallback() {
                         .maybeSingle()
 
                     if (userError2 || !usuario2) {
-                        console.error('❌ Usuario no encontrado después de reintentos')
                         await supabase.auth.signOut()
                         throw new Error('Tu usuario no pudo ser configurado. Contacta al administrador.')
                     }
 
                     // Usar segundo intento
                     if (!usuario2.aprobado) {
-                        console.log('⏳ Usuario no aprobado')
                         navigate('/pending-approval', { replace: true })
                         return
                     }
@@ -164,27 +136,22 @@ export function AuthCallback() {
                         throw new Error('Tu cuenta ha sido desactivada.')
                     }
 
-                    console.log('✅ Usuario aprobado y activo')
                     navigate('/', { replace: true })
                     return
                 }
 
                 // Verificar aprobación
                 if (!usuario.aprobado) {
-                    console.log('⏳ Usuario no aprobado')
                     navigate('/pending-approval', { replace: true })
                     return
                 }
 
                 // Verificar si está activo
                 if (!usuario.activo) {
-                    console.log('❌ Usuario inactivo')
                     await supabase.auth.signOut()
                     throw new Error('Tu cuenta ha sido desactivada.')
                 }
 
-                // Todo correcto
-                console.log('✅ Autenticación exitosa')
                 navigate('/', { replace: true })
             } catch (err: any) {
                 console.error('❌ Error en verificación:', err)
@@ -198,11 +165,9 @@ export function AuthCallback() {
     const handleBackToLogin = async () => {
         try {
             await supabase.auth.signOut()
-            //localStorage.removeItem('sb-xeypfdmbpkzkkfmthqwb-auth-token')
             navigate('/login', { replace: true })
         } catch (error) {
             console.error('Error al limpiar sesión:', error)
-            //localStorage.clear()
             window.location.href = '/login'
         }
     }

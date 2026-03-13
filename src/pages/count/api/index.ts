@@ -1,5 +1,6 @@
 import { supabase } from "@/shared/api";
 import type { CountDetail, CountDetailItem, RegistrarConteoParams } from "../model/types";
+import { useUserStore } from "@/entities/user";
 
 /**
  * Fetches the history of inventory counts from the 'conteo' table with pagination.
@@ -7,11 +8,12 @@ import type { CountDetail, CountDetailItem, RegistrarConteoParams } from "../mod
 export async function getCountHistory(page = 1, pageSize = 10) {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
+    const currentLocationId = useUserStore.getState().currentLocation?.id_localizacion;
 
     const { data, count, error } = await supabase
         .from('vista_historial_conteos')
         .select('*', { count: 'exact' })
-        .eq('localizacion', localStorage.getItem('minca_location_id'))
+        .eq('localizacion', currentLocationId)
         .order('fecha', { ascending: false })
         .range(from, to);
 
@@ -27,15 +29,11 @@ export async function getCountHistory(page = 1, pageSize = 10) {
  * Fetches the details of a specific count from vista_detalle_conteos
  */
 export async function getCountDetails(idConteo: string): Promise<CountDetail | null> {
-    console.log('Fetching count details for ID:', idConteo);
-
     const { data, error } = await supabase
         .from('vista_detalle_conteo_by_id')
         .select('*')
         .eq('id_conteo', idConteo)
         .single();
-
-    console.log('Count details response:', { data, error });
 
     if (error) {
         console.error('Error fetching count details:', error);

@@ -27,7 +27,6 @@ export function GuaranteesDashboard({ onSendWarranty }: GuaranteesDashboardProps
     if (!Array.isArray(warranties)) return [];
 
     const groups: Record<string, Guarantee[]> = {};
-    console.log("Grouping warranties:", warranties);
 
     warranties.forEach((w: Guarantee) => {
       const ordenKey = w.orden || 'sin-orden';

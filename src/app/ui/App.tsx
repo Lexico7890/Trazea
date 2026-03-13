@@ -28,7 +28,8 @@ import { DynamoPage } from "@/pages/dynamo";
 function App() {
   useSupabaseAuthListener();
   const location = useLocation();
-  const { isAuthenticated, currentLocation } = useUserStore();
+  const { isAuthenticated, currentLocation, sessionData } = useUserStore();
+  console.log("sessionData", sessionData);
 
   // Generate breadcrumbs based on current location
   const pathSegments = location.pathname.split("/").filter(Boolean);
@@ -40,10 +41,8 @@ function App() {
     };
   });
 
-  // Always prepend Home/Inventory if distinct, but here '/' is Inventory.
-  // If we are at root, breadcrumbs is empty.
   const isRoot = location.pathname === "/";
-  const locationId = currentLocation?.id_localizacion; // Assuming currentLocation has id_localizacion
+  const locationId = currentLocation?.id_localizacion;
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -109,24 +108,24 @@ function App() {
                   <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
                     <Routes>
                       {/* Protected Routes Wrapper */}
-                      <Route element={<ProtectedRoute routeKey="inventario" />}>
+                      <Route element={<ProtectedRoute routeKey="inventory" />}>
                         <Route path="/" element={<InventoryPage />} />
                       </Route>
 
-                      <Route element={<ProtectedRoute routeKey="repuestos" />}>
+                      <Route element={<ProtectedRoute routeKey="spares" />}>
                         <Route path="/repuestos" element={<RepuestosPage />} />
                       </Route>
 
                       <Route element={<ProtectedRoute routeKey="registros" />}>
                         <Route path="/registros" element={<RecordsPage />} />
                       </Route>
-                      <Route element={<ProtectedRoute routeKey="ordenes" />}>
+                      <Route element={<ProtectedRoute routeKey="order_tracking" />}>
                         <Route path="/ordenes" element={<OrdersPage />} />
                       </Route>
 
                       {/* Note: 'inventario' route (legacy) might need a permission check or just link to 'mi_inventario' perm?
-                          For now, I'll protect it with 'inventario' as well. */}
-                      <Route element={<ProtectedRoute routeKey="inventario" />}>
+                          For now, I'll protect it with 'inventory' as well. */}
+                      <Route element={<ProtectedRoute routeKey="inventory" />}>
                         <Route path="/inventario" element={<Inventory />} />
                         <Route path="/inventario/conteo" element={<ConteoPage />} />
                         <Route path="/inventario/conteo/resultados" element={<ResultadosConteoPage />} />
@@ -139,7 +138,9 @@ function App() {
                           <Route path="enviadas" element={<RequestsSentPage />} />
                         </Route>
                       </Route>
-                      <Route path="/dynamo" element={<DynamoPage />} />
+                      <Route element={<ProtectedRoute routeKey="dynamo" />}>
+                        <Route path="/dynamo" element={<DynamoPage />} />
+                      </Route>
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>

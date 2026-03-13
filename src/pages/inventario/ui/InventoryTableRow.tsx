@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 import { toast } from "sonner";
 import type { InventoryItem } from "@/entities/inventario";
 import { InventoryEditSheet } from "./InventoryEditSheet";
+import { useUserStore } from "@/entities/user";
 
 interface InventoryTableRowProps {
     item: InventoryItem;
@@ -17,6 +18,9 @@ interface InventoryTableRowProps {
 export function InventoryTableRow({ item }: InventoryTableRowProps) {
     const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
     const queryClient = useQueryClient();
+    const { checkMenuPermission } = useUserStore();
+    
+    const canEditProduct = checkMenuPermission("inventory", "edit_product");
 
     // Determine if stock is low
     const isLowStock = item.stock_actual < item.cantidad_minima;
@@ -83,21 +87,25 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
                 </Link>
             </TableCell>
             <TableCell>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setIsEditSheetOpen(true)}
-                >
-                    <Pencil className="h-4 w-4" />
-                </Button>
+                {canEditProduct && (
+                    <>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setIsEditSheetOpen(true)}
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </Button>
 
-                <InventoryEditSheet
-                    item={item}
-                    open={isEditSheetOpen}
-                    onOpenChange={setIsEditSheetOpen}
-                    onSaveSuccess={handleSaveSuccess}
-                />
+                        <InventoryEditSheet
+                            item={item}
+                            open={isEditSheetOpen}
+                            onOpenChange={setIsEditSheetOpen}
+                            onSaveSuccess={handleSaveSuccess}
+                        />
+                    </>
+                )}
             </TableCell>
         </TableRow>
     );

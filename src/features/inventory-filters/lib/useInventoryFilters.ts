@@ -22,7 +22,6 @@ export function useInventoryFilters() {
     }, []);
 
     const updateDescontinuado = useCallback((descontinuado: string) => {
-        console.log(descontinuado);
         setFilters(prev => ({ ...prev, descontinuado, page: 1 }));
     }, []);
 
