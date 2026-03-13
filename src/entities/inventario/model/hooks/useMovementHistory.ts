@@ -15,8 +15,6 @@ const fetchMovementHistory = async ({
 }): Promise<MovementHistoryItem[]> => {
   const from = pageParam * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
-  console.log("referencia", referencia);
-  console.log("idLocalizacion", idLocalizacion);
 
   const { data, error } = await supabase
     .from('vista_timeline_repuesto')

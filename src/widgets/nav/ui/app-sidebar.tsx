@@ -36,20 +36,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/dynamo",
       icon: Bot,
       badge: "Beta",
+      permissionKey: "dynamo",
       items: [],
     },
     {
       title: "Mi inventario",
       url: "/",
       icon: Warehouse,
-      permissionKey: "inventario",
+      permissionKey: "inventory",
       items: [],
     },
     {
       title: "Repuestos",
       url: "/repuestos",
       icon: Settings2,
-      permissionKey: "repuestos",
+      permissionKey: "spares",
       items: [],
     },
     {
@@ -63,7 +64,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       title: "Seguimiento ordenes",
       url: "/ordenes",
       icon: SendToBack,
-      permissionKey: "ordenes",
+      permissionKey: "order_tracking",
       items: [],
     },
     {

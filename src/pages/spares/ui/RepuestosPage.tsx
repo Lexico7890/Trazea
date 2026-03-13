@@ -64,9 +64,12 @@ export function RepuestosPage() {
     const { createMutation, updateMutation, deleteMutation } = useRepuestosMutations();
 
     // Stores
-    const { sessionData, currentLocation, hasRole } = useUserStore();
+    const { sessionData, currentLocation, checkMenuPermission } = useUserStore();
     const { addItemToCart } = useRequestsStore();
-    const isTecnico = hasRole("tecnico");
+    const canCreateSpare = checkMenuPermission("spares", "create_spare");
+    const canEditRegister = checkMenuPermission("spares", "edit_register");
+    const canBulkUpload = checkMenuPermission("spares", "bulk_upload");
+    const canDelete = checkMenuPermission("spares", "delete");
 
     // Handlers
     const handleSearchChange = (value: string) => {
@@ -212,12 +215,14 @@ export function RepuestosPage() {
                     >
                         <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
                     </Button>
-                    {!isTecnico && (
+                    {(canBulkUpload || canCreateSpare) && (
                         <>
-                            <BulkUpload onSuccess={() => refetch()} />
-                            <Button onClick={handleCreate} className="w-full sm:w-auto">
-                                <Plus className="h-4 w-4" />
-                            </Button>
+                            {canBulkUpload && <BulkUpload onSuccess={() => refetch()} />}
+                            {canCreateSpare && (
+                                <Button onClick={handleCreate} className="w-full sm:w-auto">
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            )}
                         </>
                     )}
                 </div>
@@ -257,7 +262,7 @@ export function RepuestosPage() {
                                 onDelete={handleDeleteClick}
                                 onShowImage={handleShowImage}
                                 onRequest={handleRequest}
-                                canDelete={!isTecnico}
+                                canDelete={canDelete}
                             />
                             <div className="mt-4">
                                 <Pagination
@@ -280,14 +285,14 @@ export function RepuestosPage() {
                     <SheetHeader>
                         <SheetTitle>
                             {editingRepuesto
-                                ? isTecnico
+                                ? !canEditRegister
                                     ? "Detalles del Repuesto"
                                     : "Editar Repuesto"
                                 : "Nuevo Repuesto"}
                         </SheetTitle>
                         <SheetDescription>
                             {editingRepuesto
-                                ? isTecnico
+                                ? !canEditRegister
                                     ? "Información detallada del repuesto."
                                     : "Modifica los datos del repuesto aquí."
                                 : "Ingresa los datos para crear un nuevo repuesto."}
@@ -299,7 +304,7 @@ export function RepuestosPage() {
                             onSubmit={handleSubmitForm}
                             onCancel={() => setIsSheetOpen(false)}
                             isLoading={createMutation.isPending || updateMutation.isPending}
-                            readOnly={isTecnico}
+                            readOnly={!canEditRegister}
                         />
                     </div>
                 </SheetContent>

@@ -8,6 +8,24 @@ interface ProtectedRouteProps {
   routeKey: string;
 }
 
+// Mapeo de claves para compatibilidad entre formatos antiguo y nuevo
+const ROUTE_KEY_MAP: Record<string, string> = {
+  'inventario': 'inventory',
+  'inventory': 'inventario',
+  'repuestos': 'spares',
+  'spares': 'repuestos',
+  'ordenes': 'order_tracking',
+  'order_tracking': 'ordenes',
+  'registros': 'registers',
+  'registers': 'registros',
+};
+
+// Función para obtener la clave correcta del permiso (soporta formato antiguo y nuevo)
+const getPermissionKey = (routeKey: string): string => {
+  // Si la clave ya existe en menu, usarla directamente
+  return ROUTE_KEY_MAP[routeKey] || routeKey;
+};
+
 export const ProtectedRoute = ({ routeKey }: ProtectedRouteProps) => {
   const sessionData = useUserStore((state) => state.sessionData);
   const isAuthenticated = useUserStore((state) => state.isAuthenticated);
@@ -28,13 +46,6 @@ export const ProtectedRoute = ({ routeKey }: ProtectedRouteProps) => {
     return () => clearTimeout(timer);
   }, [sessionData]);
 
-  console.log('🔒 ProtectedRoute check:', {
-    isAuthenticated,
-    aprobado: sessionData?.user?.aprobado,
-    activo: sessionData?.user?.activo,
-    routeKey
-  });
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -48,31 +59,42 @@ export const ProtectedRoute = ({ routeKey }: ProtectedRouteProps) => {
 
   // Si no está autenticado
   if (!isAuthenticated || !sessionData) {
-    console.log('❌ No autenticado, redirigiendo a /login');
     return <Navigate to="/login" replace />;
   }
 
   // Verificar aprobación (ESTRICTA)
   if (sessionData.user.aprobado !== true) {
-    console.log('⏳ Usuario NO aprobado (aprobado =', sessionData.user.aprobado, ')');
     return <Navigate to="/pending-approval" replace />;
   }
 
   // Verificar activo (ESTRICTA)
   if (sessionData.user.activo !== true) {
-    console.log('❌ Usuario NO activo (activo =', sessionData.user.activo, ')');
     return <Navigate to="/login" replace />;
   }
 
-  // Verificar permisos
+  // Verificar permisos - soporta formato nuevo y antiguo
   const menuPermissions = sessionData.user.role?.permissions?.menu;
-  const hasPermission = menuPermissions?.[routeKey]?.show_view === true;
+  
+  // Primero intentar con la clave nueva
+  let hasPermission = menuPermissions?.[routeKey]?.show_view === true;
+  
+  // Si no tiene permiso con la clave nueva, intentar con la clave antigua mapeada
+  if (!hasPermission) {
+    const oldKey = getPermissionKey(routeKey);
+    hasPermission = menuPermissions?.[oldKey]?.show_view === true;
+  }
+  
+  // Si aún no tiene permiso, verificar si existe la clave en cualquier formato
+  if (!hasPermission) {
+    const mappedKey = ROUTE_KEY_MAP[routeKey];
+    if (mappedKey) {
+      hasPermission = menuPermissions?.[mappedKey]?.show_view === true;
+    }
+  }
 
   if (!hasPermission) {
-    console.log('🚫 Sin permisos para', routeKey);
     return <Navigate to="/" replace />;
   }
 
-  console.log('✅ Acceso permitido a', routeKey);
   return <Outlet />;
 };

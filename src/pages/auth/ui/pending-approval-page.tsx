@@ -19,13 +19,11 @@ export function PendingApproval() {
             setIsLoading(false)
 
             if (!sessionData) {
-                console.log('❌ No hay sessionData después de esperar, redirigiendo a login')
                 navigate('/login', { replace: true })
                 return
             }
 
             if (sessionData.user.aprobado === true) {
-                console.log('✅ Usuario ya aprobado, redirigiendo a home')
                 navigate('/', { replace: true })
             }
         }, 1500) // Esperar 1.5 segundos antes de verificar
@@ -36,7 +34,6 @@ export function PendingApproval() {
             setIsLoading(false)
 
             if (sessionData.user.aprobado === true) {
-                console.log('✅ Usuario ya aprobado, redirigiendo a home')
                 navigate('/', { replace: true })
             }
         }
@@ -48,12 +45,10 @@ export function PendingApproval() {
         if (checking) return
 
         setChecking(true)
-        console.log('🔍 Verificando estado de aprobación...')
 
         try {
             const userId = sessionData?.user?.id
             if (!userId) {
-                console.error('❌ No hay userId')
                 navigate('/login', { replace: true })
                 return
             }
@@ -70,22 +65,16 @@ export function PendingApproval() {
             }
 
             if (!data) {
-                console.error('❌ Usuario no encontrado')
                 throw new Error('Usuario no encontrado en la base de datos')
             }
 
-            console.log('📊 Estado del usuario:', data)
-
             if (data.aprobado === true) {
-                console.log('✅ Usuario aprobado! Recargando...')
                 window.location.href = '/'
             } else {
-                console.log('⏳ Aún no aprobado')
                 alert('Tu cuenta aún no ha sido aprobada. Por favor intenta más tarde.')
             }
 
         } catch (error: any) {
-            console.error('❌ Error:', error)
             alert(`Error: ${error.message}`)
         } finally {
             setChecking(false)
@@ -97,7 +86,6 @@ export function PendingApproval() {
             await supabase.auth.signOut()
             navigate('/login', { replace: true })
         } catch (error) {
-            console.error('Error al cerrar sesión:', error)
             navigate('/login', { replace: true })
         }
     }

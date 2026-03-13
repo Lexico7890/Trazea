@@ -3,7 +3,6 @@ import { supabase } from '@/shared/api/supabase';
 import type { Repuesto } from '../types';
 
 const fetchRepuestoByReferencia = async (referencia: string, location: string): Promise<Repuesto | null> => {
-  console.log("fetchRepuestoByReferencia - referencia:", referencia, "currentLocation:", location);
   const { data, error } = await supabase
     .from('vista_repuestos_inventario')
     .select('*')

@@ -29,7 +29,6 @@ export function GuaranteesTable({
   onUpdateStatus,
   isStatusUpdatePending,
 }: GuaranteesTableProps) {
-  console.log("Rendering GuaranteesTable with groups:", groups);
   return (
     <div className="rounded-xl border bg-card shadow-lg overflow-hidden transition-all duration-300">
       <div className="overflow-x-auto">
@@ -51,14 +50,14 @@ export function GuaranteesTable({
                 className="group hover:bg-muted/30 transition-colors"
               >
                 <TableCell className="font-medium text-muted-foreground text-sm">
-                  {group.fecha_reporte 
-                    ? format(new Date(group.fecha_reporte), 'dd/MM/yyyy') 
+                  {group.fecha_reporte
+                    ? format(new Date(group.fecha_reporte), 'dd/MM/yyyy')
                     : '-'}
                 </TableCell>
                 <TableCell>
                   <SparePartsPopover
-                    items={group.items} 
-                    repuestosCount={group.repuestosCount} 
+                    items={group.items}
+                    repuestosCount={group.repuestosCount}
                   />
                 </TableCell>
                 <TableCell>

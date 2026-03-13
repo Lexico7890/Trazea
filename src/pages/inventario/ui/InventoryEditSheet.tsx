@@ -21,10 +21,11 @@ import { updateItemComplete } from "@/entities/inventario";
 
 export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: InventoryEditSheetProps) {
     const { addItemToCart } = useRequestsStore();
-    const { sessionData, hasRole } = useUserStore();
+    const { sessionData, checkMenuPermission } = useUserStore();
     const [isLoading, setIsLoading] = useState(false);
     const [selectedAction, setSelectedAction] = useState<ActionType>(null);
-    const isTechnician = hasRole('tecnico');
+    const canEditProduct = checkMenuPermission("inventory", "edit_product");
+    const isReadOnly = !canEditProduct;
 
     // Form State (Changed to string | number to handle empty inputs gracefully)
     const [stockActual, setStockActual] = useState<string | number>(item.stock_actual);
@@ -114,9 +115,6 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                     );
                     toast.success(`"${item.nombre}" agregado a solicitudes`);
                 }
-            } else if (selectedAction === "taller") {
-                // Future implementation
-                console.log("Enviar a taller - logic pending");
             }
 
             toast.success("Inventario actualizado correctamente");
@@ -198,7 +196,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                         >
                             Solicitar
                         </Button>
-                        {!isTechnician && (
+                        {!isReadOnly && (
                             <Button
                                 variant={selectedAction === "taller" ? "default" : "outline"}
                                 className="w-full bg-blue-300 hover:bg-blue-400"
@@ -219,7 +217,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                     type="number"
                                     value={stockActual}
                                     onChange={(e) => handleNumberChange(e.target.value, setStockActual)}
-                                    disabled={isTechnician}
+                                    disabled={isReadOnly}
                                 />
                             </div>
                             <div className="space-y-2">
@@ -229,7 +227,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                     type="number"
                                     value={cantidadMinima}
                                     onChange={(e) => handleNumberChange(e.target.value, setCantidadMinima)}
-                                    disabled={isTechnician}
+                                    disabled={isReadOnly}
                                 />
                             </div>
                         </div>
@@ -240,13 +238,13 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                 id="posicion"
                                 value={posicion}
                                 onChange={(e) => setPosicion(e.target.value)}
-                                disabled={isTechnician}
+                                disabled={isReadOnly}
                             />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="tipo">Tipo</Label>
-                            <Select value={tipo} onValueChange={setTipo} disabled={isTechnician}>
+                            <Select value={tipo} onValueChange={setTipo} disabled={isReadOnly}>
                                 <SelectTrigger id="tipo">
                                     <SelectValue placeholder="Seleccionar tipo" />
                                 </SelectTrigger>
@@ -269,7 +267,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                 type="date"
                                 value={fechaEstimada}
                                 onChange={(e) => setFechaEstimada(e.target.value)}
-                                disabled={isTechnician}
+                                disabled={isReadOnly}
                             />
                         </div>
 
@@ -278,7 +276,7 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                                 id="descontinuado"
                                 checked={descontinuado}
                                 onCheckedChange={(checked) => setDescontinuado(checked === true)}
-                                disabled={isTechnician}
+                                disabled={isReadOnly}
                             />
                             <Label htmlFor="descontinuado" className="font-normal cursor-pointer text-red-300">
                                 Descontinuado

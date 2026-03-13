@@ -158,7 +158,6 @@ export function InventoryImageUploadModal({
       // ---------------------------------------------------------
       // PASO 1: Subir imagen al Storage de Supabase
       // ---------------------------------------------------------
-      console.log("Subiendo imagen al Storage...");
 
       // Creamos un nombre único
       const fileExt = file.name.split(".").pop();
@@ -175,12 +174,9 @@ export function InventoryImageUploadModal({
         throw new Error(`Error subiendo imagen: ${uploadError.message}`);
       }
 
-      console.log("Imagen subida. Ruta:", uploadData.path);
-
       // ---------------------------------------------------------
       // PASO 2: Invocar la Edge Function con la RUTA
       // ---------------------------------------------------------
-      console.log("Invocando Edge Function...");
 
       const { data, error } = await supabase.functions.invoke(
         "escanear-repuestos",

@@ -22,7 +22,6 @@ export function RecordsPage() {
   const [activeTab, setActiveTab] = useState(state?.defaultTab ?? "registros");
 
   const handleSendWarranty = (data: unknown) => {
-    console.log("RecordsPage received warranty to send:", data);
     setSelectedWarranty(data);
 
     // Optional: scroll to top to see form if needed, or ensuring tab is open

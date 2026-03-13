@@ -34,7 +34,10 @@ import { InventoryTable } from "./InventoryTable";
 
 export default function InventoryPage() {
   const [isAddDialogOpen, setAddDialogOpen] = useState(false);
-  const { hasRole } = useUserStore();
+  const { checkMenuPermission } = useUserStore();
+  
+  const canCreateProduct = checkMenuPermission("inventory", "create_product");
+  const canEditProduct = checkMenuPermission("inventory", "edit_product");
   const {
     filters,
     updateSearch,
@@ -89,7 +92,7 @@ export default function InventoryPage() {
         <div className="flex items-center gap-2">
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-2">
-            {!hasRole("tecnico") && (
+            {canEditProduct && (
               <Link to="/inventario/conteo">
                 <Button variant="outline">
                   <FileScan className="h-4 w-4 mr-2" />
@@ -97,7 +100,7 @@ export default function InventoryPage() {
                 </Button>
               </Link>
             )}
-            {!hasRole("tecnico") && (
+            {canEditProduct && (
               <InventoryImageUploadModal
                 trigger={
                   <Button variant="outline" size="icon">
@@ -106,7 +109,7 @@ export default function InventoryPage() {
                 }
               />
             )}
-            {!hasRole("tecnico") && (
+            {canCreateProduct && (
               <Dialog open={isAddDialogOpen} onOpenChange={setAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
@@ -137,7 +140,7 @@ export default function InventoryPage() {
               </PopoverTrigger>
               <PopoverContent className="w-auto p-2">
                 <div className="flex flex-col gap-2">
-                  {!hasRole("tecnico") && (
+                  {canEditProduct && (
                     <Link to="/inventario/conteo">
                       <Button
                         variant="ghost"
@@ -148,7 +151,7 @@ export default function InventoryPage() {
                       </Button>
                     </Link>
                   )}
-                  {!hasRole("tecnico") && (
+                  {canEditProduct && (
                     <InventoryImageUploadModal
                       trigger={
                         <Button
@@ -161,7 +164,7 @@ export default function InventoryPage() {
                       }
                     />
                   )}
-                  {!hasRole("tecnico") && (
+                  {canCreateProduct && (
                     <Dialog
                       open={isAddDialogOpen}
                       onOpenChange={setAddDialogOpen}

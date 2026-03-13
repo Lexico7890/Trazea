@@ -38,8 +38,6 @@ export const useSupabaseAuthListener = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth event:', event);
-
       // PASSWORD_RECOVERY: Usuario hizo clic en link de recuperación
       if (event === 'PASSWORD_RECOVERY' && session?.user) {
         try {

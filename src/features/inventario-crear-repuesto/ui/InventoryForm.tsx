@@ -60,8 +60,6 @@ export function InventoryForm({ onSuccess }: InventoryFormProps) {
       return;
     }
 
-    console.log("Submitting inventory with location:", idLocalizacion);
-
     mutate({
       id_repuesto: values.repuesto.id_repuesto,
       id_localizacion: String(idLocalizacion),
