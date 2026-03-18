@@ -15,6 +15,7 @@ interface LocationState {
 export function RecordsPage() {
   const { checkMenuPermission } = useUserStore();
   const showForm = checkMenuPermission("registros", "show_form_register");
+  const showWarranties = checkMenuPermission("registros", "show_warranties");
   const location = useLocation();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedWarranty, setSelectedWarranty] = useState<any>(null);
@@ -37,7 +38,9 @@ export function RecordsPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
         <TabsList>
           <TabsTrigger value="registros">Registros</TabsTrigger>
-          <TabsTrigger value="garantias">Garantías</TabsTrigger>
+          {showWarranties && (
+            <TabsTrigger value="garantias">Garantías</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="registros">
@@ -54,10 +57,12 @@ export function RecordsPage() {
         </TabsContent>
 
         <TabsContent value="garantias">
-          <div className="mt-4 flex flex-col items-center">
-            <GuaranteesForm prefillData={selectedWarranty} />
-            <GuaranteesDashboard onSendWarranty={handleSendWarranty} />
-          </div>
+          {showWarranties && (
+            <div className="mt-4 flex flex-col items-center">
+              <GuaranteesForm prefillData={selectedWarranty} />
+              <GuaranteesDashboard onSendWarranty={handleSendWarranty} />
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

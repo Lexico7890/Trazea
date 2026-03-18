@@ -101,14 +101,14 @@ export const useLogin = () => {
 
             if (error) {
                 handleSupabaseError(error);
+                setIsGoogleLoading(false);
                 return;
             }
 
             // El redireccionamiento ocurrirá automáticamente
-            sonnerToast.success('Redirigiendo a Google...');
+            // Dejamos isGoogleLoading en true para que la animación termine mientras el navegador redirige
         } catch (error) {
             handleSupabaseError(error);
-        } finally {
             setIsGoogleLoading(false);
         }
     };

@@ -18,6 +18,7 @@ interface AudioInputProps {
   onClearError: () => void;
   onUploadStart?: () => void;
   onUploadEnd?: () => void;
+  canUpload?: boolean;
 }
 
 export function AudioInput({
@@ -28,6 +29,7 @@ export function AudioInput({
   transcript,
   error,
   onClearError,
+  canUpload = true,
 }: AudioInputProps) {
   const isActive = isListening || isProcessing || isSpeaking;
   const [isMicHovered, setIsMicHovered] = useState(false);
@@ -176,7 +178,7 @@ export function AudioInput({
                 onMouseEnter={() => setIsMicHovered(true)}
                 onMouseLeave={() => setIsMicHovered(false)}
               >
-                {isMicHovered ? (
+                {isMicHovered && canUpload ? (
                   <label htmlFor="document-upload" className="cursor-pointer">
                     {isUploading ? (
                       <Loader2 className="w-8 h-8 md:w-10 md:h-10 text-white animate-spin" />
@@ -188,15 +190,17 @@ export function AudioInput({
                   <StatusIcon />
                 )}
               </div>
-              <input
-                ref={fileInputRef}
-                id="document-upload"
-                type="file"
-                accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
-                onChange={handleFileUpload}
-                className="hidden"
-                disabled={isUploading}
-              />
+              {canUpload && (
+                <input
+                  ref={fileInputRef}
+                  id="document-upload"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,.xlsx,.xls"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              )}
             </div>
           </div>
         </div>
