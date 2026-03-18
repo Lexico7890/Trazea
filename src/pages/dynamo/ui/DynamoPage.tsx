@@ -9,6 +9,7 @@ import { ModeSwitch, HeaderTitle } from "./ModeSwitch";
 import { TextInput } from "./TextInput";
 import { AudioInput } from "./AudioInput";
 import { ChatPanel } from "./ChatPanel";
+import { useUserStore } from "@/entities/user";
 
 type Mode = "audio" | "text";
 type QueryMode = "sql" | "rag";
@@ -45,6 +46,9 @@ export function DynamoPage() {
   const [mode, setMode] = useState<Mode>("audio");
   const [textInput, setTextInput] = useState("");
   const [queryMode, setQueryMode] = useState<QueryMode>("sql");
+
+  const { checkMenuPermission } = useUserStore();
+  const canUpload = checkMenuPermission("dynamo", "upload");
 
   const isDisabled = isProcessing || isSpeaking || !isSupported;
 
@@ -129,6 +133,7 @@ export function DynamoPage() {
               transcript={transcript || ""}
               error={error}
               onClearError={clearError}
+              canUpload={canUpload}
             />
 
             <button

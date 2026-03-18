@@ -18,10 +18,13 @@ export function LocationSelector() {
     setCurrentLocation,
     isAuthenticated,
     sessionData,
+    hasPermission,
   } = useUserStore();
   const [locations, setLocations] = useState<UserLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
+
+  const canChangeLocation = hasPermission("users_and_access.changes_location");
 
   useEffect(() => {
     const initLocation = async () => {
@@ -46,7 +49,15 @@ export function LocationSelector() {
             .in("id_localizacion", locationIds);
 
           if (locsError) throw locsError;
-          setLocations(locs || []);
+          
+          const availableLocations = locs || [];
+          setLocations(availableLocations);
+
+          // Si el usuario no puede cambiar de ubicación y solo tiene una ubicación, asignarla automáticamente
+          if (!canChangeLocation && availableLocations.length === 1) {
+            setCurrentLocation(availableLocations[0]);
+            queryClient.invalidateQueries({ queryKey: ["inventory"] });
+          }
         } else {
           setLocations([]);
         }
@@ -62,7 +73,9 @@ export function LocationSelector() {
     isAuthenticated,
     currentLocation,
     sessionData?.user?.id,
-    setCurrentLocation
+    setCurrentLocation,
+    canChangeLocation,
+    queryClient
   ]);
 
   const handleSelectLocation = (location: UserLocation) => {
@@ -82,11 +95,14 @@ export function LocationSelector() {
             <MapPin className="w-8 h-8 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">
-            Selecciona una ubicación
+            {!canChangeLocation && locations.length > 1 
+              ? "Ubicación asignada" 
+              : "Selecciona una ubicación"}
           </CardTitle>
           <CardDescription>
-            Para continuar, por favor selecciona la ubicación donde te
-            encuentras.
+            {!canChangeLocation && locations.length > 1 
+              ? "Tienes múltiples ubicaciones asignadas. Contacta al administrador para cambiar de ubicación."
+              : "Para continuar, por favor selecciona la ubicación donde te encuentras."}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 max-h-[60vh] overflow-y-auto p-6 pt-0">
@@ -97,6 +113,11 @@ export function LocationSelector() {
           ) : locations.length === 0 ? (
             <div className="text-center py-4 text-muted-foreground">
               No tienes ubicaciones asignadas. Contacta al administrador.
+            </div>
+          ) : !canChangeLocation && locations.length > 1 ? (
+            <div className="text-center py-4 text-muted-foreground">
+              Tu ubicación asignada es: <br />
+              <span className="font-semibold text-foreground">{locations[0]?.nombre}</span>
             </div>
           ) : (
             locations.map((location) => (
