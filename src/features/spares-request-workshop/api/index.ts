@@ -27,6 +27,7 @@ export async function createRequest(requestData: CreateRequestData): Promise<voi
             id_usuario_solicitante: requestData.id_usuario_solicitante,
             estado: 'pendiente',
             observaciones_generales: requestData.observaciones_generales,
+            items: requestData.items,
         })
         .select('id_solicitud')
         .single();

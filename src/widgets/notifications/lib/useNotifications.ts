@@ -16,7 +16,7 @@ export const useNotifications = () => {
 
   // Determine current user and location IDs
   const userId = sessionData?.user?.id;
-  const locationId = currentLocation?.id_localizacion; // Adjusted based on context, usually id_localizacion in this codebase
+  const locationId = currentLocation?.id_localizacion;
   const isTechnician = hasRole('tecnico');
 
   // Fetch initial notifications
@@ -30,21 +30,13 @@ export const useNotifications = () => {
         .from('notificaciones')
         .select('*')
         .order('fecha_creacion', { ascending: false })
-        .limit(50); // Limit to last 50 for performance
+        .limit(10);
 
-      // Apply filtering logic
-      if (isTechnician) {
-        // Technicians only see their own notifications
+      if (locationId) {
+        query = query.eq('id_localizacion', locationId);
+      } else if (userId) {
+        // Fallback en caso de que aún no haya una locación seleccionada
         query = query.eq('id_usuario', userId);
-      } else {
-        // Others see their own OR their location's notifications
-        // Syntax for OR in Supabase: .or(`col1.eq.val1,col2.eq.val2`)
-        if (locationId) {
-          query = query.or(`id_usuario.eq.${userId},id_localizacion.eq.${locationId}`);
-        } else {
-          // Fallback if no location selected (though app usually requires it)
-          query = query.eq('id_usuario', userId);
-        }
       }
 
       const { data, error } = await query;
@@ -60,7 +52,7 @@ export const useNotifications = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, locationId, isTechnician]);
+  }, [userId, locationId]);
 
   // Mark a notification as read
   const markAsRead = async (notificationId: string) => {
@@ -70,10 +62,11 @@ export const useNotifications = () => {
         prev.map(n => n.id_notificacion === notificationId ? { ...n, leida: true } : n)
       );
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('notificaciones')
         .update({ leida: true })
-        .eq('id_notificacion', notificationId);
+        .eq('id_notificacion', notificationId)
+        .select();
 
       if (error) {
         // Revert on error
@@ -81,6 +74,16 @@ export const useNotifications = () => {
           prev.map(n => n.id_notificacion === notificationId ? { ...n, leida: false } : n)
         );
         throw error;
+      }
+
+      if (!data || data.length === 0 || isTechnician) {
+        // RLS silenciosamente ignoró el UPDATE
+        setNotifications(prev =>
+          prev.map(n => n.id_notificacion === notificationId ? { ...n, leida: false } : n)
+        );
+        console.warn("RLS bloqueó el UPDATE o la notificación ya no existe.");
+        toast.error('No tienes permiso para actualizar esta notificación');
+        return;
       }
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -106,17 +109,8 @@ export const useNotifications = () => {
         (payload) => {
           const newOrUpdatedNotif = payload.new as Notification;
 
-          // Filter incoming events based on our logic (Client-side filtering for Realtime)
-          // RLS might handle this, but explicit check is safer if RLS is broad
-          const belongsToUser = newOrUpdatedNotif.id_usuario === userId;
-          const belongsToLocation = locationId && newOrUpdatedNotif.id_localizacion === locationId;
-
-          // Logic:
-          // If technician: must belong to user.
-          // If not technician: must belong to user OR location.
-          const isRelevant = isTechnician
-            ? belongsToUser
-            : (belongsToUser || belongsToLocation);
+          // Validar si la notificación pertenece a la ubicación actual
+          const isRelevant = locationId && newOrUpdatedNotif.id_localizacion === locationId;
 
           if (!isRelevant) return;
 
@@ -135,7 +129,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, locationId, isTechnician, fetchNotifications]); // Re-subscribe if user context changes
+  }, [userId, locationId, fetchNotifications]); // Re-subscribe if user context changes
 
   return {
     notifications,
