@@ -19,7 +19,7 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
     const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
     const queryClient = useQueryClient();
     const { checkMenuPermission } = useUserStore();
-    
+
     const canEditProduct = checkMenuPermission("inventory", "edit_product");
 
     // Determine if stock is low
@@ -69,7 +69,6 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
                     {item.stock_actual}
                 </span>
             </TableCell>
-            <TableCell>{item.cantidad_minima}</TableCell>
             <TableCell>
                 <Badge variant="outline" className="capitalize" style={{ backgroundColor: item.estado_stock === 'BAJO' ? 'orange' : item.estado_stock === 'CRITICO' ? 'red' : 'green' }}>
                     {item.estado_stock || 'N/A'}

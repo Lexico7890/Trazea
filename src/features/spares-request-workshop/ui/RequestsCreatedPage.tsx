@@ -251,10 +251,11 @@ export function RequestsCreatedPage() {
                     <TableCell>{new Date(item.fecha_creacion).toLocaleDateString()}</TableCell>
                     <TableCell>{item.nombre_destino}</TableCell>
                     <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${item.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                        item.estado === 'aprobada' ? 'bg-green-100 text-green-800' :
-                          item.estado === 'rechazada' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
+                      <span className={`px-3 py-1 font-bold tracking-wider uppercase rounded-full border text-[10px] ${
+                        item.estado === 'pendiente' ? 'bg-red-500/10 text-red-400 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.2)]' :
+                        item.estado === 'enviado' || item.estado === 'aprobada' ? 'bg-green-500/10 text-green-400 border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.2)]' :
+                        item.estado === 'rechazada' ? 'bg-red-500/10 text-red-400 border-red-500/30' :
+                        'bg-zinc-500/10 text-zinc-400 border-zinc-500/30'
                         }`}>
                         {item.estado}
                       </span>

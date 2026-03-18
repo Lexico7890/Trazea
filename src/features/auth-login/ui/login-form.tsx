@@ -17,7 +17,7 @@ export function LoginForm({
       {...props}
     >
       {/* Efecto de onda eléctrica */}
-      <div className="absolute hidden w-full h-24 pointer-events-none md:flex items-center justify-center z-10">
+      <div className="absolute w-full h-24 pointer-events-none flex items-center justify-center z-10">
         <div className="absolute w-full h-px bg-red-900/30" />
         <svg
           className="absolute w-full h-full mix-blend-screen opacity-80"

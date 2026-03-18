@@ -74,16 +74,6 @@ export function InventoryTable({ items, orderBy, direction, onSort }: InventoryT
                             {getSortIcon('stock_actual')}
                         </Button>
                     </TableHead>
-                    <TableHead className="w-[120px]">
-                        <Button
-                            variant="ghost"
-                            onClick={() => onSort('cantidad_minima')}
-                            className="h-8 px-2 lg:px-3"
-                        >
-                            Cant. Mínima
-                            {getSortIcon('cantidad_minima')}
-                        </Button>
-                    </TableHead>
                     <TableHead className="w-[150px]">
                         <Button
                             variant="ghost"
