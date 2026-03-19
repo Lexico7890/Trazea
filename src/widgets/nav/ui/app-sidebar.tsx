@@ -5,7 +5,6 @@ import {
   BookOpen,
   Bot,
   ClipboardClock,
-  LifeBuoy,
   Send,
   SendToBack,
   Settings2,

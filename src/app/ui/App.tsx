@@ -29,7 +29,7 @@ import { DocumentationPage } from "@/pages/documentacion";
 function App() {
   useSupabaseAuthListener();
   const location = useLocation();
-  const { isAuthenticated, currentLocation, sessionData } = useUserStore();
+  const { isAuthenticated, currentLocation } = useUserStore();
 
   // Generate breadcrumbs based on current location
   const pathSegments = location.pathname.split("/").filter(Boolean);
