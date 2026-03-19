@@ -24,6 +24,7 @@ import NotFound from "@/pages/NotFound";
 import { OrdersPage } from "@/pages/orders";
 import { DynamoPage } from "@/pages/dynamo";
 import { DocumentationPage } from "@/pages/documentacion";
+import { FeedbackPage } from "@/pages/feedback";
 //import "../styles/App.css";
 
 function App() {
@@ -144,6 +145,9 @@ function App() {
 
                       {/* Documentación (Available internally for authenticated sessions) */}
                       <Route path="/documentacion" element={<DocumentationPage />} />
+
+                      {/* Feedback */}
+                      <Route path="/feedback" element={<FeedbackPage />} />
 
                       <Route path="*" element={<NotFound />} />
                     </Routes>
