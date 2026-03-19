@@ -2,7 +2,7 @@ import { Badge } from "@/shared/ui/badge";
 import { TableCell, TableRow } from "@/shared/ui/table";
 import { useState } from "react";
 import { Button } from "@/shared/ui/button";
-import { Pencil, History } from "lucide-react";
+import { Pencil, History, Eye } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
@@ -86,25 +86,21 @@ export function InventoryTableRow({ item }: InventoryTableRowProps) {
                 </Link>
             </TableCell>
             <TableCell>
-                {canEditProduct && (
-                    <>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => setIsEditSheetOpen(true)}
-                        >
-                            <Pencil className="h-4 w-4" />
-                        </Button>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setIsEditSheetOpen(true)}
+                >
+                    {canEditProduct ? <Pencil className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
 
-                        <InventoryEditSheet
-                            item={item}
-                            open={isEditSheetOpen}
-                            onOpenChange={setIsEditSheetOpen}
-                            onSaveSuccess={handleSaveSuccess}
-                        />
-                    </>
-                )}
+                <InventoryEditSheet
+                    item={item}
+                    open={isEditSheetOpen}
+                    onOpenChange={setIsEditSheetOpen}
+                    onSaveSuccess={handleSaveSuccess}
+                />
             </TableCell>
         </TableRow>
     );

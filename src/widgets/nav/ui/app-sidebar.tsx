@@ -5,7 +5,6 @@ import {
   BookOpen,
   Bot,
   ClipboardClock,
-  LifeBuoy,
   Send,
   SendToBack,
   Settings2,
@@ -87,11 +86,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     // Por ahora los ocultamos o dejamos como estáticos si no están en el objeto de permisos
     // El usuario solo especificó permisos para las rutas principales
     {
-      title: "Documentation",
-      url: "#",
+      title: "Documentación",
+      url: "/documentacion",
       icon: BookOpen,
       items: [],
-      // permissionKey: undefined // Siempre visible si no se define
     }
   ];
 
@@ -107,11 +105,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   const navSecondary = [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
     {
       title: "Feedback",
       url: "#",
