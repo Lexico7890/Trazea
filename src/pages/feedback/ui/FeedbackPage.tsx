@@ -26,12 +26,12 @@ export default function FeedbackPage() {
   const { title, text, images, setTitle, setText, addImage, removeImage, clearFeedback } = useFeedbackStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [history, setHistory] = useState<FixRecord[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  
+
   const sessionData = useUserStore((state) => state.sessionData);
-  const userId = sessionData?.user?.id_usuario;
+  const userId = sessionData?.user?.id;
 
   const fetchHistory = async () => {
     setIsLoadingHistory(true);
@@ -40,7 +40,7 @@ export default function FeedbackPage() {
         .from('fix_documentation')
         .select('*')
         .order('created_at', { ascending: false });
-        
+
       if (error) throw error;
       setHistory(data as FixRecord[] || []);
     } catch (err) {
@@ -57,7 +57,7 @@ export default function FeedbackPage() {
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
-    
+
     if (!items) return;
 
     for (let i = 0; i < items.length; i++) {
@@ -120,7 +120,7 @@ export default function FeedbackPage() {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const uploadedImageUrls: string[] = [];
 
@@ -133,8 +133,8 @@ export default function FeedbackPage() {
         const blob = dataURLtoBlob(img.dataUrl);
         const fileExt = blob.type.split('/')[1] || 'png';
         const fileName = `image-${i + 1}-${safeTitle}-${Date.now()}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
+
+        const { error: uploadError } = await supabase.storage
           .from('fix-documentation-images')
           .upload(fileName, blob, { contentType: blob.type });
 
@@ -159,7 +159,7 @@ export default function FeedbackPage() {
           title,
           text,
           images: uploadedImageUrls.length > 0 ? uploadedImageUrls : null,
-          id_user_notified: userId || null, 
+          id_user_notified: userId || null,
           // status defaults to 'create' in DB
         });
 
@@ -170,7 +170,7 @@ export default function FeedbackPage() {
       toast.success('¡Gracias por tus comentarios! Hemos recibido tu reporte.');
       clearFeedback();
       fetchHistory(); // Refresh history
-      
+
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Ocurrió un error al enviar el feedback. Intenta de nuevo.');
@@ -220,9 +220,9 @@ export default function FeedbackPage() {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title" className="text-sm font-medium">Título del Problema <span className="text-destructive">*</span></Label>
-                  <Input 
+                  <Input
                     id="title"
-                    placeholder="Ej: Error al intentar guardar un repuesto nuevo..." 
+                    placeholder="Ej: Error al intentar guardar un repuesto nuevo..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
@@ -239,12 +239,12 @@ export default function FeedbackPage() {
                       onChange={(e) => setText(e.target.value)}
                       onPaste={handlePaste}
                     />
-                    
+
                     <div className="absolute bottom-3 right-3 flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        size="sm" 
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
                         className="rounded-full shadow-sm bg-background/80 backdrop-blur-sm border shadow-black/5"
                         onClick={() => fileInputRef.current?.click()}
                       >
@@ -266,19 +266,19 @@ export default function FeedbackPage() {
                 {images.length > 0 && (
                   <div className="mt-4 p-4 rounded-xl border bg-muted/10">
                     <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-muted-foreground" /> 
+                      <ImageIcon className="w-4 h-4 text-muted-foreground" />
                       Archivos adjuntos en proceso ({images.length})
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {images.map((img) => (
-                        <div 
-                          key={img.id} 
+                        <div
+                          key={img.id}
                           className="group relative rounded-xl overflow-hidden border bg-muted/20 aspect-video shadow-sm"
                         >
-                          <img 
-                            src={img.dataUrl} 
-                            alt={img.name} 
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                          <img
+                            src={img.dataUrl}
+                            alt={img.name}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                             <Button
@@ -298,8 +298,8 @@ export default function FeedbackPage() {
               </div>
             </CardContent>
             <CardFooter className="bg-muted/20 border-t border-border/50 py-4 flex justify-between items-center rounded-b-xl">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 onClick={clearFeedback}
                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 disabled={isSubmitting || (!text && !title && images.length === 0)}
@@ -307,8 +307,8 @@ export default function FeedbackPage() {
                 <Trash2 className="w-4 h-4 mr-2" />
                 Limpiar todo
               </Button>
-              <Button 
-                onClick={handleSubmit} 
+              <Button
+                onClick={handleSubmit}
                 disabled={isSubmitting}
                 className="px-8 shadow-md rounded-full"
               >
@@ -347,42 +347,43 @@ export default function FeedbackPage() {
                   {history.map((record) => {
                     const statusConfig = getStatusConfig(record.status);
                     return (
-                    <div key={record.id} className="p-5 border rounded-xl hover:bg-muted/10 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-lg">{record.title || 'Sin título'}</h3>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.className}`}>
-                          {statusConfig.label}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {format(new Date(record.created_at), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
-                      </p>
-                      {record.text && (
-                        <p className="text-sm bg-muted/30 p-3 rounded-lg border whitespace-pre-wrap">
-                          {record.text}
-                        </p>
-                      )}
-                      
-                      {record.images && record.images.length > 0 && (
-                        <div className="mt-4">
-                          <p className="text-xs font-medium text-muted-foreground mb-2">Imágenes adjuntas:</p>
-                          <div className="flex gap-2 overflow-x-auto pb-2">
-                            {record.images.map((url, i) => (
-                              <a 
-                                href={url} 
-                                target="_blank" 
-                                rel="noreferrer"
-                                key={i} 
-                                className="block shrink-0 w-24 h-24 rounded-lg overflow-hidden border hover:border-primary cursor-pointer transition-colors"
-                              >
-                                <img src={url} alt={`Adjunto ${i+1}`} className="w-full h-full object-cover" />
-                              </a>
-                            ))}
-                          </div>
+                      <div key={record.id} className="p-5 border rounded-xl hover:bg-muted/10 transition-colors">
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-semibold text-lg">{record.title || 'Sin título'}</h3>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.className}`}>
+                            {statusConfig.label}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  )})}
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {format(new Date(record.created_at), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                        </p>
+                        {record.text && (
+                          <p className="text-sm bg-muted/30 p-3 rounded-lg border whitespace-pre-wrap">
+                            {record.text}
+                          </p>
+                        )}
+
+                        {record.images && record.images.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Imágenes adjuntas:</p>
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                              {record.images.map((url, i) => (
+                                <a
+                                  href={url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  key={i}
+                                  className="block shrink-0 w-24 h-24 rounded-lg overflow-hidden border hover:border-primary cursor-pointer transition-colors"
+                                >
+                                  <img src={url} alt={`Adjunto ${i + 1}`} className="w-full h-full object-cover" />
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </CardContent>
