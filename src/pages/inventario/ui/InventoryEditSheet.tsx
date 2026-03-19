@@ -188,23 +188,14 @@ export function InventoryEditSheet({ item, open, onOpenChange, onSaveSuccess }: 
                     </div>
 
                     {/* Actions */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3">
                         <Button
                             variant={selectedAction === "solicitar" ? "default" : "outline"}
-                            className="w-full bg-blue-300 hover:bg-blue-400"
+                            className="w-full"
                             onClick={() => toggleAction("solicitar")}
                         >
-                            Solicitar
+                            Solicitar Repuesto
                         </Button>
-                        {!isReadOnly && (
-                            <Button
-                                variant={selectedAction === "taller" ? "default" : "outline"}
-                                className="w-full bg-blue-300 hover:bg-blue-400"
-                                onClick={() => toggleAction("taller")}
-                            >
-                                Enviar a Taller
-                            </Button>
-                        )}
                     </div>
 
                     {/* Editable Fields */}

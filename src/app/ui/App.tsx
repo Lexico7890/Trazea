@@ -23,13 +23,13 @@ import { Toaster } from "sonner";
 import NotFound from "@/pages/NotFound";
 import { OrdersPage } from "@/pages/orders";
 import { DynamoPage } from "@/pages/dynamo";
+import { DocumentationPage } from "@/pages/documentacion";
 //import "../styles/App.css";
 
 function App() {
   useSupabaseAuthListener();
   const location = useLocation();
   const { isAuthenticated, currentLocation, sessionData } = useUserStore();
-  console.log("sessionData", sessionData);
 
   // Generate breadcrumbs based on current location
   const pathSegments = location.pathname.split("/").filter(Boolean);
@@ -141,6 +141,10 @@ function App() {
                       <Route element={<ProtectedRoute routeKey="dynamo" />}>
                         <Route path="/dynamo" element={<DynamoPage />} />
                       </Route>
+
+                      {/* Documentación (Available internally for authenticated sessions) */}
+                      <Route path="/documentacion" element={<DocumentationPage />} />
+
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </div>
