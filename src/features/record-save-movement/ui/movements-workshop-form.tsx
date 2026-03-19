@@ -41,8 +41,9 @@ export function MovementsWorkshopForm() {
   const [selectedTechnicianId, setSelectedTechnicianId] = useState<string>("");
   const [selectedParts, setSelectedParts] = useState<SparePart[]>([]);
 
-  const { sessionData } = useUserStore();
-  const locationId = sessionData?.locations?.[0]?.id_localizacion;
+  const { sessionData, currentLocation } = useUserStore();
+  const locationId =
+    currentLocation?.id_localizacion || sessionData?.locations?.[0]?.id_localizacion;
 
   const { data: technicians } = useTechnicians(locationId);
   const { movementToEdit, setMovementToEdit } = useRecordsStore();
